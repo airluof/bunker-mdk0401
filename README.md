@@ -65,6 +65,6 @@ public/assets/cards/
 
 ## Разработка
 
-Стек: React, TypeScript, Vite, Supabase PostgreSQL/RPC/RLS/Realtime. Автоматическая проверка карточек, TypeScript и production-сборки описана в `.github/workflows/ci.yml`.
+Стек: React, TypeScript, Vite, Supabase PostgreSQL/RPC/RLS/Realtime. Автоматическая проверка карточек, секретов, TypeScript и production-сборки описана в `.github/workflows/ci.yml`. Для публикации после объединения в `main` подготовлен `.github/workflows/deploy-pages.yml`.
 
 Онлайн-лобби уже подключено к RPC, но полный игровой процесс (раскрытие карт, голосование, эффекты и финальный аудит) пока не реализован на сервере. Публичные JSON-манифесты пока раскрывают полный текст карт; см. ограничения приватности в [05 — Настройка Supabase](docs/05_Supabase_Setup.md).
