@@ -29,9 +29,10 @@
 PowerShell из корня проекта:
 
 ```powershell
+npm run db:import-cards -- --dry-run
+
 $env:SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"
 $env:SUPABASE_SERVICE_ROLE_KEY = "YOUR_SERVICE_ROLE_KEY"
-npm run db:import-cards -- --dry-run
 npm run db:import-cards
 Remove-Item Env:SUPABASE_SERVICE_ROLE_KEY
 Remove-Item Env:SUPABASE_URL
@@ -43,7 +44,7 @@ Remove-Item Env:SUPABASE_URL
 
 ## Переменные frontend
 
-В локальном .env.local Vite-приложения нужны только публичные параметры:
+Скопируй `.env.example` в `.env.local` и укажи только публичные параметры:
 
 ```dotenv
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
