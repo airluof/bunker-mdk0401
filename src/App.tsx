@@ -227,8 +227,8 @@ export function App() {
       setOnlineError('Позывной должен содержать от 2 до 24 символов.');
       return;
     }
-    if (!/^[0-9A-F]{16}$/.test(inviteCode)) {
-      setOnlineError('Код комнаты должен состоять из 16 символов A–F и 0–9.');
+    if (!/^[0-9A-F]{32}$/.test(inviteCode)) {
+      setOnlineError('Код комнаты должен состоять из 32 символов A–F и 0–9.');
       return;
     }
 
@@ -841,9 +841,9 @@ export function App() {
                   <input
                     type="text"
                     value={roomCodeInput}
-                    onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 16))}
-                    maxLength={16}
-                    placeholder="КОД КОМНАТЫ · 16 СИМВОЛОВ"
+                    onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
+                    maxLength={32}
+                    placeholder="КОД КОМНАТЫ · 32 СИМВОЛА"
                     aria-label="Код онлайн-комнаты"
                     className="w-full bg-slate-950 border border-slate-700 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400 font-mono-tech"
                   />
