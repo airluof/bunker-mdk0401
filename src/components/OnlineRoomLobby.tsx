@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Copy, RefreshCw, Users, ShieldCheck, DoorOpen, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Copy, RefreshCw, Users, ShieldCheck, DoorOpen, XCircle, Settings2 } from 'lucide-react';
 import type { RoomSnapshot } from '../services/onlineRooms';
 
 interface OnlineRoomLobbyProps {
@@ -10,6 +10,7 @@ interface OnlineRoomLobbyProps {
   error: string | null;
   onRefresh: () => void;
   onExit: () => void;
+  onSaveSettings: (maxPlayers: number) => void;
 }
 
 export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
@@ -20,9 +21,18 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   error,
   onRefresh,
   onExit,
+  onSaveSettings,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [maxPlayers, setMaxPlayers] = useState(snapshot.room.max_players);
   const activePlayers = snapshot.players.filter((player) => player.membership_status === 'active');
+  const canEditSettings = isHost && snapshot.room.status === 'lobby';
+  const settingsChanged = maxPlayers !== snapshot.room.max_players;
+  const remainingToStart = Math.max(0, snapshot.room.min_players - activePlayers.length);
+
+  useEffect(() => {
+    setMaxPlayers(snapshot.room.max_players);
+  }, [snapshot.room.max_players]);
 
   const handleCopyCode = async () => {
     if (!inviteCode) return;
@@ -52,7 +62,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
           </div>
           <h1 className="incident-room-title">Комната ожидания<span>.</span></h1>
           <p className="incident-lead incident-room-lead">
-            Участники подключаются к одной серверной комнате. Состав обновляется автоматически.
+            Здесь отображаются только реальные участники, подключившиеся по коду комнаты. Тестовые боты не добавляются.
           </p>
           {snapshot.room.status === 'archived' && (
             <div className="incident-error" role="status">
@@ -128,16 +138,61 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             )}
           </div>
 
-          <div className="incident-room-aside-block">
-            <span className="incident-field-label">Регламент состава</span>
-            <div className="incident-room-range">
-              {snapshot.room.min_players}–{snapshot.room.max_players} <span>ИГРОКОВ</span>
+          <div className="incident-room-aside-block incident-room-settings">
+            <div className="incident-room-settings-heading">
+              <div>
+                <span className="incident-section-index">03 / ПАРАМЕТРЫ</span>
+                <h2 className="incident-section-title">Настройки комнаты</h2>
+              </div>
+              <Settings2 className="incident-room-settings-icon w-5 h-5" />
             </div>
-            <p className="incident-sidebar-copy">
-              {snapshot.room.status === 'archived'
-                ? 'Комната закрыта и больше не принимает участников.'
-                : 'Для запуска требуется набрать минимальный состав. Игровой стол и серверные игровые действия ещё подключаются.'}
+
+            <label className="incident-field-label" htmlFor="room-max-players">
+              Максимум участников
+            </label>
+            {canEditSettings ? (
+              <select
+                id="room-max-players"
+                className="incident-room-select"
+                value={maxPlayers}
+                onChange={(event) => setMaxPlayers(Number(event.target.value))}
+                disabled={busy}
+              >
+                {Array.from({ length: 9 }, (_, index) => index + 8).map((count) => (
+                  <option key={count} value={count} disabled={count < activePlayers.length}>
+                    {count} игроков
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="incident-room-range">
+                {snapshot.room.max_players} <span>ИГРОКОВ</span>
+              </div>
+            )}
+
+            <p className="incident-room-settings-note">
+              Минимум для начала игры — {snapshot.room.min_players} игроков. Можно ограничить комнату от 8 до 16 мест.
             </p>
+            {canEditSettings && (
+              <button
+                type="button"
+                className="incident-button incident-button-primary incident-room-save"
+                disabled={busy || !settingsChanged || maxPlayers < activePlayers.length}
+                onClick={() => onSaveSettings(maxPlayers)}
+              >
+                {busy ? 'СОХРАНЕНИЕ...' : 'СОХРАНИТЬ НАСТРОЙКИ'}
+              </button>
+            )}
+            {!isHost && snapshot.room.status === 'lobby' && (
+              <p className="incident-room-settings-note">Изменять настройки может только создатель комнаты.</p>
+            )}
+            {snapshot.room.status === 'lobby' && (
+              <p className="incident-room-settings-note incident-room-player-progress">
+                {remainingToStart > 0
+                  ? `До минимального состава осталось: ${remainingToStart}.`
+                  : 'Минимальный состав набран. Ожидайте дальнейших действий ведущего.'}
+              </p>
+            )}
           </div>
 
           <div className="incident-room-meta">
@@ -146,6 +201,11 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
           </div>
         </aside>
       </section>
+      {snapshot.room.status === 'lobby' && (
+        <p className="incident-room-engine-note">
+          Сейчас доступны создание комнаты, подключение настоящих игроков и настройка лимита. Полноценный игровой стол и синхронизация ходов ещё не подключены.
+        </p>
+      )}
     </main>
   );
 };
