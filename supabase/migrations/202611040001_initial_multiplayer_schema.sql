@@ -510,6 +510,7 @@ begin
   end if;
 
   select jsonb_build_object(
+    'my_member_id', v_member_id,
     'room', (
       select jsonb_build_object(
         'id', r.id,
