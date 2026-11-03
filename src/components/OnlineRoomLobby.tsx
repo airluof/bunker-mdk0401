@@ -108,19 +108,18 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                 )}
               </div>
             ))}
-            {snapshot.room.status === 'lobby' && (
-              {Array.from(
-                { length: Math.max(0, snapshot.room.max_players - activePlayers.length) },
-                (_, index) => (
-                  <div key={`empty-seat-${index}`} className="bunker-player-seat">
-                    <span className="bunker-player-avatar is-empty">+</span>
-                    <span className="bunker-player-details">
-                      <strong>Свободное место</strong>
-                      <small>Ожидает игрока</small>
-                    </span>
-                  </div>
-                )
-              )}            )}
+            {snapshot.room.status === 'lobby' && Array.from(
+              { length: Math.max(0, snapshot.room.max_players - activePlayers.length) },
+              (_, index) => (
+                <div key={`empty-seat-${index}`} className="bunker-player-seat">
+                  <span className="bunker-player-avatar is-empty">+</span>
+                  <span className="bunker-player-details">
+                    <strong>Свободное место</strong>
+                    <small>Ожидает игрока</small>
+                  </span>
+                </div>
+              )
+            )}
 
             {activePlayers.length === 0 && (
               <p className="bunker-empty-copy">Пока никто не подключился. Отправьте друзьям код комнаты.</p>
