@@ -48,6 +48,11 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
           <p className="mt-2 text-sm text-slate-400">
             Участники подключаются к одной серверной комнате. Список обновляется в реальном времени.
           </p>
+          {snapshot.room.status === 'archived' && (
+            <div className="mt-3 border-l-2 border-rose-500 bg-rose-950/20 px-3 py-2 text-sm text-rose-200">
+              Создатель закрыл эту комнату. Новые подключения запрещены. Нажмите «Вернуться на главную», чтобы освободить участие.
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -66,7 +71,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             className="px-3 py-2 border border-rose-900 text-rose-300 hover:border-rose-500 disabled:opacity-50 text-xs inline-flex items-center gap-2"
           >
             {isHost ? <XCircle className="w-4 h-4" /> : <DoorOpen className="w-4 h-4" />}
-            {isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
+            {snapshot.room.status === 'archived' ? 'Вернуться на главную' : isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
           </button>
         </div>
       </header>
@@ -144,7 +149,9 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
               От {snapshot.room.min_players} до {snapshot.room.max_players} игроков
             </div>
             <p className="mt-2 text-xs leading-relaxed text-slate-500">
-              После набора состава можно будет запускать партию. Пока серверные игровые действия и игровой стол ещё подключаются.
+              {snapshot.room.status === 'archived'
+                ? 'Комната закрыта и больше не принимает участников.'
+                : 'После набора состава можно будет запускать партию. Пока серверные игровые действия и игровой стол ещё подключаются.'}
             </p>
           </div>
 
