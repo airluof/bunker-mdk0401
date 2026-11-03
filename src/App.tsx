@@ -130,11 +130,7 @@ export function App() {
         .then((snapshot) => {
           if (cancelled) return;
           if (snapshot.room.status === 'archived') {
-            localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
-            sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
-            setOnlineRoom(null);
-            showToast('Комната закрыта создателем.');
-            return;
+            showToast('Комната закрыта создателем. Нажмите «Вернуться на главную».');
           }
           setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
             ? { ...current, snapshot }
@@ -269,11 +265,7 @@ export function App() {
     try {
       const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
       if (snapshot.room.status === 'archived') {
-        localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
-        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
-        setOnlineRoom(null);
-        showToast('Комната уже закрыта создателем.');
-        return;
+        showToast('Комната закрыта. Нажмите «Вернуться на главную», чтобы выйти.');
       }
       setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
         ? { ...current, snapshot }
@@ -295,9 +287,9 @@ export function App() {
       );
       if (ownMember?.technical_role === 'host' && onlineRoom.snapshot.room.status === 'lobby') {
         await closeOnlineRoom(onlineRoom.roomId);
-      } else {
-        await leaveOnlineRoom(onlineRoom.roomId);
       }
+      // Leave the active membership after room closure, freeing this user to join another room.
+      await leaveOnlineRoom(onlineRoom.roomId);
 
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
       sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
