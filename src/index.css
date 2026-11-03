@@ -562,3 +562,219 @@ body {
     transition: none;
   }
 }
+
+
+.incident-nav {
+  padding: 0 20px;
+  border-bottom: 1px solid var(--incident-line);
+  background: rgba(20, 21, 16, 0.96);
+}
+
+.incident-nav-inner {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(120px, auto) auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 66px;
+}
+
+.incident-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.incident-nav-mark {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--incident-signal);
+  color: var(--incident-signal);
+}
+
+.incident-nav-name {
+  overflow: hidden;
+  color: var(--incident-paper);
+  font: 600 14px/1.2 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.09em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-nav-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  color: var(--incident-muted);
+  font: 400 9px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.incident-nav-status {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  background: #8da887;
+}
+
+.incident-nav-center {
+  display: flex;
+  justify-content: center;
+}
+
+.incident-nav-room {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 7px 10px;
+  border-left: 2px solid var(--incident-signal);
+  background: rgba(255,255,255,0.035);
+  color: var(--incident-muted);
+  font: 400 9px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.05em;
+}
+
+.incident-nav-room svg {
+  flex: 0 0 auto;
+  color: var(--incident-signal);
+}
+
+.incident-nav-room strong {
+  overflow: hidden;
+  color: var(--incident-paper);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 4px;
+}
+
+.incident-nav-link,
+.incident-nav-icon,
+.incident-nav-exit {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--incident-muted);
+  font: 500 10px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.incident-nav-link:hover,
+.incident-nav-icon:hover {
+  border-color: var(--incident-line);
+  color: var(--incident-paper);
+}
+
+.incident-nav-link.is-active {
+  border-color: #5d5b51;
+  color: var(--incident-paper);
+  background: rgba(255,255,255,0.055);
+}
+
+.incident-nav-link.is-active::after {
+  width: 5px;
+  height: 5px;
+  background: var(--incident-signal);
+  content: '';
+}
+
+.incident-nav-icon {
+  width: 36px;
+  padding: 8px;
+}
+
+.incident-nav-exit {
+  width: 36px;
+  margin-left: 4px;
+  border-color: rgba(225, 90, 62, 0.45);
+  color: var(--incident-signal);
+}
+
+.incident-nav-exit:hover {
+  border-color: var(--incident-signal);
+  background: var(--incident-signal-soft);
+  color: #f08e77;
+}
+
+@media (max-width: 850px) {
+  .incident-nav {
+    padding: 0 14px;
+  }
+
+  .incident-nav-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 60px;
+  }
+
+  .incident-nav-center {
+    display: none;
+  }
+
+  .incident-nav-link {
+    gap: 5px;
+    padding: 8px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 520px) {
+  .incident-nav-inner {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .incident-nav-brand {
+    justify-content: center;
+  }
+
+  .incident-nav-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .incident-nav-link,
+  .incident-nav-icon,
+  .incident-nav-exit {
+    width: 100%;
+    min-height: 34px;
+    margin: 0;
+    padding: 6px 5px;
+    font-size: 8px;
+  }
+
+  .incident-nav-link svg,
+  .incident-nav-icon svg,
+  .incident-nav-exit svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .incident-nav-name {
+    font-size: 13px;
+  }
+}
