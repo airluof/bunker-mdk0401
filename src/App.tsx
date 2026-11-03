@@ -799,7 +799,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#141510] text-[#e9e5da] flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="bunker-app min-h-screen flex flex-col">
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
@@ -814,14 +814,14 @@ export function App() {
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-200 text-xs font-mono-tech shadow-2xl flex items-center gap-2 animate-in slide-in-from-bottom duration-200">
-          <Info className="w-4 h-4 text-cyan-400" />
+        <div className="bunker-toast fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom duration-200">
+          <Info aria-hidden="true" />
           <span>{toastMsg}</span>
         </div>
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="bunker-main flex-1">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
         ) : onlineRoom ? (
@@ -839,227 +839,141 @@ export function App() {
           /* ==============================================================
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL
              ============================================================== */
-          <div className="incident-page py-4 sm:py-8">
-            <div className="incident-topline">
-              <span><strong>NEUROTECH</strong> / ОТДЕЛ ВОССТАНОВЛЕНИЯ ИНФРАСТРУКТУРЫ</span>
-              <span>ЖУРНАЛ ИНЦИДЕНТА // <strong>2036.01</strong></span>
-            </div>
-
-            <section className="incident-hero">
-              <div className="incident-hero-grid">
-                <div>
-                  <div className="incident-kicker">
-                    <span className="incident-kicker-mark" />
-                    <span>КРИТИЧЕСКИЙ СТАТУС</span>
-                    <span>/</span>
-                    <span>INCIDENT 001</span>
-                  </div>
-
-                  <h1 className="incident-title">
-                    ЦЕНТРАЛЬНЫЙ ЦОД<br />
-                    <span>УНИЧТОЖЕН.</span>
-                  </h1>
-
-                  <p className="incident-lead">
-                    Вирус «Zero-Day: Oblivion» вывел из строя основной кластер корпорации «НейроТех».
-                    Остался один резервный контур — DRP-Site. Сформируйте инженерную команду,
-                    способную восстановить инфраструктуру по ГОСТ Р ИСО/МЭК 12207.
-                    Мест в Бункере вдвое меньше, чем участников.
-                  </p>
-
-                  <div className="incident-facts">
-                    <div className="incident-fact">
-                      <span className="incident-fact-label">Событие</span>
-                      <span className="incident-fact-value">Zero-Day: Oblivion</span>
-                    </div>
-                    <div className="incident-fact">
-                      <span className="incident-fact-label">Цель операции</span>
-                      <span className="incident-fact-value">DRP-Site / 2036</span>
-                    </div>
-                    <div className="incident-fact">
-                      <span className="incident-fact-label">Протокол</span>
-                      <span className="incident-fact-value">ГОСТ Р ИСО/МЭК 12207</span>
-                    </div>
-                  </div>
-                </div>
-
-                <aside className="incident-sidebar">
-                  <div>
-                    <div className="incident-alert-code">Состояние стойки / критическое</div>
-                    <div className="incident-rack" aria-label="Схема повреждённой серверной стойки">
-                      {['U42', 'U41', 'U40', 'U39', 'U38', 'U37'].map((unit, index) => (
-                        <div key={unit} className={index === 2 || index === 3 ? 'incident-rack-unit is-alert' : 'incident-rack-unit'}>
-                          <span>{unit}</span>
-                          <span />
-                        </div>
-                      ))}
-                    </div>
-                    <p className="incident-sidebar-copy">
-                      Основной вычислительный контур недоступен. Резервное питание и архивы требуют
-                      проверки до восстановления сервисов.
-                    </p>
-                  </div>
-                  <div className="incident-capacity">
-                    <strong>50%</strong>
-                    <span>ПРЕДЕЛЬНАЯ ВМЕСТИМОСТЬ БУНКЕРА</span>
-                  </div>
-                </aside>
-              </div>
-            </section>
-
-            <section className="incident-section">
-              <div className="incident-section-head">
-                <div>
-                  <span className="incident-section-index">01 / ДОСТУП К СЕССИИ</span>
-                  <h2 className="incident-section-title">Управление подключением</h2>
-                </div>
-                <p className="incident-section-note">
-                  Создайте комнату для команды или подключитесь к уже открытой сессии по коду приглашения.
+          <div className="bunker-home">
+            <section className="bunker-hero">
+              <div className="bunker-hero-copy">
+                <p className="bunker-eyebrow">МДК.04.01 · Браузерная игра</p>
+                <h1>ЦОД уничтожен<span>.</span></h1>
+                <p className="bunker-hero-description">
+                  Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
+                  Остался резервный DRP-Site. Соберите команду и решите, кто сможет восстановить инфраструктуру.
                 </p>
               </div>
+              <aside className="bunker-game-facts" aria-label="Параметры игры">
+                <div><strong>8–16</strong><span>игроков</span></div>
+                <div><strong>5</strong><span>раундов</span></div>
+                <div><strong>180</strong><span>карточек</span></div>
+              </aside>
+            </section>
 
-              <div className="incident-access-grid">
-                <div className="incident-access-panel">
-                  <label className="incident-field-label" htmlFor="engineer-call-sign">
-                    Позывной инженера / 02–24 символа
-                  </label>
-                  <input
-                    id="engineer-call-sign"
-                    type="text"
-                    value={currentUser.name}
-                    onChange={(e) => {
-                      const updated = { ...currentUser, name: e.target.value };
-                      setCurrentUser(updated);
-                      saveLocalUser(updated);
-                    }}
-                    maxLength={24}
-                    placeholder="Введите имя или позывной"
-                    className="incident-input"
-                  />
-
-                  <div className="incident-action-row">
-                    <button
-                      type="button"
-                      onClick={handleCreateOnlineRoom}
-                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
-                      className="incident-button incident-button-primary"
-                    >
-                      <Plus className="w-4 h-4" />
-                      {onlineBusy ? 'СОЗДАНИЕ...' : 'СОЗДАТЬ ОНЛАЙН-КОМНАТУ'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleLaunchSimulation}
-                      className="incident-button"
-                    >
-                      <Play className="w-4 h-4" />
-                      ДЕМО-СИМУЛЯЦИЯ / 6 ТЕСТОВЫХ ИГРОКОВ
-                    </button>
-                  </div>
-                  <div className="incident-action-row">
-                    <button
-                      type="button"
-                      onClick={handleCreateRoom}
-                      className="incident-button incident-button-soft"
-                      title="Локальная тестовая комната с четырьмя искусственными участниками. Другие устройства не подключаются."
-                    >
-                      ЛОКАЛЬНЫЙ ТЕСТ / 4 БОТА
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsRulesOpen(true)}
-                      className="incident-button incident-button-soft"
-                    >
-                      РЕГЛАМЕНТ И ПРАВИЛА
-                    </button>
-                  </div>
-                  <p className="incident-footnote">
-                    Для игры с друзьями используйте онлайн-комнату или код приглашения. Демо и локальный тест
-                    работают отдельно и показывают искусственных участников — они не подключаются к другим устройствам.
-                  </p>
+            <section className="bunker-section">
+              <header className="bunker-section-heading">
+                <div>
+                  <p className="bunker-eyebrow">Начать партию</p>
+                  <h2>Играть с друзьями</h2>
                 </div>
+                <p>Создай комнату и отправь код друзьям. Или введи код, который тебе прислали.</p>
+              </header>
 
-                <div className="incident-access-panel">
-                  <label className="incident-field-label" htmlFor="room-invite-code">
-                    Код приглашения / 32 символа
-                  </label>
+              <div className="bunker-name-field">
+                <label htmlFor="engineer-call-sign">Твоё имя</label>
+                <input
+                  id="engineer-call-sign"
+                  type="text"
+                  value={currentUser.name}
+                  onChange={(event) => {
+                    const updated = { ...currentUser, name: event.target.value };
+                    setCurrentUser(updated);
+                    saveLocalUser(updated);
+                  }}
+                  maxLength={24}
+                  placeholder="Как тебя показывать в игре?"
+                  className="bunker-input"
+                />
+              </div>
+
+              <div className="bunker-access-grid">
+                <section className="bunker-panel bunker-access-panel">
+                  <div>
+                    <h3>Создать комнату</h3>
+                    <p>Ты станешь ведущим и получишь код приглашения.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCreateOnlineRoom}
+                    disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                    className="bunker-button bunker-button-primary"
+                  >
+                    <Plus aria-hidden="true" />
+                    {onlineBusy ? 'Создаём комнату…' : 'Создать комнату'}
+                  </button>
+                  {!isSupabaseConfigured && (
+                    <p className="bunker-help">
+                      Онлайн-режим пока не настроен. Для запуска нужно подключить Supabase.
+                    </p>
+                  )}
+                </section>
+
+                <section className="bunker-panel bunker-access-panel">
+                  <div>
+                    <h3>Присоединиться</h3>
+                    <p>Введи код приглашения от ведущего.</p>
+                  </div>
+                  <label htmlFor="room-invite-code" className="bunker-visually-hidden">Код приглашения</label>
                   <input
                     id="room-invite-code"
                     type="text"
                     value={roomCodeInput}
-                    onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
+                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
                     maxLength={32}
-                    placeholder="ВВЕДИТЕ 32-СИМВОЛЬНЫЙ КОД"
+                    placeholder="Код приглашения"
                     autoComplete="off"
-                    className="incident-input font-mono-tech"
+                    className="bunker-input bunker-code-input"
                   />
-                  <div className="incident-action-row">
-                    <button
-                      type="button"
-                      onClick={handleJoinOnlineRoom}
-                      disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
-                      className="incident-button incident-button-primary"
-                    >
-                      ПОДКЛЮЧИТЬСЯ
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                  {!isSupabaseConfigured && (
-                    <p className="incident-footnote">
-                      ОНЛАЙН-РЕЖИМ НЕ НАСТРОЕН. Добавьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY
-                      в локальный .env.local. Инструкция — docs/05_Supabase_Setup.md.
-                    </p>
-                  )}
-                  {onlineError && (
-                    <div role="alert" className="incident-error">{onlineError}</div>
-                  )}
-                </div>
+                  <button
+                    type="button"
+                    onClick={handleJoinOnlineRoom}
+                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
+                    className="bunker-button bunker-button-secondary"
+                  >
+                    {onlineBusy ? 'Подключаемся…' : 'Войти в комнату'}
+                    <ArrowRight aria-hidden="true" />
+                  </button>
+                </section>
               </div>
+
+              {onlineError && <div role="alert" className="bunker-error">{onlineError}</div>}
             </section>
 
-            <section className="incident-section">
-              <div className="incident-section-head">
+            <section className="bunker-section bunker-categories-section">
+              <header className="bunker-section-heading">
                 <div>
-                  <span className="incident-section-index">02 / РЕЕСТР ОБЪЕКТОВ</span>
-                  <h2 className="incident-section-title">Комплект карточек</h2>
+                  <p className="bunker-eyebrow">Состав колоды</p>
+                  <h2>Карточки игры</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setCurrentView('catalog')}
-                  className="incident-button"
+                  className="bunker-text-button"
                 >
-                  ОТКРЫТЬ КАТАЛОГ <ArrowRight className="w-4 h-4" />
+                  Весь каталог <ArrowRight aria-hidden="true" />
                 </button>
-              </div>
+              </header>
 
-              <div className="incident-category-list">
+              <div className="bunker-category-grid">
                 {[
-                  { number: '01', name: 'Роли', color: '#68a9c4', description: 'Профессиональные роли и зоны ответственности', count: 30 },
-                  { number: '02', name: 'Навыки', color: '#79b18c', description: 'Компетенции и технические специализации', count: 30 },
-                  { number: '03', name: 'Багаж', color: '#d89a5a', description: 'Инструменты, оборудование и резервные ресурсы', count: 30 },
-                  { number: '04', name: 'Уязвимости', color: '#dc6657', description: 'Риски и ограничения участников', count: 30 },
-                  { number: '05', name: 'Кризисы', color: '#a68ac7', description: 'Аварии и угрозы для инфраструктуры', count: 30 },
-                  { number: '06', name: 'Действия', color: '#d1b45f', description: 'Специальные карточки и игровые эффекты', count: 30 },
+                  { name: 'Роли', description: 'Профессия и опыт участника', color: '#66816b' },
+                  { name: 'Навыки', description: 'Знания и технические умения', color: '#718b78' },
+                  { name: 'Багаж', description: 'Предметы и ресурсы', color: '#aa8258' },
+                  { name: 'Уязвимости', description: 'Слабые стороны и риски', color: '#ac6a60' },
+                  { name: 'Кризисы', description: 'Угрозы для бункера', color: '#8c789f' },
+                  { name: 'Действия', description: 'Особые игровые эффекты', color: '#a38a54' },
                 ].map((item) => (
                   <button
-                    key={item.number}
+                    key={item.name}
                     type="button"
                     onClick={() => setCurrentView('catalog')}
-                    className="incident-category-row"
+                    className="bunker-category-card"
+                    style={{ '--category-color': item.color } as React.CSSProperties}
                   >
-                    <span className="incident-category-number">{item.number}</span>
-                    <span className="incident-category-name" style={{ color: item.color }}>
-                      <span className="incident-category-mark" />
-                      {item.name}
+                    <span className="bunker-category-dot" />
+                    <span className="bunker-category-copy">
+                      <strong>{item.name}</strong>
+                      <small>{item.description}</small>
                     </span>
-                    <span className="incident-category-description">{item.description}</span>
-                    <span className="incident-category-count">{String(item.count).padStart(2, '0')}</span>
-                    <ArrowRight className="incident-category-arrow w-4 h-4" />
+                    <span className="bunker-category-count">30</span>
                   </button>
                 ))}
-              </div>
-              <div className="incident-footnote">
-                180 КАРТ / 6 КАТЕГОРИЙ / 30 КАРТ В КАЖДОЙ КАТЕГОРИИ
               </div>
             </section>
           </div>
