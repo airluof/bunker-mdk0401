@@ -392,7 +392,7 @@ begin
 
   if p_command_id is null
      or p_invite_code is null
-     or p_invite_code !~ '^[0-9A-Fa-f]{32}
+     or p_invite_code !~ '^[0-9A-Fa-f]{32}$'
      or p_display_name is null
      or char_length(btrim(p_display_name)) not between 2 and 24 then
     raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
