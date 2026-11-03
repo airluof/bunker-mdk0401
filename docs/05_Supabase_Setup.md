@@ -28,14 +28,14 @@
 
 PowerShell из корня проекта:
 
-\`\`\`powershell
+```powershell
 $env:SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"
 $env:SUPABASE_SERVICE_ROLE_KEY = "YOUR_SERVICE_ROLE_KEY"
 npm run db:import-cards -- --dry-run
 npm run db:import-cards
 Remove-Item Env:SUPABASE_SERVICE_ROLE_KEY
 Remove-Item Env:SUPABASE_URL
-\`\`\`
+```
 
 Для первого шага можно использовать --dry-run: он проверяет локальный манифест, не отправляя данные.
 
@@ -45,10 +45,10 @@ Remove-Item Env:SUPABASE_URL
 
 В локальном .env.local Vite-приложения нужны только публичные параметры:
 
-\`\`\`dotenv
+```dotenv
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY
-\`\`\`
+```
 
 Публичный anon/publishable key можно использовать в браузере, потому что доступ ограничивается RLS и RPC. Никогда не указывай service_role key в переменной с префиксом VITE_.
 
