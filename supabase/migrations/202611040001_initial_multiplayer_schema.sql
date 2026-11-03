@@ -889,6 +889,7 @@ as $
 declare
   v_user_id uuid := auth.uid();
   v_room_status text;
+  v_state_version bigint;
   v_existing jsonb;
   v_existing_name text;
   v_result jsonb;
@@ -936,16 +937,18 @@ begin
   where room_id = p_room_id and membership_status = 'active';
 
   update public.game_sessions
-  set status = 'finished', phase = 'gameover', updated_at = now()
-  where room_id = p_room_id;
+  set status = 'finished', phase = 'gameover', state_version = state_version + 1, updated_at = now()
+  where room_id = p_room_id
+  returning state_version into v_state_version;
 
   update public.public_game_state
   set payload = jsonb_build_object('status', 'archived', 'phase', 'gameover'),
+      state_version = v_state_version,
       updated_at = now()
   where room_id = p_room_id;
 
   insert into public.public_game_events (room_id, event_type, public_payload)
-  values (p_room_id, 'room_archived', jsonb_build_object('closed_by', v_user_id));
+  values (p_room_id, 'room_archived', jsonb_build_object('status', 'archived'));
 
   v_result := jsonb_build_object('ok', true, 'room_id', p_room_id, 'status', 'archived');
   insert into public.command_receipts (user_id, command_id, command_name, response_json)
