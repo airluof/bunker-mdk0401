@@ -172,3 +172,30 @@ export async function subscribeToOnlineRoom(
     void client.removeChannel(channel);
   };
 }
+
+
+export async function leaveOnlineRoom(roomId: string): Promise<{ ok: boolean; room_id: string; status: 'left' }> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_leave_room', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as { ok: boolean; room_id: string; status: 'left' };
+}
+
+export async function closeOnlineRoom(roomId: string): Promise<{ ok: boolean; room_id: string; status: 'archived' }> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_close_room', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as { ok: boolean; room_id: string; status: 'archived' };
+}
