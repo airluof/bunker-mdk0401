@@ -1611,3 +1611,74 @@ body {
   font: 400 10px/1.5 'IBM Plex Mono', 'Consolas', monospace;
   letter-spacing: 0.02em;
 }
+
+.incident-room-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.incident-room-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.incident-room-settings-icon {
+  flex: 0 0 auto;
+  color: var(--incident-signal);
+}
+
+.incident-room-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--incident-line);
+  border-radius: 0;
+  outline: none;
+  color: var(--incident-paper);
+  background: #171812;
+  font: 500 12px/1.4 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+.incident-room-select:focus {
+  border-color: var(--incident-signal);
+}
+
+.incident-room-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.incident-room-select option {
+  color: var(--incident-paper);
+  background: #171812;
+}
+
+.incident-room-settings-note {
+  margin: 0;
+  color: var(--incident-muted);
+  font: 400 10px/1.55 'IBM Plex Sans', Arial, sans-serif;
+}
+
+.incident-room-save {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.incident-room-player-progress {
+  padding-top: 10px;
+  border-top: 1px solid var(--incident-line);
+  color: #d3b66b;
+}
+
+.incident-room-engine-note {
+  margin: 0 0 28px;
+  padding: 12px 14px;
+  border-left: 2px solid var(--incident-signal);
+  background: var(--incident-panel);
+  color: var(--incident-muted);
+  font: 400 10px/1.55 'IBM Plex Mono', 'Consolas', monospace;
+}
