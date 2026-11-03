@@ -43,7 +43,7 @@ export const CardInspectModal: React.FC<CardInspectModalProps> = ({ card, onClos
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+        className="incident-modal-panel relative w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
