@@ -5,17 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const CATALOG_VERSION = 'v1';
-const MANIFEST_PATH = resolve(process.cwd(), 'assets/manifest.json');
-
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the current shell.');
-  process.exit(1);
-}
-
-if (process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Do not use a VITE_* variable for the service-role key.');
-  process.exit(1);
-}
+const MANIFEST_PATH = resolve(process.env.BUNKER_CARD_MANIFEST_PATH || 'assets/manifest.json');
 
 const manifestText = await readFile(MANIFEST_PATH, 'utf8');
 const source = JSON.parse(manifestText.replace(/^\uFEFF/, ''));
@@ -77,6 +67,16 @@ console.log('Validated ' + rows.length + ' cards: ' + JSON.stringify(counts));
 if (process.argv.includes('--dry-run')) {
   console.log('Dry run only. No data was sent to Supabase.');
   process.exit(0);
+}
+
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the current shell.');
+  process.exit(1);
+}
+
+if (process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Do not use a VITE_* variable for the service-role key.');
+  process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
