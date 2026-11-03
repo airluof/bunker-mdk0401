@@ -92,7 +92,7 @@ revoke all on function public.api_update_room_settings(uuid, integer, uuid) from
 grant execute on function public.api_update_room_settings(uuid, integer, uuid) to authenticated;
 
 
-do $
+do $realtime$
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
     begin
@@ -101,7 +101,7 @@ begin
     end;
   end if;
 end;
-$;
+$realtime$;
 
 alter table public.rooms replica identity full;
 
