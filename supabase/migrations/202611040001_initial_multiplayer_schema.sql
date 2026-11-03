@@ -847,7 +847,7 @@ begin
   if v_room_status is null then
     raise exception using errcode = 'P0001', message = 'ROOM_NOT_FOUND';
   end if;
-  if v_room_status <> 'lobby' then
+  if v_room_status not in ('lobby', 'archived') then
     raise exception using errcode = 'P0001', message = 'RULE_NOT_APPROVED: leaving an active game is not automated';
   end if;
 
@@ -932,10 +932,6 @@ begin
   update public.room_invites
   set is_active = false, revoked_at = now()
   where room_id = p_room_id and is_active = true;
-
-  update public.room_members
-  set membership_status = 'left', last_seen_at = now()
-  where room_id = p_room_id and membership_status = 'active';
 
   update public.game_sessions
   set status = 'finished', phase = 'gameover', state_version = state_version + 1, updated_at = now()
