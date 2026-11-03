@@ -397,6 +397,7 @@ export function App() {
     const roomCode = `BUNKER-${Math.floor(100 + Math.random() * 900)}`;
 
     const newGame: GameState = {
+      isLocalDemo: true,
       roomCode,
       hostId: deal.players[0].id,
       round: 1,
