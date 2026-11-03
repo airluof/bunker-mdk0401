@@ -30,6 +30,9 @@ jobs:
       - name: Validate original card catalog
         run: npm run db:import-cards -- --dry-run
 
+      - name: Validate Supabase migration structure
+        run: npm run db:validate-migration
+
       - name: Check for exposed service-role credentials
         shell: bash
         run: |
