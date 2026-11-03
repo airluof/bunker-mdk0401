@@ -811,7 +811,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_room_status text;
@@ -875,7 +875,7 @@ begin
   values (v_user_id, p_command_id, 'api_leave_room', v_result);
   return v_result;
 end;
-$;
+$$;
 
 create or replace function public.api_close_room(
   p_room_id uuid,
@@ -885,7 +885,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_room_status text;
@@ -955,7 +955,7 @@ begin
   values (v_user_id, p_command_id, 'api_close_room', v_result);
   return v_result;
 end;
-$;
+$$;
 
 revoke all on function public.api_create_room(text, uuid) from public, anon;
 revoke all on function public.api_join_room(text, text, uuid) from public, anon;
