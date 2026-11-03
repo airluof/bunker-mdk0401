@@ -104,7 +104,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                   </span>
                 </div>
                 {player.technical_role === 'host' && <ShieldCheck className="incident-room-host-icon w-4 h-4" />}
-                <span className="incident-room-player-status">В СЕТИ</span>
+                <span className="incident-room-player-status">В КОМНАТЕ</span>
               </div>
             ))}
             {activePlayers.length === 0 && (
