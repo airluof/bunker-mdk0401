@@ -82,7 +82,7 @@ create table public.public_game_state (
 );
 
 create table public.card_catalog (
-  card_id text primary key,
+  card_id text not null,
   source_number integer not null check (source_number between 1 and 30),
   category text not null
     check (category in ('roles', 'skills', 'baggage', 'vulnerabilities', 'crises', 'actions')),
@@ -95,7 +95,8 @@ create table public.card_catalog (
   effect_handler_id text,
   effect_status text not null default 'draft'
     check (effect_status in ('not_applicable', 'draft', 'approved', 'disabled')),
-  imported_at timestamptz not null default now()
+  imported_at timestamptz not null default now(),
+  primary key (card_id, catalog_version)
 );
 
 create index card_catalog_category_version_idx
@@ -106,7 +107,8 @@ create table public.card_instances (
   session_id uuid not null references public.game_sessions(id) on delete cascade,
   room_id uuid not null references public.rooms(id) on delete cascade,
   owner_member_id uuid references public.room_members(id) on delete restrict,
-  card_id text not null references public.card_catalog(card_id) on delete restrict,
+  card_id text not null,
+  catalog_version text not null default 'v1',
   zone text not null check (zone in ('hand', 'crisis_deck', 'active_crisis', 'discard')),
   instance_status text not null default 'hidden'
     check (instance_status in ('hidden', 'revealed')),
@@ -115,6 +117,8 @@ create table public.card_instances (
   revealed_by_member_id uuid references public.room_members(id) on delete set null,
   created_at timestamptz not null default now(),
   unique (session_id, card_id),
+  foreign key (card_id, catalog_version)
+    references public.card_catalog(card_id, catalog_version) on delete restrict,
   check ((zone = 'hand' and owner_member_id is not null)
       or (zone <> 'hand' and owner_member_id is null))
 );
@@ -569,7 +573,7 @@ begin
         ) order by cc.category, cc.source_number
       )
       from public.card_instances ci
-      join public.card_catalog cc on cc.card_id = ci.card_id
+      join public.card_catalog cc on cc.card_id = ci.card_id and cc.catalog_version = ci.catalog_version
       where ci.room_id = p_room_id
         and ci.owner_member_id = v_member_id
         and ci.zone = 'hand'
@@ -589,7 +593,7 @@ begin
         ) order by ci.revealed_at
       )
       from public.card_instances ci
-      join public.card_catalog cc on cc.card_id = ci.card_id
+      join public.card_catalog cc on cc.card_id = ci.card_id and cc.catalog_version = ci.catalog_version
       where ci.room_id = p_room_id
         and ci.zone = 'hand'
         and ci.instance_status = 'revealed'
@@ -605,7 +609,7 @@ begin
         ) order by ci.deck_position
       )
       from public.card_instances ci
-      join public.card_catalog cc on cc.card_id = ci.card_id
+      join public.card_catalog cc on cc.card_id = ci.card_id and cc.catalog_version = ci.catalog_version
       where ci.room_id = p_room_id and ci.zone = 'active_crisis'
     ), '[]'::jsonb)
   ) into v_snapshot;
@@ -709,7 +713,7 @@ begin
     select unnest(array['roles', 'skills', 'baggage', 'vulnerabilities', 'actions']::text[])
   loop
     insert into public.card_instances (
-      session_id, room_id, owner_member_id, card_id, zone, instance_status
+      session_id, room_id, owner_member_id, card_id, catalog_version, zone, instance_status
     )
     with ranked_players as (
       select
@@ -731,6 +735,7 @@ begin
       p_room_id,
       p.id,
       c.card_id,
+      v_room.catalog_version,
       'hand',
       'hidden'
     from ranked_players p
@@ -738,13 +743,14 @@ begin
   end loop;
 
   insert into public.card_instances (
-    session_id, room_id, owner_member_id, card_id, zone, instance_status, deck_position
+    session_id, room_id, owner_member_id, card_id, catalog_version, zone, instance_status, deck_position
   )
   select
     v_session.id,
     p_room_id,
     null,
     ranked.card_id,
+    v_room.catalog_version,
     case when ranked.rn = 1 then 'active_crisis' else 'crisis_deck' end,
     case when ranked.rn = 1 then 'revealed' else 'hidden' end,
     ranked.rn
