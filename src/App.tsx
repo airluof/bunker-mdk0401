@@ -24,6 +24,17 @@ import { CardCatalogView } from './components/CardCatalogView';
 import { CardInspectModal } from './components/CardInspectModal';
 import { GameRulesModal } from './components/GameRulesModal';
 import { IncidentLog } from './components/IncidentLog';
+import { OnlineRoomLobby } from './components/OnlineRoomLobby';
+import {
+  createOnlineRoom,
+  joinOnlineRoom,
+  getOnlineRoomSnapshot,
+  subscribeToOnlineRoom,
+  leaveOnlineRoom,
+  closeOnlineRoom,
+  RoomSnapshot,
+} from './services/onlineRooms';
+import { isSupabaseConfigured } from './services/supabase';
 import { 
   saveGameState, 
   loadGameState, 
@@ -54,6 +65,16 @@ import {
   Info
 } from 'lucide-react';
 
+interface OnlineRoomSession {
+  roomId: string;
+  memberId: string;
+  inviteCode?: string;
+  snapshot: RoomSnapshot;
+}
+
+const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
+const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
+
 export function App() {
   const [gameState, setGameState] = useState<GameState | null>(() => loadGameState());
   const [currentUser, setCurrentUser] = useState(() => loadLocalUser());
@@ -64,6 +85,75 @@ export function App() {
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [onlineRoom, setOnlineRoom] = useState<OnlineRoomSession | null>(null);
+  const [onlineBusy, setOnlineBusy] = useState(false);
+  const [onlineError, setOnlineError] = useState<string | null>(null);
+
+
+  // Restore the last online room after a page refresh, using the persisted Supabase Auth session.
+  useEffect(() => {
+    const savedRoomId = localStorage.getItem(ONLINE_ROOM_STORAGE_KEY);
+    if (!savedRoomId) return;
+
+    let cancelled = false;
+    void getOnlineRoomSnapshot(savedRoomId)
+      .then((snapshot) => {
+        if (cancelled) return;
+        setOnlineRoom({
+          roomId: savedRoomId,
+          memberId: snapshot.my_member_id,
+          inviteCode: sessionStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+          snapshot,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+          sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Realtime messages are invalidation signals; always reload the permitted server snapshot.
+  useEffect(() => {
+    if (!onlineRoom?.roomId) return;
+
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    void subscribeToOnlineRoom(onlineRoom.roomId, () => {
+      void getOnlineRoomSnapshot(onlineRoom.roomId)
+        .then((snapshot) => {
+          if (cancelled) return;
+          setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+            ? { ...current, snapshot }
+            : current);
+        })
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            setOnlineError(error instanceof Error ? error.message : 'Не удалось обновить комнату.');
+          }
+        });
+    })
+      .then((stop) => {
+        if (cancelled) stop();
+        else unsubscribe = stop;
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setOnlineError(error instanceof Error ? error.message : 'Не удалось подключить обновления комнаты.');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [onlineRoom?.roomId]);
 
   // Sync state changes with session storage
   useEffect(() => {
@@ -93,6 +183,125 @@ export function App() {
       cardId,
     };
     return entry;
+  };
+
+
+  const handleCreateOnlineRoom = async () => {
+    const displayName = currentUser.name.trim();
+    if (displayName.length < 2 || displayName.length > 24) {
+      setOnlineError('Позывной должен содержать от 2 до 24 символов.');
+      return;
+    }
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = await createOnlineRoom(displayName);
+      localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
+      if (result.invite_code) {
+        sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
+      }
+
+      const snapshot = await getOnlineRoomSnapshot(result.room_id);
+      setOnlineRoom({
+        roomId: result.room_id,
+        memberId: result.member_id,
+        inviteCode: result.invite_code,
+        snapshot,
+      });
+      setGameState(null);
+      clearGameState();
+      sound.playCrisisAlert();
+    } catch (error: unknown) {
+      setOnlineError(error instanceof Error ? error.message : 'Не удалось создать онлайн-комнату.');
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleJoinOnlineRoom = async () => {
+    const displayName = currentUser.name.trim();
+    const inviteCode = roomCodeInput.trim().toUpperCase();
+
+    if (displayName.length < 2 || displayName.length > 24) {
+      setOnlineError('Позывной должен содержать от 2 до 24 символов.');
+      return;
+    }
+    if (!/^[0-9A-F]{16}$/.test(inviteCode)) {
+      setOnlineError('Код комнаты должен состоять из 16 символов A–F и 0–9.');
+      return;
+    }
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = await joinOnlineRoom(inviteCode, displayName);
+      localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
+      sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+
+      const snapshot = await getOnlineRoomSnapshot(result.room_id);
+      setOnlineRoom({
+        roomId: result.room_id,
+        memberId: result.member_id,
+        inviteCode,
+        snapshot,
+      });
+      setGameState(null);
+      clearGameState();
+    } catch (error: unknown) {
+      setOnlineError(error instanceof Error ? error.message : 'Не удалось подключиться к комнате.');
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleRefreshOnlineRoom = async () => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+    } catch (error: unknown) {
+      setOnlineError(error instanceof Error ? error.message : 'Не удалось обновить комнату.');
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleExitOnlineRoom = async () => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const ownMember = onlineRoom.snapshot.players.find(
+        (player) => player.member_id === onlineRoom.memberId
+      );
+      if (ownMember?.technical_role === 'host') {
+        await closeOnlineRoom(onlineRoom.roomId);
+      } else {
+        await leaveOnlineRoom(onlineRoom.roomId);
+      }
+
+      localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+      setOnlineRoom(null);
+      showToast(ownMember?.technical_role === 'host' ? 'Комната закрыта.' : 'Вы покинули комнату.');
+    } catch (error: unknown) {
+      setOnlineError(error instanceof Error ? error.message : 'Не удалось выйти из комнаты.');
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleExitCurrentRoom = () => {
+    if (onlineRoom) {
+      void handleExitOnlineRoom();
+      return;
+    }
+    handleExitGame();
   };
 
   // Launch instant simulation mode
@@ -519,9 +728,11 @@ export function App() {
         currentView={currentView}
         onViewChange={setCurrentView}
         onOpenRules={() => setIsRulesOpen(true)}
-        roomCode={gameState?.roomCode}
-        isHost={gameState?.players[0]?.isHost}
-        onExitGame={gameState ? handleExitGame : undefined}
+        roomCode={onlineRoom?.inviteCode ?? gameState?.roomCode}
+        isHost={onlineRoom
+          ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
+          : gameState?.players[0]?.isHost}
+        onExitGame={onlineRoom || gameState ? handleExitCurrentRoom : undefined}
       />
 
       {/* Toast Notification */}
@@ -536,6 +747,16 @@ export function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
+        ) : onlineRoom ? (
+          <OnlineRoomLobby
+            snapshot={onlineRoom.snapshot}
+            inviteCode={onlineRoom.inviteCode}
+            isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
+            busy={onlineBusy}
+            error={onlineError}
+            onRefresh={handleRefreshOnlineRoom}
+            onExit={handleExitCurrentRoom}
+          />
         ) : !gameState ? (
           /* ==============================================================
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL
@@ -575,6 +796,7 @@ export function App() {
                       setCurrentUser(updated);
                       saveLocalUser(updated);
                     }}
+                    maxLength={24}
                     placeholder="Введите ваше имя или позывной..."
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono-tech transition-colors shadow-inner"
                   />
@@ -583,19 +805,28 @@ export function App() {
                 {/* Primary Action Buttons */}
                 <div className="pt-4 flex flex-wrap items-center gap-3.5">
                   <button
-                    onClick={handleLaunchSimulation}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 via-cyan-500 to-teal-500 hover:from-sky-400 hover:to-teal-400 text-slate-950 font-tactical font-bold text-sm uppercase tracking-wider shadow-lg shadow-cyan-900/40 active:scale-95 transition-all flex items-center gap-2"
+                    onClick={handleCreateOnlineRoom}
+                    disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                    className="px-6 py-3 border border-amber-500 bg-amber-500 hover:bg-amber-400 text-slate-950 disabled:opacity-40 disabled:cursor-not-allowed font-tactical font-bold text-sm uppercase tracking-wider transition-colors flex items-center gap-2"
                   >
-                    <Play className="w-4 h-4 fill-slate-950" />
-                    <span>БЫСТРЫЙ СТАРТ СИМУЛЯЦИИ (6 ИНЖЕНЕРОВ)</span>
+                    <Plus className="w-4 h-4" />
+                    <span>{onlineBusy ? 'СОЗДАНИЕ...' : 'СОЗДАТЬ ОНЛАЙН-КОМНАТУ'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleLaunchSimulation}
+                    className="px-5 py-3 border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-tactical text-xs uppercase tracking-wider transition-colors flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>ЛОКАЛЬНАЯ ДЕМО-СИМУЛЯЦИЯ</span>
                   </button>
 
                   <button
                     onClick={handleCreateRoom}
-                    className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-tactical text-xs uppercase tracking-wider transition-colors flex items-center gap-2"
+                    className="px-4 py-3 border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500 font-tactical text-xs uppercase tracking-wider transition-colors"
+                    title="Создаёт локальную комнату с тестовыми инженерами, без подключения других устройств"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>СОЗДАТЬ СВОЮ КОМНАТУ</span>
+                    <span>ЛОКАЛЬНЫЙ ТЕСТ С БОТАМИ</span>
                   </button>
 
                   <button
@@ -605,6 +836,36 @@ export function App() {
                     РЕГЛАМЕНТ И ПРАВИЛА
                   </button>
                 </div>
+
+                <div className="mt-4 max-w-xl grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                  <input
+                    type="text"
+                    value={roomCodeInput}
+                    onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 16))}
+                    maxLength={16}
+                    placeholder="КОД КОМНАТЫ · 16 СИМВОЛОВ"
+                    aria-label="Код онлайн-комнаты"
+                    className="w-full bg-slate-950 border border-slate-700 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400 font-mono-tech"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleJoinOnlineRoom}
+                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 16 || currentUser.name.trim().length < 2}
+                    className="px-5 py-2.5 border border-slate-600 text-slate-100 hover:border-amber-400 hover:text-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-tactical uppercase tracking-wider"
+                  >
+                    ПОДКЛЮЧИТЬСЯ
+                  </button>
+                </div>
+                {!isSupabaseConfigured && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Онлайн-комнаты включатся после настройки VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY. Инструкция: docs/05_Supabase_Setup.md.
+                  </p>
+                )}
+                {onlineError && (
+                  <p role="alert" className="mt-2 text-xs text-rose-300">
+                    {onlineError}
+                  </p>
+                )}
               </div>
             </div>
 
