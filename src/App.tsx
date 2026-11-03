@@ -1028,7 +1028,7 @@ export function App() {
           /* ==============================================================
              SCREEN 2: ROOM LOBBY
              ============================================================== */
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="incident-page incident-local-room-page py-4 sm:py-8">
             {/* Room Info Banner */}
             <div className="rounded-2xl border border-cyan-500/40 bg-slate-900/90 p-5 sm:p-6 shadow-xl flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -1124,7 +1124,7 @@ export function App() {
           /* ==============================================================
              SCREEN 3 & 4: MAIN TACTICAL COMMAND GAME TABLE
              ============================================================== */
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="incident-page incident-game-page py-4 sm:py-8">
             {/* Top Tactical Status Bar */}
             <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
