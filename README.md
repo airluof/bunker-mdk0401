@@ -48,6 +48,10 @@ public/assets/cards/
 - [Отчёт независимого аудита](docs/Bunker_Master_Audit_Report.txt)
 - [Промт реализации Gemini](prompts/Gemini_Bunker_Implementation_Master_Prompt.txt)
 
+## Загрузка иллюстраций
+
+Библиотека из 180 PNG подготовлена локально. Чтобы добавить её в репозиторий, скачай `Bunker_Assets_180_Complete.zip`, клонируй репозиторий через GitHub Desktop и следуй инструкции [UPLOAD_ASSETS_TO_GITHUB.md](docs/UPLOAD_ASSETS_TO_GITHUB.md). Скрипт `scripts/import-assets.ps1` проверит 6 категорий по 30 PNG и сохранит исходные имена файлов.
+
 ## Важные ограничения
 
 1. Не придумывать и не менять оригинальные игровые правила без утверждения владельца.
