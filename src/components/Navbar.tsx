@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import {
-  ShieldAlert,
+  ShieldCheck,
   Layers,
   BookOpen,
   Volume2,
   VolumeX,
   LogOut,
-  Radio,
   Activity,
 } from 'lucide-react';
 import { sound } from '../services/sound';
@@ -36,81 +35,80 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="incident-nav sticky top-0 z-40">
-      <div className="incident-nav-inner max-w-7xl mx-auto">
-        <div className="incident-nav-brand">
-          <div className="incident-nav-mark" aria-hidden="true">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <div className="min-w-0">
-            <div className="incident-nav-name">БУНКЕР / МДК.04.01</div>
-            <div className="incident-nav-subtitle">
-              <span className="incident-nav-status" />
-              НЕЙРОТЕХ · DRP-SITE · 2036
-            </div>
-          </div>
-        </div>
+    <header className="bunker-nav sticky top-0 z-40">
+      <div className="bunker-nav-inner">
+        <button
+          type="button"
+          className="bunker-brand"
+          onClick={() => onViewChange('game')}
+          aria-label="На главную"
+        >
+          <span className="bunker-brand-mark" aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <span className="bunker-brand-copy">
+            <span className="bunker-brand-name">Бункер</span>
+            <span className="bunker-brand-subtitle">МДК.04.01</span>
+          </span>
+        </button>
 
-        <div className="incident-nav-center">
-          {roomCode && (
-            <div className="incident-nav-room">
-              <Radio className="w-3.5 h-3.5" />
-              <span>СЕССИЯ</span>
-              <strong>{roomCode}</strong>
-            </div>
-          )}
-        </div>
+        {roomCode && (
+          <div className="bunker-nav-room" title="Код приглашения">
+            <span>Комната</span>
+            <strong>{roomCode}</strong>
+          </div>
+        )}
 
-        <nav className="incident-nav-actions" aria-label="Основная навигация">
+        <nav className="bunker-nav-actions" aria-label="Основная навигация">
           <button
             type="button"
             onClick={() => onViewChange('game')}
             aria-current={currentView === 'game' ? 'page' : undefined}
-            className={currentView === 'game' ? 'incident-nav-link is-active' : 'incident-nav-link'}
+            className={currentView === 'game' ? 'bunker-nav-link is-active' : 'bunker-nav-link'}
           >
-            <Activity className="w-4 h-4" />
-            <span>СТОЛ</span>
+            <Activity aria-hidden="true" />
+            <span>Игра</span>
           </button>
 
           <button
             type="button"
             onClick={() => onViewChange('catalog')}
             aria-current={currentView === 'catalog' ? 'page' : undefined}
-            className={currentView === 'catalog' ? 'incident-nav-link is-active' : 'incident-nav-link'}
+            className={currentView === 'catalog' ? 'bunker-nav-link is-active' : 'bunker-nav-link'}
           >
-            <Layers className="w-4 h-4" />
-            <span>АРХИВ / 180</span>
+            <Layers aria-hidden="true" />
+            <span>Карточки</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenRules}
-            className="incident-nav-icon"
-            title="Регламент и правила"
+            className="bunker-nav-icon"
+            title="Правила игры"
             aria-label="Открыть правила"
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen aria-hidden="true" />
           </button>
 
           <button
             type="button"
             onClick={toggleSound}
-            className="incident-nav-icon"
-            title={soundEnabled ? 'Отключить звук' : 'Включить звук'}
-            aria-label={soundEnabled ? 'Отключить звук' : 'Включить звук'}
+            className="bunker-nav-icon"
+            title={soundEnabled ? 'Выключить звук' : 'Включить звук'}
+            aria-label={soundEnabled ? 'Выключить звук' : 'Включить звук'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {soundEnabled ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
           </button>
 
           {onExitGame && (
             <button
               type="button"
               onClick={onExitGame}
-              className="incident-nav-exit"
-              title={isHost ? 'Закрыть комнату или выйти' : 'Покинуть сессию'}
-              aria-label={isHost ? 'Закрыть комнату или выйти' : 'Покинуть сессию'}
+              className="bunker-nav-exit"
+              title={isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
+              aria-label={isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut aria-hidden="true" />
             </button>
           )}
         </nav>
