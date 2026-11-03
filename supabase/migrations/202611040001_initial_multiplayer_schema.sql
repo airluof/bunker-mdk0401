@@ -860,7 +860,7 @@ begin
   if v_member_id is null then
     raise exception using errcode = 'P0001', message = 'NOT_ROOM_MEMBER';
   end if;
-  if v_technical_role = 'host' then
+  if v_technical_role = 'host' and v_room_status = 'lobby' then
     raise exception using errcode = 'P0001', message = 'HOST_MUST_CLOSE_ROOM';
   end if;
 
