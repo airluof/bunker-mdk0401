@@ -1089,115 +1089,72 @@ export function App() {
           /* ==============================================================
              SCREEN 3 & 4: MAIN TACTICAL COMMAND GAME TABLE
              ============================================================== */
-          <div className="incident-page incident-game-page py-4 sm:py-8">
-            {/* Top Tactical Status Bar */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-mono-tech text-slate-400">РАУНД:</span>
-                  <span className="text-sm font-mono-tech font-bold text-amber-400">
-                    {gameState.round}/5
-                  </span>
+          <div className="bunker-game-board">
+            {/* Раунд и текущий этап */}
+            <section className="bunker-round-header" aria-label="Текущий раунд и этап игры">
+              <div className="bunker-round-summary">
+                <div className="bunker-round-number">
+                  <span>Раунд</span>
+                  <strong>{gameState.round}<small> / 5</small></strong>
                 </div>
-
+                <div className="bunker-phase-detail">
+                  <span>Текущий этап</span>
+                  <strong>
+                    {gameState.phase === 'reveal' && 'Вскрытие карт'}
+                    {gameState.phase === 'briefing' && 'Обсуждение'}
+                    {gameState.phase === 'voting' && 'Голосование'}
+                    {gameState.phase === 'elimination' && 'Итоги голосования'}
+                  </strong>
+                </div>
+                <div className="bunker-capacity-detail">
+                  <span>Мест в Бункере</span>
+                  <strong>{gameState.bunkerCapacity}</strong>
+                </div>
                 {gameState.isLocalDemo !== false && (
-                  <div className="px-2 py-1 border border-amber-500/50 bg-amber-950/20 text-[9px] font-mono-tech uppercase tracking-wider text-amber-300">
-                    LOCAL DEMO / BOTS
-                  </div>
+                  <span className="bunker-demo-label">Локальный тест с ботами</span>
                 )}
-                <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                  <span className="text-xs font-mono-tech text-slate-400">ТЕКУЩАЯ ФАЗА:</span>
-                  <span className="text-xs font-tactical font-bold text-cyan-300 uppercase">
-                    {gameState.phase === 'reveal' && '1. Вскрытие характеристик'}
-                    {gameState.phase === 'briefing' && '2. Технический брифинг'}
-                    {gameState.phase === 'voting' && '3. Открытое голосование'}
-                    {gameState.phase === 'elimination' && '4. Протокол изгнания'}
-                  </span>
-                </div>
-
-                <div className="hidden sm:flex px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 items-center gap-2">
-                  <span className="text-xs font-mono-tech text-slate-400">МЕСТ В БУНКЕРЕ:</span>
-                  <span className="text-xs font-mono-tech font-bold text-emerald-400">
-                    {gameState.bunkerCapacity}
-                  </span>
-                </div>
               </div>
 
-              {/* Phase Progression Controller */}
-              <div className="flex items-center gap-2">
+              <div className="bunker-round-actions">
                 {gameState.phase === 'reveal' && (
-                  <button
-                    onClick={() => {
-                      setGameState({ ...gameState, phase: 'briefing' });
-                      sound.playCrisisAlert();
-                      showToast('Фаза брифинга: включите 60-секундный таймер и начните аргументацию');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <span>ПЕРЕЙТИ К БРИФИНГУ</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <button type="button" onClick={() => {
+                    setGameState({ ...gameState, phase: 'briefing' });
+                    sound.playCrisisAlert();
+                    showToast('Фаза брифинга: включите таймер и начните обсуждение.');
+                  }} className="bunker-game-action">
+                    К обсуждению <ArrowRight aria-hidden="true" />
                   </button>
                 )}
-
                 {gameState.phase === 'briefing' && (
-                  <button
-                    onClick={() => {
-                      setIsVotingOpen(true);
-                      setGameState({ ...gameState, phase: 'voting' });
-                      sound.playVoteCast();
-                    }}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <Vote className="w-4 h-4" />
-                    <span>ОТКРЫТЬ ГОЛОСОВАНИЕ</span>
+                  <button type="button" onClick={() => {
+                    setIsVotingOpen(true);
+                    setGameState({ ...gameState, phase: 'voting' });
+                    sound.playVoteCast();
+                  }} className="bunker-game-action is-danger">
+                    <Vote aria-hidden="true" /> Открыть голосование
                   </button>
                 )}
-
                 {gameState.phase === 'voting' && (
-                  <button
-                    onClick={() => setIsVotingOpen(true)}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <Vote className="w-4 h-4" />
-                    <span>ОТДАТЬ ГОЛОС</span>
+                  <button type="button" onClick={() => setIsVotingOpen(true)} className="bunker-game-action is-danger">
+                    <Vote aria-hidden="true" /> Отдать голос
                   </button>
                 )}
-
                 {gameState.phase === 'elimination' && (
-                  <button
-                    onClick={handleConfirmElimination}
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-                  >
-                    <span>УТВЕРДИТЬ ИЗГНАНИЕ И СЛЕДУЮЩИЙ РАУНД</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <button type="button" onClick={handleConfirmElimination} className="bunker-game-action">
+                    Следующий раунд <ArrowRight aria-hidden="true" />
                   </button>
                 )}
               </div>
-            </div>
+            </section>
 
-            {/* Active Crises Section */}
-            <ActiveCrisesBanner
-              crises={gameState.activeCrises}
-              currentRound={gameState.round}
-              onInspectCrisis={setInspectingCard}
-            />
-
-            {/* Middle Section: Briefing Timer & Team Roster */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-1 space-y-5">
-                {/* 60s / 30s Tactical Briefing Timer */}
-                <BriefingTimer
-                  initialSeconds={60}
-                  activeSpeakerName={gameState.players.find(p => p.id === gameState.activeSpeakerId)?.name}
+            {/* Игровой стол: кризисы и игроки, таймер и хроника */}
+            <div className="bunker-table-layout">
+              <div className="bunker-table-main">
+                <ActiveCrisesBanner
+                  crises={gameState.activeCrises}
+                  currentRound={gameState.round}
+                  onInspectCrisis={setInspectingCard}
                 />
-
-                {/* System Incident Terminal Log */}
-                <IncidentLog logs={gameState.log} />
-              </div>
-
-              {/* Team Composition & Revealed Cards Matrix */}
-              <div className="lg:col-span-2">
                 <PlayerRoster
                   players={gameState.players}
                   activeSpeakerId={gameState.activeSpeakerId}
@@ -1207,6 +1164,14 @@ export function App() {
                   onInspectCard={setInspectingCard}
                 />
               </div>
+
+              <aside className="bunker-table-sidebar" aria-label="Инструменты раунда">
+                <BriefingTimer
+                  initialSeconds={60}
+                  activeSpeakerName={gameState.players.find((player) => player.id === gameState.activeSpeakerId)?.name}
+                />
+                <IncidentLog logs={gameState.log} />
+              </aside>
             </div>
 
             {/* Bottom Section: My Personal Hand (5 Cards) */}
