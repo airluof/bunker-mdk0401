@@ -75,6 +75,43 @@ interface OnlineRoomSession {
 const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
 const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
 
+function formatOnlineError(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message : String(error || '');
+  const normalized = message.toUpperCase();
+
+  if (normalized.includes('SUPABASE_NOT_CONFIGURED')) {
+    return 'Онлайн-режим не настроен. Проверьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY.';
+  }
+  if (normalized.includes('UNAUTHENTICATED') || normalized.includes('ANONYMOUS_SIGN_IN_FAILED')) {
+    return 'Не удалось создать гостевую сессию. Обновите страницу и попробуйте снова.';
+  }
+  if (normalized.includes('ROOM_NOT_FOUND')) {
+    return 'Комната не найдена. Проверьте код приглашения.';
+  }
+  if (normalized.includes('ROOM_NOT_JOINABLE')) {
+    return 'Эта комната уже запущена или закрыта и не принимает новых участников.';
+  }
+  if (normalized.includes('ROOM_FULL')) {
+    return 'В комнате уже максимальное количество участников — 16.';
+  }
+  if (normalized.includes('ACTIVE_ROOM_OR_DUPLICATE_NAME')) {
+    return 'Вы уже участвуете в другой комнате или такой позывной занят.';
+  }
+  if (normalized.includes('PLAYER_COUNT_OUT_OF_RANGE')) {
+    return 'Для запуска нужно от 8 до 16 активных участников.';
+  }
+  if (normalized.includes('CARD_CATALOG_INCOMPLETE')) {
+    return 'Каталог карточек ещё не загружен в Supabase. Обратитесь к создателю игры.';
+  }
+  if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
+    return 'Создатель должен закрыть комнату, прежде чем выйти из неё.';
+  }
+  if (normalized.includes('RULE_NOT_APPROVED')) {
+    return 'Это действие пока недоступно: соответствующая игровая процедура ещё не утверждена.';
+  }
+  return message || fallback;
+}
+
 export function App() {
   const [gameState, setGameState] = useState<GameState | null>(() => loadGameState());
   const [currentUser, setCurrentUser] = useState(() => loadLocalUser());
@@ -138,7 +175,7 @@ export function App() {
         })
         .catch((error: unknown) => {
           if (!cancelled) {
-            setOnlineError(error instanceof Error ? error.message : 'Не удалось обновить комнату.');
+            setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
           }
         });
     })
@@ -148,7 +185,7 @@ export function App() {
       })
       .catch((error: unknown) => {
         if (!cancelled) {
-          setOnlineError(error instanceof Error ? error.message : 'Не удалось подключить обновления комнаты.');
+          setOnlineError(formatOnlineError(error, 'Не удалось подключить обновления комнаты.'));
         }
       });
 
@@ -216,7 +253,7 @@ export function App() {
       clearGameState();
       sound.playCrisisAlert();
     } catch (error: unknown) {
-      setOnlineError(error instanceof Error ? error.message : 'Не удалось создать онлайн-комнату.');
+      setOnlineError(formatOnlineError(error, 'Не удалось создать онлайн-комнату.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -252,7 +289,7 @@ export function App() {
       setGameState(null);
       clearGameState();
     } catch (error: unknown) {
-      setOnlineError(error instanceof Error ? error.message : 'Не удалось подключиться к комнате.');
+      setOnlineError(formatOnlineError(error, 'Не удалось подключиться к комнате.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -271,7 +308,7 @@ export function App() {
         ? { ...current, snapshot }
         : current);
     } catch (error: unknown) {
-      setOnlineError(error instanceof Error ? error.message : 'Не удалось обновить комнату.');
+      setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -296,7 +333,7 @@ export function App() {
       setOnlineRoom(null);
       showToast(ownMember?.technical_role === 'host' ? 'Комната закрыта.' : 'Вы покинули комнату.');
     } catch (error: unknown) {
-      setOnlineError(error instanceof Error ? error.message : 'Не удалось выйти из комнаты.');
+      setOnlineError(formatOnlineError(error, 'Не удалось выйти из комнаты.'));
     } finally {
       setOnlineBusy(false);
     }
