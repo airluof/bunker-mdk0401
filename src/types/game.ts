@@ -88,6 +88,8 @@ export interface RecoveryPlanStep {
 }
 
 export interface GameState {
+  /** True for browser-only test sessions populated with simulated engineers. */
+  isLocalDemo?: boolean;
   roomCode: string;
   hostId: string;
   round: number;
