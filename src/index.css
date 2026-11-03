@@ -1682,3 +1682,1576 @@ body {
   color: var(--incident-muted);
   font: 400 10px/1.55 'IBM Plex Mono', 'Consolas', monospace;
 }
+
+
+/* Bunker interface refresh */
+:root {
+  --bunker-bg: #f4f3ee;
+  --bunker-surface: #ffffff;
+  --bunker-surface-soft: #f8f8f4;
+  --bunker-ink: #252820;
+  --bunker-muted: #73786f;
+  --bunker-line: #e3e4dc;
+  --bunker-accent: #607765;
+  --bunker-accent-dark: #425b49;
+  --bunker-danger: #ad5d50;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bunker-bg) !important;
+  color: var(--bunker-ink) !important;
+  font-family: Inter, "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.font-tactical {
+  font-family: Inter, "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+.font-mono-tech {
+  font-family: "IBM Plex Mono", Consolas, monospace !important;
+  letter-spacing: normal !important;
+}
+
+.bunker-app {
+  min-height: 100vh;
+  background: var(--bunker-bg);
+  color: var(--bunker-ink);
+}
+
+.bunker-main {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 30px 24px 72px;
+}
+
+.bunker-page {
+  width: 100%;
+}
+
+.bunker-nav {
+  border-bottom: 1px solid var(--bunker-line);
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(14px);
+}
+
+.bunker-nav-inner {
+  display: flex;
+  width: min(100%, 1240px);
+  min-height: 68px;
+  align-items: center;
+  gap: 28px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.bunker-brand {
+  display: inline-flex;
+  min-width: 180px;
+  align-items: center;
+  gap: 11px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--bunker-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.bunker-brand-mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 11px;
+  background: #e8eee8;
+  color: var(--bunker-accent-dark);
+}
+
+.bunker-brand-mark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.bunker-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bunker-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.bunker-brand-subtitle {
+  color: var(--bunker-muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.bunker-nav-room {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: auto;
+  border: 1px solid var(--bunker-line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--bunker-muted);
+  font-size: 12px;
+}
+
+.bunker-nav-room strong {
+  color: var(--bunker-ink);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bunker-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.bunker-nav-link,
+.bunker-nav-icon,
+.bunker-nav-exit {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px 11px;
+  background: transparent;
+  color: #62685f;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.bunker-nav-link svg,
+.bunker-nav-icon svg,
+.bunker-nav-exit svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bunker-nav-link:hover,
+.bunker-nav-icon:hover {
+  background: #f1f3ef;
+  color: var(--bunker-ink);
+}
+
+.bunker-nav-link.is-active {
+  border-color: #e1e8e1;
+  background: #edf2ed;
+  color: var(--bunker-accent-dark);
+}
+
+.bunker-nav-icon {
+  width: 38px;
+  padding: 8px;
+}
+
+.bunker-nav-exit {
+  width: 38px;
+  margin-left: 3px;
+  color: var(--bunker-danger);
+}
+
+.bunker-nav-exit:hover {
+  background: #f8eeeb;
+}
+
+.bunker-home {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.bunker-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  align-items: stretch;
+  gap: 32px;
+  overflow: hidden;
+  border: 1px solid var(--bunker-line);
+  border-radius: 22px;
+  padding: clamp(28px, 5vw, 58px);
+  background: var(--bunker-surface);
+}
+
+.bunker-hero-copy {
+  max-width: 760px;
+  align-self: center;
+}
+
+.bunker-eyebrow {
+  margin: 0 0 12px;
+  color: var(--bunker-accent-dark);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .025em;
+}
+
+.bunker-hero h1 {
+  margin: 0 0 18px;
+  color: var(--bunker-ink);
+  font-size: clamp(42px, 6.5vw, 74px);
+  font-weight: 750;
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.bunker-hero h1 span {
+  color: var(--bunker-accent);
+}
+
+.bunker-hero-description {
+  max-width: 680px;
+  margin: 0;
+  color: #596057;
+  font-size: clamp(15px, 1.4vw, 17px);
+  line-height: 1.7;
+}
+
+.bunker-game-facts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  border-left: 1px solid var(--bunker-line);
+  padding-left: 28px;
+}
+
+.bunker-game-facts div {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  border-bottom: 1px solid var(--bunker-line);
+  padding: 12px 0;
+}
+
+.bunker-game-facts div:last-child {
+  border-bottom: 0;
+}
+
+.bunker-game-facts strong {
+  min-width: 78px;
+  color: var(--bunker-ink);
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+
+.bunker-game-facts span {
+  color: var(--bunker-muted);
+  font-size: 13px;
+}
+
+.bunker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bunker-section-heading,
+.bunker-page-heading,
+.bunker-room-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.bunker-section-heading h2,
+.bunker-page-heading h1,
+.bunker-room-heading h1 {
+  margin: 0;
+  color: var(--bunker-ink);
+  font-size: clamp(27px, 3vw, 38px);
+  font-weight: 720;
+  line-height: 1.1;
+  letter-spacing: -.04em;
+}
+
+.bunker-section-heading > p,
+.bunker-page-description {
+  max-width: 460px;
+  margin: 0;
+  color: var(--bunker-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.bunker-name-field {
+  display: flex;
+  max-width: 440px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bunker-name-field label,
+.bunker-field-label {
+  color: #4e554c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bunker-input,
+.bunker-select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid #d9dcd3;
+  border-radius: 10px;
+  padding: 11px 13px;
+  outline: none;
+  background: var(--bunker-surface);
+  color: var(--bunker-ink);
+  font: 400 14px/1.4 Inter, "IBM Plex Sans", sans-serif;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.bunker-input::placeholder {
+  color: #a0a49b;
+}
+
+.bunker-input:focus,
+.bunker-select:focus {
+  border-color: #8ba18e;
+  box-shadow: 0 0 0 3px rgba(96,119,101,.12);
+}
+
+.bunker-code-input {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: .04em;
+}
+
+.bunker-access-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bunker-panel {
+  min-width: 0;
+  border: 1px solid var(--bunker-line);
+  border-radius: 16px;
+  padding: 23px;
+  background: var(--bunker-surface);
+}
+
+.bunker-access-panel {
+  display: flex;
+  min-height: 208px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 15px;
+}
+
+.bunker-access-panel > div:first-child {
+  margin-bottom: auto;
+}
+
+.bunker-access-panel h3,
+.bunker-panel h2 {
+  margin: 0;
+  color: var(--bunker-ink);
+  font-size: 18px;
+  font-weight: 680;
+  letter-spacing: -.02em;
+}
+
+.bunker-access-panel p,
+.bunker-invite-panel > p,
+.bunker-panel-heading p {
+  margin: 6px 0 0;
+  color: var(--bunker-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.bunker-button {
+  display: inline-flex;
+  min-height: 43px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 620;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+
+.bunker-button svg,
+.bunker-text-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bunker-button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.bunker-button-primary {
+  background: var(--bunker-accent-dark);
+  color: #fff;
+}
+
+.bunker-button-primary:hover:not(:disabled) {
+  background: #334a3a;
+}
+
+.bunker-button-secondary {
+  border-color: #d8ddd5;
+  background: #fff;
+  color: #3f5545;
+}
+
+.bunker-button-secondary:hover:not(:disabled) {
+  border-color: #aab9aa;
+  background: #f3f6f2;
+}
+
+.bunker-button-danger {
+  border-color: #ead8d3;
+  background: #fff;
+  color: var(--bunker-danger);
+}
+
+.bunker-button-danger:hover:not(:disabled) {
+  background: #fbf1ee;
+}
+
+.bunker-help {
+  margin: 0;
+  color: var(--bunker-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.bunker-error {
+  border: 1px solid #ecd6d0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fbf2ef;
+  color: #8f463a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bunker-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 7px 0;
+  background: transparent;
+  color: var(--bunker-accent-dark);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.bunker-text-button:hover {
+  color: #2e4735;
+}
+
+.bunker-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bunker-category-card {
+  display: flex;
+  min-width: 0;
+  min-height: 90px;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--bunker-line);
+  border-radius: 13px;
+  padding: 15px;
+  background: var(--bunker-surface);
+  color: var(--bunker-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease;
+}
+
+.bunker-category-card:hover {
+  transform: translateY(-2px);
+  border-color: #c6d0c4;
+  background: #fcfdfb;
+}
+
+.bunker-category-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: var(--category-color);
+}
+
+.bunker-category-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bunker-category-copy strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.bunker-category-copy small {
+  overflow: hidden;
+  color: var(--bunker-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bunker-category-count {
+  color: #858b81;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.bunker-toast {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: min(420px, calc(100vw - 32px));
+  border: 1px solid var(--bunker-line);
+  border-radius: 12px;
+  padding: 13px 16px;
+  background: #fff;
+  color: var(--bunker-ink);
+  font-size: 13px;
+  box-shadow: 0 12px 30px rgba(40,45,35,.12);
+}
+
+.bunker-toast svg {
+  width: 17px;
+  height: 17px;
+  color: var(--bunker-accent);
+  flex: 0 0 auto;
+}
+
+.bunker-page-heading {
+  margin-bottom: 28px;
+}
+
+.bunker-catalog-total {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--bunker-muted);
+  font-size: 13px;
+}
+
+.bunker-catalog-total strong {
+  color: var(--bunker-ink);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+
+.bunker-catalog-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-bottom: 1px solid var(--bunker-line);
+  padding-bottom: 20px;
+}
+
+.bunker-search {
+  display: flex;
+  width: min(100%, 460px);
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dfe1d9;
+  border-radius: 10px;
+  padding: 0 12px;
+  background: #fff;
+  color: #8b9187;
+}
+
+.bunker-search:focus-within {
+  border-color: #8ba18e;
+  box-shadow: 0 0 0 3px rgba(96,119,101,.10);
+}
+
+.bunker-search svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.bunker-search input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--bunker-ink);
+  font: 400 13px/1.3 Inter, "IBM Plex Sans", sans-serif;
+}
+
+.bunker-search input::placeholder {
+  color: #9a9f96;
+}
+
+.bunker-category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.bunker-filter {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e1e3dc;
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: #fff;
+  color: #60675e;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 520;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.bunker-filter svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bunker-filter:hover {
+  border-color: #cbd4ca;
+  color: var(--bunker-ink);
+}
+
+.bunker-filter.is-active {
+  border-color: #d0ddd0;
+  background: #eaf0e9;
+  color: var(--bunker-accent-dark);
+}
+
+.bunker-catalog-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 0;
+  color: var(--bunker-muted);
+  font-size: 12px;
+}
+
+.bunker-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+  padding-bottom: 28px;
+}
+
+.bunker-catalog-item {
+  min-width: 0;
+  min-height: 310px;
+}
+
+.bunker-card {
+  --category-color: #7b8d7b;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 310px;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e2e3dc;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--bunker-ink);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(31,37,29,.035);
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+.bunker-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbd4ca;
+  box-shadow: 0 10px 24px rgba(31,37,29,.09);
+}
+
+.bunker-card-topline {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eceee8;
+  background: #fff;
+}
+
+.bunker-card-category {
+  color: #5e715f;
+  font-size: 11px;
+  font-weight: 630;
+}
+
+.bunker-card-inspect {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #838a80;
+  cursor: pointer;
+}
+
+.bunker-card-inspect svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bunker-card-inspect:hover {
+  border-color: var(--bunker-line);
+  background: var(--bunker-surface-soft);
+  color: var(--bunker-ink);
+}
+
+.bunker-card-art {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 180px;
+  overflow: hidden;
+  background: #eeeee8;
+}
+
+.bunker-card-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 24%;
+}
+
+.bunker-card-art-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  place-items: center;
+  color: #8b9b8c;
+  background: #f0f2ec;
+}
+
+.bunker-card-art-fallback svg {
+  width: 34px;
+  height: 34px;
+  stroke-width: 1.5;
+}
+
+.bunker-card-copy {
+  display: flex;
+  min-height: 106px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 14px 14px;
+  border-top: 2px solid var(--category-color);
+  background: #fff;
+}
+
+.bunker-card-copy h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--bunker-ink);
+  font-size: 14px;
+  font-weight: 680;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bunker-card-copy p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #71776e;
+  font-size: 11px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.bunker-card-copy p.is-compact {
+  -webkit-line-clamp: 2;
+}
+
+.bunker-card-sealed {
+  justify-content: space-between;
+  border-color: #dfe3dc;
+  background: #f7f8f4;
+  cursor: default;
+}
+
+.bunker-card-sealed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.bunker-card-seal {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #7a8278;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bunker-card-lock {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid #d8ded6;
+  border-radius: 14px;
+  background: #edf1eb;
+  color: var(--bunker-accent);
+}
+
+.bunker-card-lock svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bunker-card-bottom {
+  padding: 10px;
+  border-top: 1px solid #e5e8e1;
+}
+
+.bunker-card-reveal {
+  display: flex;
+  width: 100%;
+  min-height: 37px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--bunker-accent-dark);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bunker-card-reveal:hover {
+  background: #344a3a;
+}
+
+.bunker-card-reveal svg,
+.bunker-card-access svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bunker-card-access {
+  display: flex;
+  min-height: 27px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #899087;
+  font-size: 11px;
+}
+
+.bunker-empty {
+  display: flex;
+  min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px dashed #d9ddd4;
+  border-radius: 14px;
+  color: var(--bunker-muted);
+  text-align: center;
+}
+
+.bunker-empty > svg {
+  width: 25px;
+  height: 25px;
+}
+
+.bunker-empty h2 {
+  margin: 0;
+  color: var(--bunker-ink);
+  font-size: 18px;
+}
+
+.bunker-empty p {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.bunker-catalog-note {
+  margin: 4px 0 0;
+  color: #858b82;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.bunker-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Card detail */
+.bunker-modal {
+  background: rgba(24,29,24,.55);
+  backdrop-filter: blur(5px);
+}
+
+.bunker-modal-panel {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--bunker-ink);
+  box-shadow: 0 24px 80px rgba(20,28,20,.22);
+}
+
+.bunker-modal-art {
+  display: flex;
+  min-height: 420px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 22px;
+  background: #eeeee8;
+}
+
+.bunker-modal-art img {
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+}
+
+.bunker-modal-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  overflow-y: auto;
+  padding: 42px 36px;
+}
+
+.bunker-category-label {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #edf2ec;
+  color: #4e6954;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.bunker-modal-copy h2 {
+  margin: 0;
+  color: var(--bunker-ink);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 730;
+  line-height: 1.1;
+  letter-spacing: -.035em;
+}
+
+.bunker-modal-copy p {
+  margin: 0;
+  color: #60675d;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.bunker-modal-close {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.9);
+  color: #596156;
+  cursor: pointer;
+}
+
+.bunker-modal-close:hover {
+  background: #fff;
+  color: var(--bunker-ink);
+}
+
+.bunker-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Online lobby */
+.bunker-room-heading {
+  margin-bottom: 30px;
+}
+
+.bunker-room-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bunker-room-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .8fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.bunker-players-panel {
+  padding: 25px;
+}
+
+.bunker-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.bunker-player-count {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--bunker-muted);
+  font-size: 12px;
+}
+
+.bunker-player-count svg {
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  color: var(--bunker-accent);
+}
+
+.bunker-player-count strong {
+  color: var(--bunker-ink);
+  font-size: 26px;
+  font-weight: 720;
+  letter-spacing: -.04em;
+}
+
+.bunker-player-list {
+  border-top: 1px solid var(--bunker-line);
+}
+
+.bunker-player-row {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--bunker-line);
+  padding: 10px 2px;
+}
+
+.bunker-player-avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: #edf2ec;
+  color: var(--bunker-accent-dark);
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.bunker-player-details {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bunker-player-details strong {
+  overflow: hidden;
+  color: var(--bunker-ink);
+  font-size: 14px;
+  font-weight: 630;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bunker-player-details small {
+  color: var(--bunker-muted);
+  font-size: 11px;
+}
+
+.bunker-host-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #92733d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bunker-host-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bunker-empty-copy {
+  margin: 0;
+  padding: 28px 0;
+  color: var(--bunker-muted);
+  font-size: 13px;
+}
+
+.bunker-player-progress {
+  margin: 16px 0 0;
+  border-radius: 9px;
+  padding: 11px 13px;
+  background: #f2f5f0;
+  color: #526753;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bunker-room-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bunker-invite-panel h2,
+.bunker-settings-panel h2 {
+  font-size: 17px;
+}
+
+.bunker-invite-code {
+  overflow-wrap: anywhere;
+  margin: 15px 0;
+  border: 1px solid var(--bunker-line);
+  border-radius: 9px;
+  padding: 12px;
+  background: #f8f9f6;
+  color: var(--bunker-ink);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: .03em;
+}
+
+.bunker-copy-button,
+.bunker-save-settings {
+  width: 100%;
+}
+
+.bunker-settings-panel .bunker-panel-heading {
+  margin-bottom: 15px;
+}
+
+.bunker-settings-panel .bunker-panel-heading > svg {
+  width: 19px;
+  height: 19px;
+  color: var(--bunker-accent);
+}
+
+.bunker-select {
+  min-height: 43px;
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+
+.bunker-setting-value {
+  color: var(--bunker-ink);
+  font-size: 27px;
+  font-weight: 720;
+}
+
+.bunker-setting-value span {
+  color: var(--bunker-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.bunker-settings-panel .bunker-help {
+  margin-bottom: 13px;
+}
+
+.bunker-online-note {
+  margin: 17px 0 0;
+  border-top: 1px solid var(--bunker-line);
+  padding-top: 15px;
+  color: #858b82;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Keep legacy single-device play screens readable while the multiplayer game table is being built. */
+.incident-game-page,
+.incident-local-room-page {
+  color: var(--bunker-ink) !important;
+}
+
+.incident-game-page .rounded-2xl,
+.incident-game-page .rounded-xl,
+.incident-game-page .rounded-lg,
+.incident-local-room-page .rounded-2xl,
+.incident-local-room-page .rounded-xl,
+.incident-local-room-page .rounded-lg {
+  border-color: var(--bunker-line) !important;
+  border-radius: 14px !important;
+  background-color: #fff !important;
+  box-shadow: 0 2px 8px rgba(31,37,29,.04) !important;
+}
+
+.incident-game-page [class*="bg-slate-"],
+.incident-local-room-page [class*="bg-slate-"] {
+  background-color: #fff !important;
+  background-image: none !important;
+}
+
+.incident-game-page [class*="border-slate-"],
+.incident-local-room-page [class*="border-slate-"] {
+  border-color: var(--bunker-line) !important;
+}
+
+.incident-game-page .text-white,
+.incident-local-room-page .text-white,
+.incident-game-page .text-slate-100,
+.incident-local-room-page .text-slate-100,
+.incident-game-page .text-slate-200,
+.incident-local-room-page .text-slate-200,
+.incident-game-page .text-slate-300,
+.incident-local-room-page .text-slate-300 {
+  color: var(--bunker-ink) !important;
+}
+
+.incident-game-page .text-slate-400,
+.incident-local-room-page .text-slate-400,
+.incident-game-page .text-slate-500,
+.incident-local-room-page .text-slate-500 {
+  color: var(--bunker-muted) !important;
+}
+
+.incident-game-page button,
+.incident-local-room-page button {
+  border-radius: 9px !important;
+  font-family: inherit !important;
+  letter-spacing: normal !important;
+}
+
+.incident-game-page button[class*="bg-gradient"],
+.incident-local-room-page button[class*="bg-gradient"] {
+  border: 1px solid var(--bunker-accent-dark) !important;
+  background: var(--bunker-accent-dark) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.incident-game-page button:disabled,
+.incident-local-room-page button:disabled {
+  opacity: .45;
+}
+
+.incident-modal {
+  background: rgba(24,29,24,.55) !important;
+  backdrop-filter: blur(5px);
+}
+
+.incident-modal-panel {
+  border: 1px solid var(--bunker-line) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  color: var(--bunker-ink) !important;
+  box-shadow: 0 22px 70px rgba(20,28,20,.2) !important;
+}
+
+.incident-modal-panel .rounded-2xl,
+.incident-modal-panel .rounded-xl,
+.incident-modal-panel .rounded-lg {
+  border-radius: 11px !important;
+}
+
+.incident-modal-panel [class*="bg-slate-"] {
+  background-color: #f4f5f1 !important;
+  background-image: none !important;
+}
+
+.incident-modal-panel [class*="border-slate-"] {
+  border-color: var(--bunker-line) !important;
+}
+
+.incident-modal-panel .text-white,
+.incident-modal-panel .text-slate-100,
+.incident-modal-panel .text-slate-200,
+.incident-modal-panel .text-slate-300 {
+  color: var(--bunker-ink) !important;
+}
+
+.incident-modal-panel .text-slate-400,
+.incident-modal-panel .text-slate-500 {
+  color: var(--bunker-muted) !important;
+}
+
+.incident-modal-panel button {
+  border-radius: 9px !important;
+  font-family: inherit !important;
+}
+
+@media (max-width: 900px) {
+  .bunker-nav-inner {
+    gap: 14px;
+  }
+
+  .bunker-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bunker-catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .bunker-main {
+    padding: 22px 16px 48px;
+  }
+
+  .bunker-nav-inner {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 10px 16px;
+  }
+
+  .bunker-brand {
+    min-width: 0;
+    margin-right: auto;
+  }
+
+  .bunker-nav-room {
+    order: 3;
+    width: 100%;
+    margin: 0;
+  }
+
+  .bunker-nav-actions {
+    gap: 2px;
+    margin-left: 0;
+  }
+
+  .bunker-nav-link,
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .bunker-nav-link svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .bunker-hero {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    border-radius: 17px;
+    padding: 28px 23px;
+  }
+
+  .bunker-game-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--bunker-line);
+    border-left: 0;
+    padding: 10px 0 0;
+  }
+
+  .bunker-game-facts div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    border-right: 1px solid var(--bunker-line);
+    border-bottom: 0;
+    padding: 7px 10px 7px 0;
+  }
+
+  .bunker-game-facts div:last-child {
+    border-right: 0;
+  }
+
+  .bunker-game-facts strong {
+    min-width: 0;
+    font-size: 23px;
+  }
+
+  .bunker-home {
+    gap: 42px;
+  }
+
+  .bunker-section-heading,
+  .bunker-page-heading,
+  .bunker-room-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bunker-access-grid,
+  .bunker-room-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-room-actions {
+    width: 100%;
+  }
+
+  .bunker-room-actions .bunker-button {
+    flex: 1;
+  }
+
+  .bunker-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+
+  .bunker-catalog-item {
+    min-height: 285px;
+  }
+
+  .bunker-modal-panel {
+    grid-template-columns: 1fr;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .bunker-modal-art {
+    min-height: 280px;
+    max-height: 42vh;
+  }
+
+  .bunker-modal-art img {
+    max-height: 38vh;
+  }
+
+  .bunker-modal-copy {
+    padding: 24px;
+  }
+
+  .bunker-players-panel,
+  .bunker-panel {
+    padding: 19px;
+  }
+}
+
+@media (max-width: 430px) {
+  .bunker-brand-name {
+    font-size: 15px;
+  }
+
+  .bunker-nav-link {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .bunker-nav-link span {
+    font-size: 10px;
+  }
+
+  .bunker-category-grid,
+  .bunker-catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-category-card {
+    min-height: 76px;
+  }
+
+  .bunker-room-actions {
+    flex-direction: column;
+  }
+
+  .bunker-room-actions .bunker-button {
+    width: 100%;
+  }
+
+  .bunker-host-label {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
