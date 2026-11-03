@@ -87,7 +87,7 @@ for (let offset = 0; offset < rows.length; offset += 30) {
   const batch = rows.slice(offset, offset + 30);
   const { error } = await supabase
     .from('card_catalog')
-    .upsert(batch, { onConflict: 'card_id' });
+    .upsert(batch, { onConflict: 'card_id,catalog_version' });
 
   if (error) {
     throw new Error('Import failed at batch ' + (offset / 30 + 1) + ': ' + error.message);
