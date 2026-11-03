@@ -1,0 +1,162 @@
+{
+  "project": "Бункер — МДК.04.01",
+  "status": "PASS",
+  "validation_scope": "All six uploaded category ZIP archives; full extraction and PNG decoding",
+  "total_expected": 180,
+  "total_found": 180,
+  "total_categories": 6,
+  "per_category": {
+    "roles": {
+      "category_name_ru": "Роли",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    },
+    "skills": {
+      "category_name_ru": "Навыки",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    },
+    "baggage": {
+      "category_name_ru": "Багаж",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    },
+    "vulnerabilities": {
+      "category_name_ru": "Уязвимости",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    },
+    "crises": {
+      "category_name_ru": "Кризисы",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    },
+    "actions": {
+      "category_name_ru": "Действия",
+      "expected_png": 30,
+      "found_png": 30,
+      "ids_01_to_30_present": true,
+      "dimensions": "1200x1600",
+      "decode_errors": 0,
+      "missing_ids": [],
+      "duplicate_ids": []
+    }
+  },
+  "integrity_checks": {
+    "all_pngs_decoded": true,
+    "all_png_dimensions_1200x1600": true,
+    "unique_card_ids": true,
+    "duplicate_byte_files": [],
+    "duplicate_pixel_files": [],
+    "archive_crc_read_checks_passed": true
+  },
+  "source_comparison": {
+    "titles_compared_against_original_excel": 180,
+    "source_export_matches_original_excel_titles": true,
+    "export_filename_title_differences": [
+      {
+        "card_id": "role_06",
+        "original_title": "Технический писатель / ГОСТ 34 и 19",
+        "exported_title": "Технический писатель ГОСТ 34 и 19",
+        "file_name": "role_06 — [Технический писатель ГОСТ 34 и 19].png"
+      },
+      {
+        "card_id": "role_09",
+        "original_title": "Инженер СХД / SAN",
+        "exported_title": "Инженер СХД SAN",
+        "file_name": "role_09 — [Инженер СХД SAN].png"
+      },
+      {
+        "card_id": "skill_04",
+        "original_title": "Эксперт по ГОСТ Р ИСО/МЭК 12207",
+        "exported_title": "Эксперт по ГОСТ Р ИСО МЭК 12207",
+        "file_name": "skill_04 — [Эксперт по ГОСТ Р ИСО МЭК 12207].png"
+      },
+      {
+        "card_id": "skill_13",
+        "original_title": "Скриптовый автоматизатор (PowerShell/Bash)",
+        "exported_title": "Скриптовый автоматизатор (PowerShell Bash)",
+        "file_name": "skill_13 — [Скриптовый автоматизатор (PowerShell Bash)].png"
+      },
+      {
+        "card_id": "skill_16",
+        "original_title": "Властелин удаленного управления IPMI/iLO",
+        "exported_title": "Властелин удаленного управления IPMI iLO",
+        "file_name": "skill_16 — [Властелин удаленного управления IPMI iLO].png"
+      },
+      {
+        "card_id": "baggage_28",
+        "original_title": "Криптошлюз ГОСТ (Континент / ViPNet)",
+        "exported_title": "Криптошлюз ГОСТ (Континент ViPNet)",
+        "file_name": "baggage_28 — [Криптошлюз ГОСТ (Континент ViPNet)].png"
+      },
+      {
+        "card_id": "vulnerability_17",
+        "original_title": "Сетевой слепец (Путает маску/шлюз)",
+        "exported_title": "Сетевой слепец (Путает маску шлюз)",
+        "file_name": "vulnerability_17 — [Сетевой слепец (Путает маску шлюз)].png"
+      },
+      {
+        "card_id": "crisis_06",
+        "original_title": "Отказ охлаждения (>95°C)",
+        "exported_title": "Отказ охлаждения (_95°C)",
+        "file_name": "crisis_06 — [Отказ охлаждения (_95°C)].png"
+      },
+      {
+        "card_id": "crisis_13",
+        "original_title": "Зависание шины iSCSI / FC",
+        "exported_title": "Зависание шины iSCSI FC",
+        "file_name": "crisis_13 — [Зависание шины iSCSI FC].png"
+      },
+      {
+        "card_id": "crisis_20",
+        "original_title": "Потеря пароля root / Administrator",
+        "exported_title": "Потеря пароля root Administrator",
+        "file_name": "crisis_20 — [Потеря пароля root Administrator].png"
+      },
+      {
+        "card_id": "crisis_30",
+        "original_title": "Комбинированный коллапс: Черный старт",
+        "exported_title": "Комбинированный коллапс_ Черный старт",
+        "file_name": "crisis_30 — [Комбинированный коллапс_ Черный старт].png"
+      },
+      {
+        "card_id": "action_05",
+        "original_title": "Принудительный gpupdate /force",
+        "exported_title": "Принудительный gpupdate force",
+        "file_name": "action_05 — [Принудительный gpupdate force].png"
+      }
+    ],
+    "note": "Where filename title differs, original_title from the manifest remains authoritative. File names were preserved exactly as uploaded."
+  },
+  "limitations": [
+    "This is technical validation, not a full semantic human review of every illustration.",
+    "OCR was not run; embedded text inside the images was not automatically checked.",
+    "Image visual suitability should be reviewed using contact sheets or in the final UI."
+  ]
+}
