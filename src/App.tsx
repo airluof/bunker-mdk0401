@@ -32,6 +32,7 @@ import {
   subscribeToOnlineRoom,
   leaveOnlineRoom,
   closeOnlineRoom,
+  updateOnlineRoomSettings,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -99,6 +100,18 @@ function formatOnlineError(error: unknown, fallback: string): string {
   }
   if (normalized.includes('PLAYER_COUNT_OUT_OF_RANGE')) {
     return 'Для запуска нужно от 8 до 16 активных участников.';
+  }
+  if (normalized.includes('INVALID_MAX_PLAYERS')) {
+    return 'Лимит комнаты должен быть от 8 до 16 участников.';
+  }
+  if (normalized.includes('ROOM_CAPACITY_BELOW_CURRENT')) {
+    return 'Нельзя установить лимит ниже числа уже подключённых игроков.';
+  }
+  if (normalized.includes('ROOM_NOT_EDITABLE')) {
+    return 'Настройки можно менять только до начала игры.';
+  }
+  if (normalized.includes('FORBIDDEN')) {
+    return 'Изменять настройки комнаты может только её создатель.';
   }
   if (normalized.includes('CARD_CATALOG_INCOMPLETE')) {
     return 'Каталог карточек ещё не загружен в Supabase. Обратитесь к создателю игры.';
@@ -309,6 +322,25 @@ export function App() {
         : current);
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleSaveOnlineRoomSettings = async (maxPlayers: number) => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await updateOnlineRoomSettings(onlineRoom.roomId, maxPlayers);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(`Лимит комнаты изменён: до ${maxPlayers} участников.`);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось сохранить настройки комнаты.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -801,6 +833,7 @@ export function App() {
             error={onlineError}
             onRefresh={handleRefreshOnlineRoom}
             onExit={handleExitCurrentRoom}
+            onSaveSettings={handleSaveOnlineRoomSettings}
           />
         ) : !gameState ? (
           /* ==============================================================
@@ -920,7 +953,7 @@ export function App() {
                       className="incident-button"
                     >
                       <Play className="w-4 h-4" />
-                      ДЕМО-СИМУЛЯЦИЯ
+                      ДЕМО-СИМУЛЯЦИЯ / 6 ТЕСТОВЫХ ИГРОКОВ
                     </button>
                   </div>
                   <div className="incident-action-row">
@@ -928,9 +961,9 @@ export function App() {
                       type="button"
                       onClick={handleCreateRoom}
                       className="incident-button incident-button-soft"
-                      title="Локальная тестовая комната с ботами. Другие устройства не подключаются."
+                      title="Локальная тестовая комната с четырьмя искусственными участниками. Другие устройства не подключаются."
                     >
-                      ЛОКАЛЬНЫЙ ТЕСТ С БОТАМИ
+                      ЛОКАЛЬНЫЙ ТЕСТ / 4 БОТА
                     </button>
                     <button
                       type="button"
@@ -940,6 +973,10 @@ export function App() {
                       РЕГЛАМЕНТ И ПРАВИЛА
                     </button>
                   </div>
+                  <p className="incident-footnote">
+                    Для игры с друзьями используйте онлайн-комнату или код приглашения. Демо и локальный тест
+                    работают отдельно и показывают искусственных участников — они не подключаются к другим устройствам.
+                  </p>
                 </div>
 
                 <div className="incident-access-panel">
