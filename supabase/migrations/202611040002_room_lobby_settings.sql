@@ -91,4 +91,18 @@ $$;
 revoke all on function public.api_update_room_settings(uuid, integer, uuid) from public, anon;
 grant execute on function public.api_update_room_settings(uuid, integer, uuid) to authenticated;
 
+
+do $
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    begin
+      alter publication supabase_realtime add table public.rooms;
+    exception when duplicate_object then null;
+    end;
+  end if;
+end;
+$;
+
+alter table public.rooms replica identity full;
+
 commit;
