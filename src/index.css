@@ -1458,3 +1458,88 @@ body {
     flex: 1 0 calc(50% - 6px);
   }
 }
+
+
+/* Apply the same editorial surface to the local demo screens and legacy gameplay panels. */
+.incident-local-room-page .rounded-2xl,
+.incident-local-room-page .rounded-xl,
+.incident-local-room-page .rounded-lg,
+.incident-game-page .rounded-2xl,
+.incident-game-page .rounded-xl,
+.incident-game-page .rounded-lg {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.incident-local-room-page [class*="bg-slate-"],
+.incident-game-page [class*="bg-slate-"] {
+  background-color: var(--incident-panel) !important;
+  background-image: none !important;
+}
+
+.incident-local-room-page [class*="border-slate-"],
+.incident-game-page [class*="border-slate-"] {
+  border-color: var(--incident-line) !important;
+}
+
+.incident-local-room-page .text-white,
+.incident-game-page .text-white,
+.incident-local-room-page .text-slate-100,
+.incident-game-page .text-slate-100 {
+  color: var(--incident-paper) !important;
+}
+
+.incident-local-room-page .text-slate-200,
+.incident-game-page .text-slate-200,
+.incident-local-room-page .text-slate-300,
+.incident-game-page .text-slate-300 {
+  color: #c9c5ba !important;
+}
+
+.incident-local-room-page .text-slate-400,
+.incident-game-page .text-slate-400,
+.incident-local-room-page .text-slate-500,
+.incident-game-page .text-slate-500 {
+  color: var(--incident-muted) !important;
+}
+
+.incident-local-room-page button,
+.incident-game-page button {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: 0.045em;
+}
+
+.incident-local-room-page button[class*="bg-gradient"],
+.incident-game-page button[class*="bg-gradient"] {
+  border: 1px solid var(--incident-signal) !important;
+  background: var(--incident-signal) !important;
+  color: #17130f !important;
+}
+
+.incident-local-room-page button[class*="bg-gradient"]:hover,
+.incident-game-page button[class*="bg-gradient"]:hover {
+  background: #f07b61 !important;
+}
+
+.incident-local-room-page button:disabled,
+.incident-game-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.incident-local-room-page .shadow-xl,
+.incident-local-room-page .shadow-2xl,
+.incident-game-page .shadow-xl,
+.incident-game-page .shadow-2xl {
+  box-shadow: none !important;
+}
+
+.incident-game-page > .rounded-2xl:first-child {
+  border-top: 2px solid var(--incident-signal);
+}
+
+.incident-local-room-page > div:first-child {
+  border-top: 2px solid var(--incident-signal);
+}
