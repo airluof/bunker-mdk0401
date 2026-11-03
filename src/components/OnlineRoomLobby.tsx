@@ -70,7 +70,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             disabled={busy}
             className="px-3 py-2 border border-rose-900 text-rose-300 hover:border-rose-500 disabled:opacity-50 text-xs inline-flex items-center gap-2"
           >
-            {isHost ? <XCircle className="w-4 h-4" /> : <DoorOpen className="w-4 h-4" />}
+            {snapshot.room.status === 'archived' || !isHost ? <DoorOpen className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             {snapshot.room.status === 'archived' ? 'Вернуться на главную' : isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
           </button>
         </div>
