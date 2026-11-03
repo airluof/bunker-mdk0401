@@ -1543,3 +1543,59 @@ body {
 .incident-local-room-page > div:first-child {
   border-top: 2px solid var(--incident-signal);
 }
+
+
+.incident-modal {
+  background: rgba(8, 9, 7, 0.88) !important;
+  backdrop-filter: blur(5px);
+}
+
+.incident-modal-panel {
+  border: 1px solid #57564b !important;
+  border-radius: 0 !important;
+  background: #1b1c17 !important;
+  color: var(--incident-paper);
+  box-shadow: 0 22px 70px rgba(0,0,0,0.42) !important;
+}
+
+.incident-modal-panel .rounded-2xl,
+.incident-modal-panel .rounded-xl,
+.incident-modal-panel .rounded-lg {
+  border-radius: 0 !important;
+}
+
+.incident-modal-panel [class*="bg-slate-"] {
+  background-color: #20211b !important;
+  background-image: none !important;
+}
+
+.incident-modal-panel [class*="border-slate-"] {
+  border-color: var(--incident-line) !important;
+}
+
+.incident-modal-panel .text-white,
+.incident-modal-panel .text-slate-100 {
+  color: var(--incident-paper) !important;
+}
+
+.incident-modal-panel .text-slate-200,
+.incident-modal-panel .text-slate-300 {
+  color: #c9c5ba !important;
+}
+
+.incident-modal-panel .text-slate-400,
+.incident-modal-panel .text-slate-500 {
+  color: var(--incident-muted) !important;
+}
+
+.incident-modal-panel button {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+.incident-modal-panel button[class*="bg-gradient"] {
+  border: 1px solid var(--incident-signal) !important;
+  background: var(--incident-signal) !important;
+  color: #17130f !important;
+}
