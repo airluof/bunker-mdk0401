@@ -39,7 +39,7 @@ jobs:
           fi
 
       - name: Check diff whitespace
-        run: git diff --check
+        run: git diff --check HEAD^1 HEAD
 
       - name: Type-check
         run: npm run lint
