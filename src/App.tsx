@@ -728,7 +728,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="min-h-screen bg-[#141510] text-[#e9e5da] flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
