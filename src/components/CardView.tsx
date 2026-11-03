@@ -72,7 +72,7 @@ export const CardView: React.FC<CardViewProps> = ({
     return (
       <article
         onClick={handleInspectClick}
-        className={\`incident-card incident-card-sealed \${sizeClass} \${className}\`}
+        className={`incident-card incident-card-sealed ${sizeClass} ${className}`}
         style={{ '--card-accent': config.accentHex } as React.CSSProperties}
       >
         <div className="incident-card-topline">
@@ -113,7 +113,7 @@ export const CardView: React.FC<CardViewProps> = ({
   return (
     <article
       onClick={handleInspectClick}
-      className={\`incident-card incident-card-open \${sizeClass} \${className}\`}
+      className={`incident-card incident-card-open ${sizeClass} ${className}`}
       style={{ '--card-accent': config.accentHex } as React.CSSProperties}
     >
       <div className="incident-card-topline">
@@ -128,7 +128,7 @@ export const CardView: React.FC<CardViewProps> = ({
             onClick={handleInspectClick}
             className="incident-card-inspect"
             title="Осмотреть карту подробно"
-            aria-label={\`Осмотреть карту \${card.original_title}\`}
+            aria-label={`Осмотреть карту ${card.original_title}`}
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
