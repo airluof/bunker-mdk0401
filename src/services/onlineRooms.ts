@@ -12,6 +12,7 @@ export interface RoomCommandResult {
 }
 
 export interface RoomSnapshot {
+  my_member_id: string;
   room: {
     id: string;
     status: string;
