@@ -32,8 +32,8 @@ import {
   subscribeToOnlineRoom,
   leaveOnlineRoom,
   closeOnlineRoom,
-  RoomSnapshot,
 } from './services/onlineRooms';
+import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
 import { 
   saveGameState, 
@@ -300,14 +300,6 @@ export function App() {
     } finally {
       setOnlineBusy(false);
     }
-  };
-
-  const handleExitCurrentRoom = () => {
-    if (onlineRoom) {
-      void handleExitOnlineRoom();
-      return;
-    }
-    handleExitGame();
   };
 
   // Launch instant simulation mode
@@ -715,6 +707,14 @@ export function App() {
   const handleExitGame = () => {
     clearGameState();
     setGameState(null);
+  };
+
+  const handleExitCurrentRoom = () => {
+    if (onlineRoom) {
+      void handleExitOnlineRoom();
+      return;
+    }
+    handleExitGame();
   };
 
   // Copy share invite link
