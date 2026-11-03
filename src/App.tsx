@@ -846,7 +846,7 @@ export function App() {
                 <h1>ЦОД уничтожен<span>.</span></h1>
                 <p className="bunker-hero-description">
                   Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
-                  Остался резервный DRP-Site. Соберите команду и решите, кто сможет восстановить инфраструктуру.
+                  Остался резервный контур — DRP-Site. Мест в Бункере вдвое меньше, чем участников.
                 </p>
               </div>
               <aside className="bunker-game-facts" aria-label="Параметры игры">
