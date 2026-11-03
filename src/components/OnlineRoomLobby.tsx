@@ -187,7 +187,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
 
       {snapshot.room.status === 'lobby' && (
         <p className="bunker-online-note">
-          Сейчас доступно ожидание игроков. Сам игровой стол и синхронизация ходов ещё не подключены.
+          Комната готова принимать игроков. Начать партию пока нельзя.
         </p>
       )}
     </main>
