@@ -1048,7 +1048,7 @@ export function App() {
                 <p className="text-xs font-mono-tech text-slate-400 mt-0.5">
                   Подключено инженеров: {gameState.players.length} из 16 максимум
                 </p>
-                {gameState.isLocalDemo && (
+                {gameState.isLocalDemo !== false && (
                   <p className="mt-2 text-[10px] font-mono-tech uppercase tracking-wider text-amber-400">
                     ЛОКАЛЬНЫЙ ТЕСТ / БОТЫ / ДРУГИЕ УСТРОЙСТВА НЕ ПОДКЛЮЧАЮТСЯ
                   </p>
@@ -1143,7 +1143,7 @@ export function App() {
                   </span>
                 </div>
 
-                {gameState.isLocalDemo && (
+                {gameState.isLocalDemo !== false && (
                   <div className="px-2 py-1 border border-amber-500/50 bg-amber-950/20 text-[9px] font-mono-tech uppercase tracking-wider text-amber-300">
                     LOCAL DEMO / BOTS
                   </div>
