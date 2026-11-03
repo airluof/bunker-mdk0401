@@ -1599,3 +1599,15 @@ body {
   background: var(--incident-signal) !important;
   color: #17130f !important;
 }
+
+
+.incident-catalog-warning {
+  max-width: 760px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--incident-signal);
+  background: var(--incident-signal-soft);
+  color: #e7a18f;
+  font: 400 10px/1.5 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.02em;
+}
