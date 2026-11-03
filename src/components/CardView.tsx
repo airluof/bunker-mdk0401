@@ -40,12 +40,12 @@ export const CardView: React.FC<CardViewProps> = ({
 
   const renderIcon = (category: CardCategory) => {
     switch (category) {
-      case 'roles': return <UserCheck className="w-4 h-4" />;
-      case 'skills': return <Cpu className="w-4 h-4" />;
-      case 'baggage': return <Briefcase className="w-4 h-4" />;
-      case 'vulnerabilities': return <AlertTriangle className="w-4 h-4" />;
-      case 'crises': return <Flame className="w-4 h-4" />;
-      case 'actions': return <Zap className="w-4 h-4" />;
+      case 'roles': return <UserCheck />;
+      case 'skills': return <Cpu />;
+      case 'baggage': return <Briefcase />;
+      case 'vulnerabilities': return <AlertTriangle />;
+      case 'crises': return <Flame />;
+      case 'actions': return <Zap />;
     }
   };
 
@@ -72,35 +72,30 @@ export const CardView: React.FC<CardViewProps> = ({
     return (
       <article
         onClick={handleInspectClick}
-        className={`incident-card incident-card-sealed ${sizeClass} ${className}`}
-        style={{ '--card-accent': config.accentHex } as React.CSSProperties}
+        className={`bunker-card bunker-card-sealed ${sizeClass} ${className}`}
+        style={{ '--category-color': config.accentHex } as React.CSSProperties}
       >
-        <div className="incident-card-topline">
-          <span className="incident-card-category">
-            <span className="incident-card-mark" />
-            {config.nameRu}
-          </span>
-          <span className="incident-card-number">#{String(card.card_number || 1).padStart(2, '0')}</span>
+        <div className="bunker-card-topline">
+          <span className="bunker-card-category">{config.nameRu}</span>
         </div>
 
-        <div className="incident-card-seal">
-          <div className="incident-card-lock">
-            <Lock className="w-5 h-5" />
+        <div className="bunker-card-seal">
+          <div className="bunker-card-lock">
+            <Lock aria-hidden="true" />
           </div>
-          <span className="incident-card-seal-title">ЗАСЕКРЕЧЕНО</span>
-          <span className="incident-card-seal-code">DRP-SITE / CLASSIFIED</span>
+          <span>Карта закрыта</span>
         </div>
 
-        <div className="incident-card-bottom">
+        <div className="bunker-card-bottom">
           {canReveal && onReveal ? (
-            <button type="button" onClick={handleRevealClick} className="incident-card-reveal">
-              <Eye className="w-4 h-4" />
-              РАСКРЫТЬ КАРТУ
+            <button type="button" onClick={handleRevealClick} className="bunker-card-reveal">
+              <Eye aria-hidden="true" />
+              Открыть карту
             </button>
           ) : (
-            <span className="incident-card-access">
-              <Lock className="w-3 h-3" />
-              ДОСТУП ЗАКРЫТ
+            <span className="bunker-card-access">
+              <Lock aria-hidden="true" />
+              Доступна только вам
             </span>
           )}
         </div>
@@ -113,46 +108,39 @@ export const CardView: React.FC<CardViewProps> = ({
   return (
     <article
       onClick={handleInspectClick}
-      className={`incident-card incident-card-open ${sizeClass} ${className}`}
-      style={{ '--card-accent': config.accentHex } as React.CSSProperties}
+      className={`bunker-card bunker-card-open ${sizeClass} ${className}`}
+      style={{ '--category-color': config.accentHex } as React.CSSProperties}
     >
-      <div className="incident-card-topline">
-        <span className="incident-card-category">
-          <span className="incident-card-mark" />
-          {config.nameRu}
-        </span>
-        <div className="incident-card-actions">
-          <span className="incident-card-number">{card.card_id.toUpperCase()}</span>
-          <button
-            type="button"
-            onClick={handleInspectClick}
-            className="incident-card-inspect"
-            title="Осмотреть карту подробно"
-            aria-label={`Осмотреть карту ${card.original_title}`}
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-        </div>
+      <div className="bunker-card-topline">
+        <span className="bunker-card-category">{config.nameRu}</span>
+        <button
+          type="button"
+          onClick={handleInspectClick}
+          className="bunker-card-inspect"
+          title="Открыть карточку"
+          aria-label={`Открыть карточку «${card.original_title}»`}
+        >
+          <ZoomIn aria-hidden="true" />
+        </button>
       </div>
 
-      <div className="incident-card-art">
+      <div className="bunker-card-art">
         {!imgError ? (
           <img
             src={imageSrc}
-            alt={card.original_title}
+            alt=""
             onError={() => setImgError(true)}
             loading="lazy"
           />
         ) : (
-          <div className="incident-card-art-fallback">
+          <div className="bunker-card-art-fallback" role="img" aria-label={card.original_title}>
             {renderIcon(card.category)}
-            <span>{card.file_name}</span>
           </div>
         )}
       </div>
 
-      <div className="incident-card-copy">
-        <h4>{card.original_title}</h4>
+      <div className="bunker-card-copy">
+        <h3>{card.original_title}</h3>
         <p className={compact ? 'is-compact' : ''}>{card.source_description}</p>
       </div>
     </article>
