@@ -8,7 +8,7 @@
 - Цифровая игровая модель спроектирована; часть процедур требует утверждения владельцем.
 - Техническая архитектура: React + TypeScript + Vite, GitHub Pages и Supabase Free.
 - Библиотека из 180 PNG размещена в `public/assets/cards/` (6 категорий по 30 изображений).
-- Рабочая ветка содержит первую серверную заготовку Supabase; она ещё не подключена к интерфейсу и требует применения миграции в проекте Supabase.
+- В рабочей ветке подключены создание онлайн-комнаты, вход по коду и экран лобби; перед использованием нужно применить SQL-миграцию и импортировать каталог карточек в Supabase.
 
 ## Категории карточек
 
@@ -46,6 +46,8 @@ public/assets/cards/
 - [03 — Техническое задание v0.2](docs/03_Technical_Specification.md)
 - [Исходная выгрузка материалов](docs/Bunker_Source_Export_For_Audit.txt)
 - [Отчёт независимого аудита](docs/Bunker_Master_Audit_Report.txt)
+- [04 — Аудит реализации](docs/04_Implementation_Audit.md)
+- [05 — Настройка Supabase](docs/05_Supabase_Setup.md)
 - [Промт реализации Gemini](prompts/Gemini_Bunker_Implementation_Master_Prompt.txt)
 
 ## Загрузка иллюстраций
@@ -63,4 +65,6 @@ public/assets/cards/
 
 ## Разработка
 
-Предполагаемый стек: React, TypeScript, Vite, Supabase PostgreSQL/RPC/RLS/Realtime.
+Стек: React, TypeScript, Vite, Supabase PostgreSQL/RPC/RLS/Realtime. Автоматическая проверка карточек, TypeScript и production-сборки описана в `.github/workflows/ci.yml`.
+
+Онлайн-лобби уже подключено к RPC, но полный игровой процесс (раскрытие карт, голосование, эффекты и финальный аудит) пока не реализован на сервере. Публичные JSON-манифесты пока раскрывают полный текст карт; см. ограничения приватности в [05 — Настройка Supabase](docs/05_Supabase_Setup.md).
