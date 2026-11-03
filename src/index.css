@@ -778,3 +778,238 @@ body {
     font-size: 13px;
   }
 }
+
+
+.incident-nav-link.is-active::after {
+  margin-left: 2px;
+}
+
+.incident-nav-link.is-active {
+  position: relative;
+}
+
+.incident-room-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(28px, 4vw, 48px) 0 28px;
+  border-bottom: 1px solid var(--incident-line);
+}
+
+.incident-room-title {
+  margin: 18px 0 10px;
+  color: var(--incident-paper);
+  font: 600 clamp(2.5rem, 6vw, 5rem)/0.95 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: -0.045em;
+}
+
+.incident-room-title span {
+  color: var(--incident-signal);
+}
+
+.incident-room-lead {
+  max-width: 610px;
+}
+
+.incident-room-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.incident-button-danger {
+  border-color: rgba(225,90,62,0.55);
+  color: var(--incident-signal);
+}
+
+.incident-button-danger:hover:not(:disabled) {
+  border-color: var(--incident-signal);
+  background: var(--incident-signal-soft);
+  color: #f08e77;
+}
+
+.incident-room-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 310px);
+  gap: clamp(24px, 4vw, 48px);
+  padding: 30px 0;
+}
+
+.incident-room-roster {
+  min-width: 0;
+}
+
+.incident-room-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.incident-room-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--incident-muted);
+  font: 400 11px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+.incident-room-count svg {
+  align-self: center;
+  color: var(--incident-muted);
+}
+
+.incident-room-count strong {
+  color: var(--incident-paper);
+  font: 600 27px/1 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+.incident-room-player-list {
+  border-top: 1px solid var(--incident-line);
+}
+
+.incident-room-player {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 20px auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--incident-line);
+}
+
+.incident-room-player-index {
+  color: #79776d;
+  font: 400 10px/1 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+.incident-room-player-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+
+.incident-room-player-name {
+  overflow: hidden;
+  color: var(--incident-paper);
+  font: 600 17px/1.1 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-room-player-role {
+  color: var(--incident-muted);
+  font: 400 9px/1.3 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.09em;
+}
+
+.incident-room-host-icon {
+  color: #d1b45f;
+}
+
+.incident-room-player-status {
+  color: #8da887;
+  font: 400 9px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.08em;
+}
+
+.incident-room-empty {
+  padding: 24px 8px;
+  color: var(--incident-muted);
+  font: 400 12px/1.5 'IBM Plex Sans', Arial, sans-serif;
+}
+
+.incident-room-aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px;
+  border: 1px solid var(--incident-line);
+  background: var(--incident-panel);
+}
+
+.incident-room-invite-code {
+  margin-top: 18px;
+  overflow-wrap: anywhere;
+  color: var(--incident-paper);
+  font: 500 clamp(15px, 1.8vw, 21px)/1.5 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.04em;
+}
+
+.incident-room-copy {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.incident-room-aside-block {
+  padding-top: 20px;
+  border-top: 1px solid var(--incident-line);
+}
+
+.incident-room-range {
+  margin: 8px 0 10px;
+  color: var(--incident-paper);
+  font: 600 30px/1 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+.incident-room-range span {
+  color: var(--incident-muted);
+  font: 400 9px/1 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.1em;
+}
+
+.incident-room-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--incident-line);
+  color: var(--incident-muted);
+  font: 400 9px/1.4 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 760px) {
+  .incident-room-header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .incident-room-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .incident-room-aside {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 460px) {
+  .incident-room-player {
+    grid-template-columns: 24px minmax(0, 1fr) 16px;
+    gap: 8px;
+  }
+
+  .incident-room-player-status {
+    display: none;
+  }
+
+  .incident-room-section-head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .incident-room-controls {
+    width: 100%;
+  }
+
+  .incident-room-controls .incident-button {
+    flex: 1;
+    padding-inline: 8px;
+    font-size: 9px;
+  }
+}
