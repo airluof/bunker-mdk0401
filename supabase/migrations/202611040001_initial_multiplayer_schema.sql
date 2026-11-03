@@ -802,15 +802,171 @@ begin
 end;
 $$;
 
+
+create or replace function public.api_leave_room(
+  p_room_id uuid,
+  p_command_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_room_status text;
+  v_member_id uuid;
+  v_technical_role text;
+  v_existing jsonb;
+  v_existing_name text;
+  v_result jsonb;
+begin
+  if v_user_id is null then
+    raise exception using errcode = '28000', message = 'UNAUTHENTICATED';
+  end if;
+  if p_room_id is null or p_command_id is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  select cr.response_json, cr.command_name
+    into v_existing, v_existing_name
+  from public.command_receipts cr
+  where cr.user_id = v_user_id and cr.command_id = p_command_id;
+  if found then
+    if v_existing_name <> 'api_leave_room' then
+      raise exception using errcode = '22023', message = 'COMMAND_ID_REUSED';
+    end if;
+    return v_existing;
+  end if;
+
+  select r.status into v_room_status
+  from public.rooms r
+  where r.id = p_room_id
+  for update;
+  if v_room_status is null then
+    raise exception using errcode = 'P0001', message = 'ROOM_NOT_FOUND';
+  end if;
+  if v_room_status <> 'lobby' then
+    raise exception using errcode = 'P0001', message = 'RULE_NOT_APPROVED: leaving an active game is not automated';
+  end if;
+
+  select m.id, m.technical_role into v_member_id, v_technical_role
+  from public.room_members m
+  where m.room_id = p_room_id
+    and m.user_id = v_user_id
+    and m.membership_status = 'active'
+  for update;
+  if v_member_id is null then
+    raise exception using errcode = 'P0001', message = 'NOT_ROOM_MEMBER';
+  end if;
+  if v_technical_role = 'host' then
+    raise exception using errcode = 'P0001', message = 'HOST_MUST_CLOSE_ROOM';
+  end if;
+
+  update public.room_members
+  set membership_status = 'left', last_seen_at = now()
+  where id = v_member_id;
+
+  insert into public.public_game_events (room_id, event_type, public_payload)
+  values (p_room_id, 'member_left_lobby', jsonb_build_object('member_id', v_member_id));
+
+  v_result := jsonb_build_object('ok', true, 'room_id', p_room_id, 'status', 'left');
+  insert into public.command_receipts (user_id, command_id, command_name, response_json)
+  values (v_user_id, p_command_id, 'api_leave_room', v_result);
+  return v_result;
+end;
+$;
+
+create or replace function public.api_close_room(
+  p_room_id uuid,
+  p_command_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_room_status text;
+  v_existing jsonb;
+  v_existing_name text;
+  v_result jsonb;
+begin
+  if v_user_id is null then
+    raise exception using errcode = '28000', message = 'UNAUTHENTICATED';
+  end if;
+  if p_room_id is null or p_command_id is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  select cr.response_json, cr.command_name
+    into v_existing, v_existing_name
+  from public.command_receipts cr
+  where cr.user_id = v_user_id and cr.command_id = p_command_id;
+  if found then
+    if v_existing_name <> 'api_close_room' then
+      raise exception using errcode = '22023', message = 'COMMAND_ID_REUSED';
+    end if;
+    return v_existing;
+  end if;
+
+  select r.status into v_room_status
+  from public.rooms r
+  where r.id = p_room_id
+    and r.created_by_user_id = v_user_id
+  for update;
+  if v_room_status is null then
+    raise exception using errcode = '42501', message = 'FORBIDDEN_OR_ROOM_NOT_FOUND';
+  end if;
+  if v_room_status <> 'lobby' then
+    raise exception using errcode = 'P0001', message = 'RULE_NOT_APPROVED: active game cannot be closed by lobby command';
+  end if;
+
+  update public.rooms
+  set status = 'archived', updated_at = now()
+  where id = p_room_id;
+
+  update public.room_invites
+  set is_active = false, revoked_at = now()
+  where room_id = p_room_id and is_active = true;
+
+  update public.room_members
+  set membership_status = 'left', last_seen_at = now()
+  where room_id = p_room_id and membership_status = 'active';
+
+  update public.game_sessions
+  set status = 'finished', phase = 'gameover', updated_at = now()
+  where room_id = p_room_id;
+
+  update public.public_game_state
+  set payload = jsonb_build_object('status', 'archived', 'phase', 'gameover'),
+      updated_at = now()
+  where room_id = p_room_id;
+
+  insert into public.public_game_events (room_id, event_type, public_payload)
+  values (p_room_id, 'room_archived', jsonb_build_object('closed_by', v_user_id));
+
+  v_result := jsonb_build_object('ok', true, 'room_id', p_room_id, 'status', 'archived');
+  insert into public.command_receipts (user_id, command_id, command_name, response_json)
+  values (v_user_id, p_command_id, 'api_close_room', v_result);
+  return v_result;
+end;
+$;
+
 revoke all on function public.api_create_room(text, uuid) from public, anon;
 revoke all on function public.api_join_room(text, text, uuid) from public, anon;
 revoke all on function public.api_get_room_snapshot(uuid) from public, anon;
 revoke all on function public.api_start_game(uuid, uuid) from public, anon;
+revoke all on function public.api_leave_room(uuid, uuid) from public, anon;
+revoke all on function public.api_close_room(uuid, uuid) from public, anon;
 
 grant execute on function public.api_create_room(text, uuid) to authenticated;
 grant execute on function public.api_join_room(text, text, uuid) to authenticated;
 grant execute on function public.api_get_room_snapshot(uuid) to authenticated;
 grant execute on function public.api_start_game(uuid, uuid) to authenticated;
+grant execute on function public.api_leave_room(uuid, uuid) to authenticated;
+grant execute on function public.api_close_room(uuid, uuid) to authenticated;
 
 do $$
 begin
