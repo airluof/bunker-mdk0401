@@ -115,6 +115,23 @@ export async function joinOnlineRoom(
   return data as RoomCommandResult;
 }
 
+export async function updateOnlineRoomSettings(
+  roomId: string,
+  maxPlayers: number,
+): Promise<{ ok: boolean; room_id: string; max_players: number }> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_update_room_settings', {
+    p_room_id: roomId,
+    p_max_players: maxPlayers,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as { ok: boolean; room_id: string; max_players: number };
+}
+
 export async function startOnlineGame(roomId: string): Promise<RoomCommandResult> {
   const client = getClient();
   await ensureAnonymousSession();
