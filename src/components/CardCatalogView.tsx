@@ -42,9 +42,6 @@ export const CardCatalogView: React.FC<CardCatalogViewProps> = ({ onInspectCard 
         <div>
           <p className="bunker-eyebrow">Бункер · Колода</p>
           <h1>Карточки</h1>
-          <p className="bunker-page-description">
-            Все шесть категорий игры собраны в одном каталоге.
-          </p>
         </div>
         <div className="bunker-catalog-total">
           <strong>{filteredCards.length}</strong>
