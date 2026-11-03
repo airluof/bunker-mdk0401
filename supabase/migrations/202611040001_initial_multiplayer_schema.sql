@@ -105,7 +105,7 @@ create table public.card_instances (
   id uuid primary key default gen_random_uuid(),
   session_id uuid not null references public.game_sessions(id) on delete cascade,
   room_id uuid not null references public.rooms(id) on delete cascade,
-  owner_member_id uuid references public.room_members(id) on delete set null,
+  owner_member_id uuid references public.room_members(id) on delete restrict,
   card_id text not null references public.card_catalog(card_id) on delete restrict,
   zone text not null check (zone in ('hand', 'crisis_deck', 'active_crisis', 'discard')),
   instance_status text not null default 'hidden'
@@ -257,7 +257,9 @@ revoke all on public.rooms,
   public.player_private_events,
   public.audit_submissions,
   public.command_receipts
-from anon, authenticated;
+from public, anon, authenticated;
+
+grant select, insert, update, delete on public.card_catalog to service_role;
 
 grant select (id, status, min_players, max_players, ruleset_version, catalog_version, schema_version, created_at, updated_at)
   on public.rooms to authenticated;
@@ -352,7 +354,7 @@ begin
   );
 
   insert into public.command_receipts (user_id, command_id, command_name, response_json)
-  values (v_user_id, p_command_id, 'api_create_room', v_result);
+  values (v_user_id, p_command_id, 'api_create_room', v_result - 'invite_code');
 
   return v_result;
 exception
