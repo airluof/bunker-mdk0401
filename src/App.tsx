@@ -864,7 +864,7 @@ export function App() {
                   <button
                     type="button"
                     onClick={handleJoinOnlineRoom}
-                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 16 || currentUser.name.trim().length < 2}
+                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
                     className="px-5 py-2.5 border border-slate-600 text-slate-100 hover:border-amber-400 hover:text-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-tactical uppercase tracking-wider"
                   >
                     ПОДКЛЮЧИТЬСЯ
