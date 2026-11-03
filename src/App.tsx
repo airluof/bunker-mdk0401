@@ -129,6 +129,13 @@ export function App() {
       void getOnlineRoomSnapshot(onlineRoom.roomId)
         .then((snapshot) => {
           if (cancelled) return;
+          if (snapshot.room.status === 'archived') {
+            localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+            sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+            setOnlineRoom(null);
+            showToast('Комната закрыта создателем.');
+            return;
+          }
           setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
             ? { ...current, snapshot }
             : current);
@@ -261,6 +268,13 @@ export function App() {
     setOnlineError(null);
     try {
       const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      if (snapshot.room.status === 'archived') {
+        localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        setOnlineRoom(null);
+        showToast('Комната уже закрыта создателем.');
+        return;
+      }
       setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
         ? { ...current, snapshot }
         : current);
@@ -279,7 +293,7 @@ export function App() {
       const ownMember = onlineRoom.snapshot.players.find(
         (player) => player.member_id === onlineRoom.memberId
       );
-      if (ownMember?.technical_role === 'host') {
+      if (ownMember?.technical_role === 'host' && onlineRoom.snapshot.room.status === 'lobby') {
         await closeOnlineRoom(onlineRoom.roomId);
       } else {
         await leaveOnlineRoom(onlineRoom.roomId);
@@ -750,7 +764,7 @@ export function App() {
         ) : onlineRoom ? (
           <OnlineRoomLobby
             snapshot={onlineRoom.snapshot}
-            inviteCode={onlineRoom.inviteCode}
+            inviteCode={onlineRoom.snapshot.room.status === 'lobby' ? onlineRoom.inviteCode : undefined}
             isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
             busy={onlineBusy}
             error={onlineError}
