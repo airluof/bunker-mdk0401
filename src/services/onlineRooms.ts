@@ -173,6 +173,12 @@ export async function subscribeToOnlineRoom(
       filter: 'room_id=eq.' + roomId,
     }, (payload) => onChange(payload))
     .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'rooms',
+      filter: 'id=eq.' + roomId,
+    }, (payload) => onChange(payload))
+    .on('postgres_changes', {
       event: '*',
       schema: 'public',
       table: 'game_sessions',
