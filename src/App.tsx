@@ -126,7 +126,14 @@ function formatOnlineError(error: unknown, fallback: string): string {
 }
 
 export function App() {
-  const [gameState, setGameState] = useState<GameState | null>(() => loadGameState());
+  const [gameState, setGameState] = useState<GameState | null>(() => {
+    const savedGame = loadGameState();
+    if (savedGame?.isLocalDemo) {
+      clearGameState();
+      return null;
+    }
+    return savedGame;
+  });
   const [currentUser, setCurrentUser] = useState(() => loadLocalUser());
   const [currentView, setCurrentView] = useState<'game' | 'catalog'>('game');
   const [inspectingCard, setInspectingCard] = useState<Card | null>(null);
