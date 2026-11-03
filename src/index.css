@@ -1250,3 +1250,211 @@ body {
     transition: none;
   }
 }
+
+
+.incident-catalog-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(26px, 4vw, 44px) 0 25px;
+  border-bottom: 1px solid var(--incident-line);
+}
+
+.incident-catalog-lead {
+  max-width: 650px;
+}
+
+.incident-catalog-total {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding-left: 22px;
+  border-left: 1px solid var(--incident-line);
+}
+
+.incident-catalog-total strong {
+  color: var(--incident-signal);
+  font: 600 clamp(2.4rem, 5vw, 4rem)/0.9 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+.incident-catalog-total span {
+  color: var(--incident-muted);
+  font: 400 9px/1.3 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.1em;
+}
+
+.incident-catalog-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.5fr);
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--incident-line);
+}
+
+.incident-catalog-search {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--incident-line);
+  color: var(--incident-muted);
+  background: var(--incident-panel);
+}
+
+.incident-catalog-search:focus-within {
+  border-color: var(--incident-signal);
+}
+
+.incident-catalog-search input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--incident-paper);
+  font: 400 10px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+}
+
+.incident-catalog-search input::placeholder {
+  color: #77766d;
+}
+
+.incident-catalog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+}
+
+.incident-filter {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--incident-muted);
+  font: 400 9px/1.2 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.03em;
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+}
+
+.incident-filter:hover {
+  border-color: var(--incident-line);
+  color: var(--incident-paper);
+}
+
+.incident-filter.is-active {
+  border-color: var(--filter-accent, #e9e5da);
+  background: rgba(255,255,255,0.045);
+  color: var(--filter-accent, var(--incident-paper));
+}
+
+.incident-catalog-result-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0 12px;
+  color: var(--incident-muted);
+  font: 400 9px/1.3 'IBM Plex Mono', 'Consolas', monospace;
+  letter-spacing: 0.12em;
+}
+
+.incident-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
+  gap: 13px;
+  padding-bottom: 32px;
+}
+
+.incident-catalog-card {
+  min-width: 0;
+}
+
+.incident-catalog-empty {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-top: 1px solid var(--incident-line);
+  border-bottom: 1px solid var(--incident-line);
+  color: var(--incident-muted);
+  text-align: center;
+}
+
+.incident-catalog-empty h2 {
+  margin: 0;
+  color: var(--incident-paper);
+  font: 600 20px/1.1 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+}
+
+.incident-catalog-empty p {
+  margin: 0 0 8px;
+  font: 400 12px/1.5 'IBM Plex Sans', Arial, sans-serif;
+}
+
+@media (max-width: 1150px) {
+  .incident-catalog-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .incident-catalog-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .incident-catalog-filters {
+    justify-content: start;
+  }
+
+  .incident-catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .incident-catalog-header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .incident-catalog-total {
+    align-items: start;
+    padding: 0;
+    border: 0;
+  }
+
+  .incident-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .incident-catalog-grid .incident-card-open {
+    height: 15rem;
+  }
+
+  .incident-catalog-grid .incident-card-copy h4 {
+    font-size: 12px;
+  }
+
+  .incident-catalog-grid .incident-card-copy p {
+    font-size: 9px;
+  }
+
+  .incident-filter {
+    flex: 1 0 calc(50% - 6px);
+  }
+}
