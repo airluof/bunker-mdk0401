@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Copy, RefreshCw, Users, ShieldCheck, DoorOpen, XCircle } from 'lucide-react';
-import { RoomSnapshot } from '../services/onlineRooms';
+import type { RoomSnapshot } from '../services/onlineRooms';
 
 interface OnlineRoomLobbyProps {
   snapshot: RoomSnapshot;
