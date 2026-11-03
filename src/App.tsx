@@ -767,34 +767,92 @@ export function App() {
           /* ==============================================================
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL
              ============================================================== */
-          <div className="space-y-8 animate-in fade-in duration-300 py-4 sm:py-8">
-            {/* Incident Alert Hero */}
-            <div className="relative rounded-3xl border border-rose-500/40 bg-gradient-to-b from-rose-950/40 via-slate-900 to-slate-950 p-6 sm:p-10 shadow-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-tactical-grid opacity-25 pointer-events-none" />
-              
-              <div className="relative z-10 max-w-3xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-mono-tech uppercase tracking-wider">
-                  <Flame className="w-3.5 h-3.5 animate-pulse" />
-                  <span>ТРЕВОГА // КАТАСТРОФА ДАТА-ЦЕНТРА 2036</span>
+          <div className="incident-page py-4 sm:py-8">
+            <div className="incident-topline">
+              <span><strong>NEUROTECH</strong> / ОТДЕЛ ВОССТАНОВЛЕНИЯ ИНФРАСТРУКТУРЫ</span>
+              <span>ЖУРНАЛ ИНЦИДЕНТА // <strong>2036.01</strong></span>
+            </div>
+
+            <section className="incident-hero">
+              <div className="incident-hero-grid">
+                <div>
+                  <div className="incident-kicker">
+                    <span className="incident-kicker-mark" />
+                    <span>КРИТИЧЕСКИЙ СТАТУС</span>
+                    <span>/</span>
+                    <span>INCIDENT 001</span>
+                  </div>
+
+                  <h1 className="incident-title">
+                    ЦЕНТРАЛЬНЫЙ ЦОД<br />
+                    <span>УНИЧТОЖЕН.</span>
+                  </h1>
+
+                  <p className="incident-lead">
+                    Вирус «Zero-Day: Oblivion» вывел из строя основной кластер корпорации «НейроТех».
+                    Остался один резервный контур — DRP-Site. Сформируйте инженерную команду,
+                    способную восстановить инфраструктуру по ГОСТ Р ИСО/МЭК 12207.
+                    Мест в Бункере вдвое меньше, чем участников.
+                  </p>
+
+                  <div className="incident-facts">
+                    <div className="incident-fact">
+                      <span className="incident-fact-label">Событие</span>
+                      <span className="incident-fact-value">Zero-Day: Oblivion</span>
+                    </div>
+                    <div className="incident-fact">
+                      <span className="incident-fact-label">Цель операции</span>
+                      <span className="incident-fact-value">DRP-Site / 2036</span>
+                    </div>
+                    <div className="incident-fact">
+                      <span className="incident-fact-label">Протокол</span>
+                      <span className="incident-fact-value">ГОСТ Р ИСО/МЭК 12207</span>
+                    </div>
+                  </div>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl font-tactical font-bold text-white tracking-tight leading-tight">
-                  БУНКЕР // МДК.04.01
-                </h1>
+                <aside className="incident-sidebar">
+                  <div>
+                    <div className="incident-alert-code">Состояние стойки / критическое</div>
+                    <div className="incident-rack" aria-label="Схема повреждённой серверной стойки">
+                      {['U42', 'U41', 'U40', 'U39', 'U38', 'U37'].map((unit, index) => (
+                        <div key={unit} className={index === 2 || index === 3 ? 'incident-rack-unit is-alert' : 'incident-rack-unit'}>
+                          <span>{unit}</span>
+                          <span />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="incident-sidebar-copy">
+                      Основной вычислительный контур недоступен. Резервное питание и архивы требуют
+                      проверки до восстановления сервисов.
+                    </p>
+                  </div>
+                  <div className="incident-capacity">
+                    <strong>50%</strong>
+                    <span>ПРЕДЕЛЬНАЯ ВМЕСТИМОСТЬ БУНКЕРА</span>
+                  </div>
+                </aside>
+              </div>
+            </section>
 
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                  Вирус <strong className="text-rose-400 font-mono-tech">«Zero-Day: Oblivion»</strong> уничтожил центральный кластер корпорации «НейроТех». 
-                  Для холодного пуска аварийного дата-центра в изолированном Резервном Серверном Бункере (DRP-Site) 
-                  требуется сформировать команду специалистов по ГОСТ Р ИСО/МЭК 12207. 
-                  Ресурсы жизнеобеспечения ограничены: <strong className="text-amber-400">мест вдвое меньше, чем инженеров!</strong>
+            <section className="incident-section">
+              <div className="incident-section-head">
+                <div>
+                  <span className="incident-section-index">01 / ДОСТУП К СЕССИИ</span>
+                  <h2 className="incident-section-title">Управление подключением</h2>
+                </div>
+                <p className="incident-section-note">
+                  Создайте комнату для команды или подключитесь к уже открытой сессии по коду приглашения.
                 </p>
+              </div>
 
-                {/* Name Input */}
-                <div className="pt-2 max-w-md">
-                  <label className="block text-xs font-mono-tech uppercase text-slate-400 mb-1.5">
-                    Позывной инженера:
+              <div className="incident-access-grid">
+                <div className="incident-access-panel">
+                  <label className="incident-field-label" htmlFor="engineer-call-sign">
+                    Позывной инженера / 02–24 символа
                   </label>
                   <input
+                    id="engineer-call-sign"
                     type="text"
                     value={currentUser.name}
                     onChange={(e) => {
@@ -803,132 +861,131 @@ export function App() {
                       saveLocalUser(updated);
                     }}
                     maxLength={24}
-                    placeholder="Введите ваше имя или позывной..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono-tech transition-colors shadow-inner"
+                    placeholder="Введите имя или позывной"
+                    className="incident-input"
                   />
+
+                  <div className="incident-action-row">
+                    <button
+                      type="button"
+                      onClick={handleCreateOnlineRoom}
+                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                      className="incident-button incident-button-primary"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {onlineBusy ? 'СОЗДАНИЕ...' : 'СОЗДАТЬ ОНЛАЙН-КОМНАТУ'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLaunchSimulation}
+                      className="incident-button"
+                    >
+                      <Play className="w-4 h-4" />
+                      ДЕМО-СИМУЛЯЦИЯ
+                    </button>
+                  </div>
+                  <div className="incident-action-row">
+                    <button
+                      type="button"
+                      onClick={handleCreateRoom}
+                      className="incident-button incident-button-soft"
+                      title="Локальная тестовая комната с ботами. Другие устройства не подключаются."
+                    >
+                      ЛОКАЛЬНЫЙ ТЕСТ С БОТАМИ
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsRulesOpen(true)}
+                      className="incident-button incident-button-soft"
+                    >
+                      РЕГЛАМЕНТ И ПРАВИЛА
+                    </button>
+                  </div>
                 </div>
 
-                {/* Primary Action Buttons */}
-                <div className="pt-4 flex flex-wrap items-center gap-3.5">
-                  <button
-                    onClick={handleCreateOnlineRoom}
-                    disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
-                    className="px-6 py-3 border border-amber-500 bg-amber-500 hover:bg-amber-400 text-slate-950 disabled:opacity-40 disabled:cursor-not-allowed font-tactical font-bold text-sm uppercase tracking-wider transition-colors flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{onlineBusy ? 'СОЗДАНИЕ...' : 'СОЗДАТЬ ОНЛАЙН-КОМНАТУ'}</span>
-                  </button>
-
-                  <button
-                    onClick={handleLaunchSimulation}
-                    className="px-5 py-3 border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-tactical text-xs uppercase tracking-wider transition-colors flex items-center gap-2"
-                  >
-                    <Play className="w-4 h-4" />
-                    <span>ЛОКАЛЬНАЯ ДЕМО-СИМУЛЯЦИЯ</span>
-                  </button>
-
-                  <button
-                    onClick={handleCreateRoom}
-                    className="px-4 py-3 border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-500 font-tactical text-xs uppercase tracking-wider transition-colors"
-                    title="Создаёт локальную комнату с тестовыми инженерами, без подключения других устройств"
-                  >
-                    <span>ЛОКАЛЬНЫЙ ТЕСТ С БОТАМИ</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsRulesOpen(true)}
-                    className="px-4 py-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-amber-300 border border-amber-500/30 font-tactical text-xs uppercase tracking-wider transition-colors"
-                  >
-                    РЕГЛАМЕНТ И ПРАВИЛА
-                  </button>
-                </div>
-
-                <div className="mt-4 max-w-xl grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                <div className="incident-access-panel">
+                  <label className="incident-field-label" htmlFor="room-invite-code">
+                    Код приглашения / 32 символа
+                  </label>
                   <input
+                    id="room-invite-code"
                     type="text"
                     value={roomCodeInput}
                     onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
                     maxLength={32}
-                    placeholder="КОД КОМНАТЫ · 32 СИМВОЛА"
-                    aria-label="Код онлайн-комнаты"
-                    className="w-full bg-slate-950 border border-slate-700 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400 font-mono-tech"
+                    placeholder="ВВЕДИТЕ 32-СИМВОЛЬНЫЙ КОД"
+                    autoComplete="off"
+                    className="incident-input font-mono-tech"
                   />
-                  <button
-                    type="button"
-                    onClick={handleJoinOnlineRoom}
-                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
-                    className="px-5 py-2.5 border border-slate-600 text-slate-100 hover:border-amber-400 hover:text-amber-300 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-tactical uppercase tracking-wider"
-                  >
-                    ПОДКЛЮЧИТЬСЯ
-                  </button>
+                  <div className="incident-action-row">
+                    <button
+                      type="button"
+                      onClick={handleJoinOnlineRoom}
+                      disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
+                      className="incident-button incident-button-primary"
+                    >
+                      ПОДКЛЮЧИТЬСЯ
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {!isSupabaseConfigured && (
+                    <p className="incident-footnote">
+                      ОНЛАЙН-РЕЖИМ НЕ НАСТРОЕН. Добавьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY
+                      в локальный .env.local. Инструкция — docs/05_Supabase_Setup.md.
+                    </p>
+                  )}
+                  {onlineError && (
+                    <div role="alert" className="incident-error">{onlineError}</div>
+                  )}
                 </div>
-                {!isSupabaseConfigured && (
-                  <p className="mt-2 text-xs text-slate-500">
-                    Онлайн-комнаты включатся после настройки VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY. Инструкция: docs/05_Supabase_Setup.md.
-                  </p>
-                )}
-                {onlineError && (
-                  <p role="alert" className="mt-2 text-xs text-rose-300">
-                    {onlineError}
-                  </p>
-                )}
               </div>
-            </div>
+            </section>
 
-            {/* 6 Categories Overview Cards */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
+            <section className="incident-section">
+              <div className="incident-section-head">
                 <div>
-                  <h3 className="text-lg font-tactical font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-sky-400" />
-                    <span>СТРУКТУРА КОМПЛЕКТА // 180 КАРТ В 6 КАТЕГОРИЯХ</span>
-                  </h3>
-                  <p className="text-xs font-mono-tech text-slate-400">
-                    Каждому инженеру выдается по 1 карте из 5 категорий; Кризисы выкладываются на общий игровой стол
-                  </p>
+                  <span className="incident-section-index">02 / РЕЕСТР ОБЪЕКТОВ</span>
+                  <h2 className="incident-section-title">Комплект карточек</h2>
                 </div>
-
                 <button
+                  type="button"
                   onClick={() => setCurrentView('catalog')}
-                  className="text-xs font-mono-tech text-sky-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
+                  className="incident-button"
                 >
-                  <span>Открыть весь каталог</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  ОТКРЫТЬ КАТАЛОГ <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="incident-category-list">
                 {[
-                  { name: 'Роли', color: 'Синий', count: 30, border: 'border-sky-500/50', bg: 'bg-sky-950/40', text: 'text-sky-400', desc: 'Специализация в ЦОД' },
-                  { name: 'Навыки', color: 'Зелёный', count: 30, border: 'border-emerald-500/50', bg: 'bg-emerald-950/40', text: 'text-emerald-400', desc: 'Компетенции и ГОСТ' },
-                  { name: 'Багаж', color: 'Оранжевый', count: 30, border: 'border-orange-500/50', bg: 'bg-orange-950/40', text: 'text-orange-400', desc: 'Оборудование и бэкапы' },
-                  { name: 'Уязвимости', color: 'Алый', count: 30, border: 'border-rose-500/50', bg: 'bg-rose-950/40', text: 'text-rose-400', desc: 'Факторы риска' },
-                  { name: 'Кризисы', color: 'Фиолетовый', count: 30, border: 'border-purple-500/50', bg: 'bg-purple-950/40', text: 'text-purple-400', desc: 'Аварии оборудования' },
-                  { name: 'Действия', color: 'Золотой', count: 30, border: 'border-amber-500/50', bg: 'bg-amber-950/40', text: 'text-amber-400', desc: 'Привилегии и вето' },
+                  { number: '01', name: 'Роли', color: '#68a9c4', description: 'Профессиональные роли и зоны ответственности', count: 30 },
+                  { number: '02', name: 'Навыки', color: '#79b18c', description: 'Компетенции и технические специализации', count: 30 },
+                  { number: '03', name: 'Багаж', color: '#d89a5a', description: 'Инструменты, оборудование и резервные ресурсы', count: 30 },
+                  { number: '04', name: 'Уязвимости', color: '#dc6657', description: 'Риски и ограничения участников', count: 30 },
+                  { number: '05', name: 'Кризисы', color: '#a68ac7', description: 'Аварии и угрозы для инфраструктуры', count: 30 },
+                  { number: '06', name: 'Действия', color: '#d1b45f', description: 'Специальные карточки и игровые эффекты', count: 30 },
                 ].map((item) => (
-                  <div
-                    key={item.name}
+                  <button
+                    key={item.number}
+                    type="button"
                     onClick={() => setCurrentView('catalog')}
-                    className={`p-3.5 rounded-xl border ${item.border} ${item.bg} hover:brightness-125 transition-all cursor-pointer`}
+                    className="incident-category-row"
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-mono-tech font-bold uppercase ${item.text}`}>
-                        {item.name}
-                      </span>
-                      <span className="text-[10px] font-mono-tech text-slate-400">
-                        {item.count}
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono-tech text-slate-400">
-                      Цвет: {item.color}
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-1 line-clamp-1">
-                      {item.desc}
-                    </p>
-                  </div>
+                    <span className="incident-category-number">{item.number}</span>
+                    <span className="incident-category-name" style={{ color: item.color }}>
+                      <span className="incident-category-mark" />
+                      {item.name}
+                    </span>
+                    <span className="incident-category-description">{item.description}</span>
+                    <span className="incident-category-count">{String(item.count).padStart(2, '0')}</span>
+                    <ArrowRight className="incident-category-arrow w-4 h-4" />
+                  </button>
                 ))}
               </div>
-            </div>
+              <div className="incident-footnote">
+                180 КАРТ / 6 КАТЕГОРИЙ / 30 КАРТ В КАЖДОЙ КАТЕГОРИИ
+              </div>
+            </section>
           </div>
         ) : gameState.phase === 'lobby' ? (
           /* ==============================================================
