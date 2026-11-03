@@ -4453,3 +4453,62 @@ button.bunker-player-card-slot:hover {
     transition-duration: .01ms !important;
   }
 }
+
+/* Rules sheet */
+.bunker-rules-modal {
+  background: rgba(5,8,6,.84);
+  backdrop-filter: none;
+}
+.bunker-rules-panel {
+  border: 1px solid var(--bunker-line-strong) !important;
+  border-top: 3px solid var(--bunker-accent) !important;
+  border-radius: 3px !important;
+  background: var(--bunker-panel) !important;
+  color: var(--bunker-paper) !important;
+  box-shadow: 0 24px 75px rgba(0,0,0,.5) !important;
+}
+.bunker-rules-panel > div:first-child,
+.bunker-rules-panel > div:last-child {
+  border-color: var(--bunker-line) !important;
+  background: #171d18 !important;
+}
+.bunker-rules-panel h2,
+.bunker-rules-panel h4 {
+  color: var(--bunker-paper) !important;
+  font-family: 'IBM Plex Sans Condensed', sans-serif !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+.bunker-rules-panel h4 {
+  color: var(--bunker-accent-bright) !important;
+  font-size: 14px !important;
+}
+.bunker-rules-panel p,
+.bunker-rules-panel li,
+.bunker-rules-panel span {
+  color: #c3c1b4;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+.bunker-rules-panel strong {
+  color: #f0ecdf;
+}
+.bunker-rules-panel button {
+  border-radius: 3px !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+.bunker-rules-panel button:hover {
+  color: var(--bunker-paper) !important;
+}
+.bunker-rules-panel .bg-slate-950\/60,
+.bunker-rules-panel .bg-slate-950\/70 {
+  border: 1px solid var(--bunker-line) !important;
+  border-radius: 3px !important;
+  background: #202720 !important;
+}
+.bunker-rules-panel .bg-amber-950\/30 {
+  border-color: rgba(226,170,59,.35) !important;
+  border-radius: 3px !important;
+  background: #29251b !important;
+}
