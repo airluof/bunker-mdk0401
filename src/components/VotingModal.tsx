@@ -30,9 +30,9 @@ export const VotingModal: React.FC<VotingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="incident-modal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-xl bg-slate-900 border border-rose-500/50 rounded-2xl shadow-2xl p-5 sm:p-6 relative overflow-hidden"
+        className="incident-modal-panel w-full max-w-xl bg-slate-900 border border-rose-500/50 rounded-2xl shadow-2xl p-5 sm:p-6 relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
