@@ -68,6 +68,9 @@ export const CardCatalogView: React.FC<CardCatalogViewProps> = ({ onInspectCard 
             Шесть категорий инженерных характеристик, аварийных ситуаций и специальных действий.
             Каждая запись привязана к оригинальному идентификатору и иллюстрации.
           </p>
+          <div className="incident-catalog-warning" role="note">
+            ПУБЛИЧНЫЙ АРХИВ / ТЕКСТЫ ВСЕХ КАРТ ДОСТУПНЫ ПОСЕТИТЕЛЯМ. Не считать этот каталог закрытой игровой информацией до переноса текстов в защищённое хранилище.
+          </div>
         </div>
         <div className="incident-catalog-total">
           <strong>{filteredCards.length.toString().padStart(3, '0')}</strong>
