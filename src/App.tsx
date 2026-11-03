@@ -354,6 +354,7 @@ export function App() {
     const roomCode = `DRP-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newGame: GameState = {
+      isLocalDemo: true,
       roomCode,
       hostId: deal.players[0].id,
       round: 1,
@@ -1046,6 +1047,11 @@ export function App() {
                 <p className="text-xs font-mono-tech text-slate-400 mt-0.5">
                   Подключено инженеров: {gameState.players.length} из 16 максимум
                 </p>
+                {gameState.isLocalDemo && (
+                  <p className="mt-2 text-[10px] font-mono-tech uppercase tracking-wider text-amber-400">
+                    ЛОКАЛЬНЫЙ ТЕСТ / БОТЫ / ДРУГИЕ УСТРОЙСТВА НЕ ПОДКЛЮЧАЮТСЯ
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -1136,6 +1142,11 @@ export function App() {
                   </span>
                 </div>
 
+                {gameState.isLocalDemo && (
+                  <div className="px-2 py-1 border border-amber-500/50 bg-amber-950/20 text-[9px] font-mono-tech uppercase tracking-wider text-amber-300">
+                    LOCAL DEMO / BOTS
+                  </div>
+                )}
                 <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
                   <span className="text-xs font-mono-tech text-slate-400">ТЕКУЩАЯ ФАЗА:</span>
                   <span className="text-xs font-tactical font-bold text-cyan-300 uppercase">
