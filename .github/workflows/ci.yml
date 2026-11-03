@@ -30,6 +30,17 @@ jobs:
       - name: Validate original card catalog
         run: npm run db:import-cards -- --dry-run
 
+      - name: Check for exposed service-role credentials
+        shell: bash
+        run: |
+          if grep -R -n -E 'SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=' src public; then
+            echo "A service-role credential must never be committed to frontend files."
+            exit 1
+          fi
+
+      - name: Check diff whitespace
+        run: git diff --check
+
       - name: Type-check
         run: npm run lint
 
