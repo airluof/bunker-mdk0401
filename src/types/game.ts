@@ -31,6 +31,10 @@ export interface PlayerHand {
   baggage: Card;
   vulnerabilities: Card;
   actions: Card;
+  /** Additional Skill cards granted by Action effects. */
+  extraSkills?: Card[];
+  /** Card IDs of additional Skills revealed in public play. */
+  revealedExtraSkills?: string[];
 }
 
 export interface PlayerRevealedState {
@@ -103,6 +107,8 @@ export interface GameState {
   players: Player[];
   activeCrises: Card[];
   crisisDeck: Card[];
+  /** Remaining Skills available to local-demo effects. */
+  skillDeck?: Card[];
   bunkerCapacity: number;
   timerSeconds: number;
   timerActive: boolean;
