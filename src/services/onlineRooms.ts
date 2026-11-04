@@ -12,6 +12,12 @@ export interface RoomCommandResult {
   test_mode?: boolean;
 }
 
+export interface ActionPrivateEvent {
+  event_type: string;
+  private_payload: Record<string, unknown>;
+  created_at: string;
+}
+
 export interface RoomSnapshot {
   my_member_id: string;
   room: {
@@ -86,6 +92,7 @@ export interface RoomSnapshot {
     public_payload: Record<string, unknown>;
     created_at: string;
   }>;
+  my_private_action_events?: ActionPrivateEvent[];
 }
 
 function getClient() {
@@ -227,7 +234,17 @@ export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapsho
   });
   throwIfError(error);
 
-  return data as RoomSnapshot;
+  const { data: privateData, error: privateError } = await client.rpc('api_get_my_action_private_data', {
+    p_room_id: roomId,
+  });
+  const privateEvents = !privateError && Array.isArray((privateData as { events?: unknown[] } | null)?.events)
+    ? (privateData as { events: ActionPrivateEvent[] }).events
+    : [];
+
+  return {
+    ...(data as RoomSnapshot),
+    my_private_action_events: privateEvents,
+  };
 }
 
 
@@ -260,6 +277,33 @@ export async function useOnlineActionCard(roomId: string, cardInstanceId: string
     card_instance_id: string;
     capacity_before: number;
     capacity_after: number;
+    state_version: number;
+  };
+}
+
+export async function useOnlineActionEffect(
+  roomId: string,
+  cardInstanceId: string,
+  targetMemberId?: string,
+  targetCardInstanceId?: string,
+) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_use_action_effect', {
+    p_room_id: roomId,
+    p_card_instance_id: cardInstanceId,
+    p_target_member_id: targetMemberId ?? null,
+    p_target_card_instance_id: targetCardInstanceId ?? null,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    action_id: string;
+    effect_id: string;
+    card_instance_id: string;
+    target_member_id: string | null;
+    target_name: string | null;
     state_version: number;
   };
 }
