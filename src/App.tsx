@@ -136,6 +136,7 @@ function createOnlineBotSimulation(snapshot: RoomSnapshot, botData: Awaited<Retu
   const crisisDeck = botData.crisis_deck.map((card) => mapServerCardToGameCard(card, 'crises'));
   return {
     isLocalDemo: true,
+    isOnlineBotTest: true,
     roomCode,
     hostId: snapshot.my_member_id,
     round: 1,
@@ -207,7 +208,7 @@ function formatOnlineError(error: unknown, fallback: string): string {
 export function App() {
   const [gameState, setGameState] = useState<GameState | null>(() => {
     const savedGame = loadGameState();
-    if (savedGame?.isLocalDemo) {
+    if (savedGame?.isLocalDemo && !savedGame?.isOnlineBotTest) {
       clearGameState();
       return null;
     }
