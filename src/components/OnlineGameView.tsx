@@ -80,13 +80,15 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     .map((card) => toDisplayCard({ ...card, category: 'crises' }, 'crises'));
 
   const phaseLabel = PHASE_LABELS[snapshot.session.phase] || 'Игровой этап';
-  const isTestMode = snapshot.public_state?.test_mode === true;
+  const hasTestBots = snapshot.players.some((player) => player.is_bot);
+  const isTestMode = snapshot.public_state?.test_mode === true || hasTestBots;
+  const isHost = snapshot.players.some((player) => player.member_id === snapshot.my_member_id && player.technical_role === 'host');
 
   return (
     <main className="bunker-page bunker-online-game">
       <header className="bunker-online-game-heading">
         <div>
-          <p className="bunker-eyebrow">{isTestMode ? 'ТЕСТОВЫЙ ЗАПУСК' : 'Онлайн-партия'} · {snapshot.players.length} участников</p>
+          <p className="bunker-eyebrow">{hasTestBots ? `ТЕСТОВЫЙ СОСТАВ · ${snapshot.players.filter((player) => player.is_bot).length} ботов` : isTestMode ? 'ТЕСТОВЫЙ ЗАПУСК' : 'Онлайн-партия'} · {snapshot.players.length} участников</p>
           <h1>Игровой стол</h1>
           <p className="bunker-page-description">
             Раунд {snapshot.session.round_number} из {snapshot.session.max_rounds} · {phaseLabel}
@@ -102,7 +104,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             <RefreshCw aria-hidden="true" />
             {busy ? 'Обновляем…' : 'Синхронизировать'}
           </button>
-          {isTestMode && (
+          {(isTestMode || hasTestBots) && (
             <button
               type="button"
               onClick={onExit}
@@ -110,7 +112,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               className="bunker-button bunker-button-danger"
             >
               <DoorOpen aria-hidden="true" />
-              {busy ? 'Выходим…' : 'Завершить тест и выйти'}
+              {busy ? 'Выходим…' : isHost ? 'Завершить тест и выйти' : 'Покинуть тестовую партию'}
             </button>
           )}
         </div>
@@ -187,7 +189,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                   </span>
                   <span className="bunker-player-details">
                     <strong>{player.display_name}</strong>
-                    <small>{player.member_id === snapshot.my_member_id ? 'Вы' : 'Участник'}</small>
+                    <small>{player.is_bot ? 'Тестовый бот · не управляет игрой' : player.member_id === snapshot.my_member_id ? 'Вы' : 'Участник'}</small>
                   </span>
                   {player.technical_role === 'host' && (
                     <span className="bunker-host-label"><Crown aria-hidden="true" /> Ведущий</span>
@@ -209,9 +211,8 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
       </section>
 
       <p className="bunker-online-game-footnote">
-        Сейчас подключены серверный запуск и личная раздача. Вскрытие карточек,
-        таймер брифинга и голосование будут добавлены отдельными серверными действиями,
-        чтобы каждый участник видел одинаковый результат.
+        Тестовые боты присутствуют в составе и получили места для раздачи, но не выполняют игровые действия.
+        Вскрытие карточек, таймер брифинга и голосование будут добавлены отдельными серверными действиями.
       </p>
     </main>
   );
