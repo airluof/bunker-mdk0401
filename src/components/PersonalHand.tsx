@@ -1,7 +1,7 @@
 import React from 'react';
 import { Player, Card, PlayerSlotCategory } from '../types/game';
 import { CardView } from './CardView';
-import { Zap, LockKeyhole } from 'lucide-react';
+import { Zap, ShieldCheck, LockKeyhole } from 'lucide-react';
 import { sound } from '../services/sound';
 
 interface PersonalHandProps {
@@ -37,10 +37,13 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
           <p>{player.name} · 5 карт в руке</p>
         </div>
 
-        {player.hand.actions.card_id === 'action_28' && !player.actionUsed && player.isAlive && !['audit', 'gameover'].includes(currentPhase) && (
+        {['action_04', 'action_28'].includes(player.hand.actions.card_id) && !player.actionUsed && player.isAlive && !['audit', 'gameover', 'lobby'].includes(currentPhase) && (
           <button type="button" onClick={handleUseActionClick} className="bunker-action-card-button">
-            <Zap aria-hidden="true" />
-            Аварийный генератор · +1 место
+            {player.hand.actions.card_id === 'action_28' ? (
+              <><Zap aria-hidden="true" /> Аварийный генератор · +1 место</>
+            ) : (
+              <><ShieldCheck aria-hidden="true" /> Hotfix · сбросить Уязвимость</>
+            )}
           </button>
         )}
         {player.revealed.actions && !player.actionUsed && player.hand.actions.card_id !== 'action_28' && (
@@ -50,7 +53,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
 
       <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
       <div className="bunker-hand-grid">
-        {categories.map((category) => {
+        {categories.filter((category) => !(category === 'vulnerabilities' && player.vulnerabilityDiscarded)).map((category) => {
           const card = player.hand[category];
           const isRevealed = player.revealed[category];
           const canReveal = !isRevealed && !hasRevealedThisRound && (currentPhase === 'reveal' || currentPhase === 'briefing');
