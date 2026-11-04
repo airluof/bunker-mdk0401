@@ -434,15 +434,27 @@ export function App() {
   const handleStartOnlineGame = async () => {
     if (!onlineRoom) return;
 
+    const hasBots = onlineRoom.snapshot.players.some((player) => player.membership_status === 'active' && player.is_bot);
+    const realPlayers = onlineRoom.snapshot.players.filter((player) => player.membership_status === 'active' && !player.is_bot);
+    if (hasBots && (realPlayers.length !== 1 || realPlayers[0]?.member_id !== onlineRoom.memberId)) {
+      setOnlineError('Полная тестовая симуляция рассчитана на ведущего и ботов. Уберите других реальных участников из комнаты.');
+      return;
+    }
+
     setOnlineBusy(true);
     setOnlineError(null);
     try {
       await startOnlineGame(onlineRoom.roomId);
       const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
-      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
-        ? { ...current, snapshot }
-        : current);
-      showToast('Партия запущена. Личные карты выданы участникам.');
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId ? { ...current, snapshot } : current);
+      if (hasBots) {
+        const botData = await getOnlineTestBotData(onlineRoom.roomId);
+        const simulation = createOnlineBotSimulation(snapshot, botData, onlineRoom.inviteCode?.slice(0, 8) || onlineRoom.roomId.slice(0, 8).toUpperCase());
+        setGameState(simulation);
+        showToast('Тестовая партия запущена. Боты участвуют в раскрытии карт и голосовании.');
+      } else {
+        showToast('Партия запущена. Личные карты выданы участникам.');
+      }
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось запустить онлайн-партию.'));
     } finally {
@@ -487,6 +499,8 @@ export function App() {
         localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
         sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         setOnlineRoom(null);
+        setGameState(null);
+        clearGameState();
         showToast(result.status === 'archived' ? 'Тестовая комната закрыта.' : 'Вы вышли из тестовой партии.');
         return;
       }
@@ -499,6 +513,8 @@ export function App() {
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
       sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       setOnlineRoom(null);
+      setGameState(null);
+      clearGameState();
       showToast(ownMember?.technical_role === 'host' ? 'Комната закрыта.' : 'Вы покинули комнату.');
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось выйти из комнаты.'));
@@ -912,6 +928,10 @@ export function App() {
 
   // Exit game
   const handleExitGame = () => {
+    if (onlineRoom) {
+      void handleExitOnlineRoom();
+      return;
+    }
     clearGameState();
     setGameState(null);
   };
@@ -946,7 +966,7 @@ export function App() {
           ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
           : gameState?.players[0]?.isHost}
         onExitGame={onlineRoom
-          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived'
+          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || gameState?.isLocalDemo
             ? handleExitCurrentRoom
             : undefined
           : gameState ? handleExitCurrentRoom : undefined}
@@ -964,7 +984,7 @@ export function App() {
       <main className="bunker-main flex-1">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
-        ) : onlineRoom ? (
+        ) : onlineRoom && !gameState?.isLocalDemo ? (
           onlineRoom.snapshot.room.status === 'in_progress' ? (
             <OnlineGameView
               snapshot={onlineRoom.snapshot}
