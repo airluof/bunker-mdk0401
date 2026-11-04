@@ -127,6 +127,41 @@ export async function ensureAnonymousSession(): Promise<string> {
   return data.user.id;
 }
 
+export async function heartbeatOnlineRoom(roomId: string): Promise<{ ok: boolean; last_seen_at: string }> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_heartbeat_room', {
+    p_room_id: roomId,
+  });
+  throwIfError(error);
+
+  return data as { ok: boolean; last_seen_at: string };
+}
+
+export async function takeoverOnlineRoomControl(roomId: string): Promise<{
+  ok: boolean;
+  room_id: string;
+  controller_member_id: string;
+  controller_name: string;
+}> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_takeover_room_control', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as {
+    ok: boolean;
+    room_id: string;
+    controller_member_id: string;
+    controller_name: string;
+  };
+}
+
 export async function createOnlineRoom(displayName: string): Promise<RoomCommandResult> {
   const client = getClient();
   await ensureAnonymousSession();
@@ -467,7 +502,11 @@ export async function subscribeToOnlineRoom(
       table: 'public_game_state',
       filter: 'room_id=eq.' + roomId,
     }, (payload) => onChange(payload))
-    .subscribe();
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        onChange({ type: 'reconnected' });
+      }
+    });
 
   return () => {
     void client.removeChannel(channel);
