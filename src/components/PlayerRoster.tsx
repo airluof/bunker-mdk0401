@@ -63,6 +63,7 @@ export const PlayerRoster: React.FC<PlayerRosterProps> = ({
                   <div className="bunker-player-name-line">
                     <h3>{player.name}</h3>
                     {player.isHost && <Crown className="bunker-player-crown" aria-label="Ведущий" />}
+                    {player.isBot && <span className="bunker-player-you">БОТ</span>}
                     {isMe && <span className="bunker-player-you">Вы</span>}
                   </div>
                   <span className="bunker-player-status">
@@ -70,9 +71,11 @@ export const PlayerRoster: React.FC<PlayerRosterProps> = ({
                       ? `Выбыл · раунд ${player.eliminatedInRound || 1}`
                       : isSpeaker
                         ? 'Сейчас говорит'
-                        : player.isHost
-                          ? 'Ведущий'
-                          : 'Участник'}
+                        : player.isBot
+                          ? 'Тестовый участник'
+                          : player.isHost
+                            ? 'Ведущий'
+                            : 'Участник'}
                   </span>
                 </div>
 
