@@ -11,6 +11,11 @@ const inviteMigrationPath = resolve(
   'supabase/migrations/202611040014_short_room_invite_codes.sql',
 );
 const inviteSql = await readFile(inviteMigrationPath, 'utf8');
+const fullAlphabetMigrationPath = resolve(
+  process.cwd(),
+  'supabase/migrations/202611040015_full_alphabet_invite_codes.sql',
+);
+const fullAlphabetSql = await readFile(fullAlphabetMigrationPath, 'utf8');
 
 const expectedTables = [
   'rooms',
@@ -88,6 +93,39 @@ requireText(/grant select, insert, update, delete on public\.card_catalog to ser
 requireText(/revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'RPC execute privileges must be revoked from PUBLIC and anon.');
 requireText(/grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Authenticated room creation RPC grant is missing.');
 requireInviteText(/v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Short invite alphabet is missing or includes ambiguous letters.');
+if (!fullAlphabetSql.includes("v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'")) {
+  failures.push('Latest invite migration must generate codes using the full A-Z alphabet.');
+}
+if (!fullAlphabetSql.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})
+requireInviteText(/for v_char_index in 1\.\.5 loop/i, 'Room creation must generate exactly five letters.');
+if (!inviteSql.includes("upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'")) {
+  failures.push('Join RPC must accept five-letter invite codes and keep legacy 32-character codes valid.');
+}
+if (!inviteSql.includes("extensions.digest(convert_to(upper(btrim(p_invite_code)), 'UTF8'), 'sha256')")) {
+  failures.push('Updated join RPC must hash normalized invite codes before lookup.');
+}
+requireInviteText(/INVITE_CODE_GENERATION_FAILED/, 'Short invite collision handling is missing.');
+
+if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
+  failures.push('The migration must not grant database access to anon.');
+}
+
+if (failures.length > 0) {
+  console.error('Supabase migration validation failed:');
+  for (const failure of failures) console.error(' - ' + failure);
+  process.exit(1);
+}
+
+console.log('Supabase migration structure validated.');
+console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
+console.log('Five-letter full A-Z invite generation, legacy-code compatibility and versioned catalog constraints are present.');
+")) {
+  failures.push('Latest join RPC must accept all A-Z letters and legacy hexadecimal codes.');
+}
+if (!fullAlphabetSql.includes("v_random_byte < 234") || !fullAlphabetSql.includes("v_random_byte % 26")) {
+  failures.push('Full alphabet code generation must select letters without distribution bias.');
+}
+
 requireInviteText(/for v_char_index in 1\.\.5 loop/i, 'Room creation must generate exactly five letters.');
 if (!inviteSql.includes("upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'")) {
   failures.push('Join RPC must accept five-letter invite codes and keep legacy 32-character codes valid.');
