@@ -6,6 +6,11 @@ const migrationPath = resolve(
   'supabase/migrations/202611040001_initial_multiplayer_schema.sql',
 );
 const sql = await readFile(migrationPath, 'utf8');
+const inviteMigrationPath = resolve(
+  process.cwd(),
+  'supabase/migrations/202611040014_short_room_invite_codes.sql',
+);
+const inviteSql = await readFile(inviteMigrationPath, 'utf8');
 
 const expectedTables = [
   'rooms',
@@ -37,6 +42,9 @@ const failures = [];
 const count = (pattern) => [...sql.matchAll(pattern)].length;
 const requireText = (pattern, message) => {
   if (!pattern.test(sql)) failures.push(message);
+};
+const requireInviteText = (pattern, message) => {
+  if (!pattern.test(inviteSql)) failures.push(message);
 };
 
 const beginCount = count(/^begin;$/gim);
@@ -79,6 +87,15 @@ requireText(/revoke all on public\.rooms[\s\S]*?from public, anon, authenticated
 requireText(/grant select, insert, update, delete on public\.card_catalog to service_role;/i, 'Only the service role should receive direct catalog import privileges.');
 requireText(/revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'RPC execute privileges must be revoked from PUBLIC and anon.');
 requireText(/grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Authenticated room creation RPC grant is missing.');
+requireInviteText(/v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Short invite alphabet is missing or includes ambiguous letters.');
+requireInviteText(/for v_char_index in 1\.\.5 loop/i, 'Room creation must generate exactly five letters.');
+if (!inviteSql.includes("upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'")) {
+  failures.push('Join RPC must accept five-letter invite codes and keep legacy 32-character codes valid.');
+}
+if (!inviteSql.includes("extensions.digest(convert_to(upper(btrim(p_invite_code)), 'UTF8'), 'sha256')")) {
+  failures.push('Updated join RPC must hash normalized invite codes before lookup.');
+}
+requireInviteText(/INVITE_CODE_GENERATION_FAILED/, 'Short invite collision handling is missing.');
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
   failures.push('The migration must not grant database access to anon.');
@@ -92,4 +109,4 @@ if (failures.length > 0) {
 
 console.log('Supabase migration structure validated.');
 console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
-console.log('Invite hashing, 128-bit invite generation, and versioned catalog constraints are present.');
+console.log('Base schema hashing, five-letter invite generation, legacy-code compatibility and versioned catalog constraints are present.');
