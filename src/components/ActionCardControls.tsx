@@ -22,6 +22,7 @@ interface ActionCrisis {
 }
 
 interface ActionCardControlsProps {
+  myMemberId: string;
   cards: ActionCard[];
   players: ActionPlayer[];
   crises: ActionCrisis[];
@@ -52,6 +53,7 @@ const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 
 };
 
 export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
+  myMemberId,
   cards,
   players,
   crises,
@@ -106,7 +108,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
           <div className="bunker-online-action-tools-list">
             {availableCards.map((card) => {
               const config = AVAILABLE_EFFECTS[card.card_id];
-              const otherPlayers = activePlayers.filter((player) => player.member_id !== players.find((p) => p.member_id === player.member_id)?.member_id || player.member_id !== '');
+              const otherPlayers = activePlayers.filter((player) => player.member_id !== myMemberId);
               const eligiblePlayers = config.target === 'expelled'
                 ? otherPlayers.filter((player) => !player.is_alive)
                 : otherPlayers;
