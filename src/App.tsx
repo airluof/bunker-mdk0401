@@ -129,6 +129,39 @@ function formatOnlineError(error: unknown, fallback: string): string {
   if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
     return 'Создатель должен закрыть комнату, прежде чем выйти из неё.';
   }
+  if (normalized.includes('BOTS_ALLOWED_ONLY_IN_TEST_ROOMS')) {
+    return 'Боты разрешены только в тестовых комнатах. Создайте тестовую комнату, чтобы добавить их.';
+  }
+  if (normalized.includes('PLAYERS_MUST_REVEAL_FIRST')) {
+    return 'Сначала каждый живой участник должен раскрыть одну карту текущего раунда.';
+  }
+  if (normalized.includes('BRIEFING_TIMER_RUNNING')) {
+    return 'Брифинг ещё идёт. Голосование откроется после завершения 60 секунд.';
+  }
+  if (normalized.includes('ALREADY_VOTED_THIS_ROUND')) {
+    return 'Вы уже проголосовали в этом раунде.';
+  }
+  if (normalized.includes('WAITING_FOR_PLAYER_VOTES')) {
+    return 'Не все реальные участники ещё проголосовали.';
+  }
+  if (normalized.includes('VOTE_TIE_NEEDS_RULE')) {
+    return 'Получилась ничья. Для обычной партии способ её разрешения ещё не утверждён.';
+  }
+  if (normalized.includes('NOT_ACTIVE_PLAYER')) {
+    return 'Вы не можете выполнять это действие: возможно, вы выбыли из партии.';
+  }
+  if (normalized.includes('NOT_ELIGIBLE_TO_VOTE')) {
+    return 'Вы не можете голосовать в текущем состоянии партии.';
+  }
+  if (normalized.includes('VOTING_NOT_OPEN')) {
+    return 'Голосование пока не открыто.';
+  }
+  if (normalized.includes('REVEAL_PHASE_CLOSED')) {
+    return 'Этап вскрытия уже завершён.';
+  }
+  if (normalized.includes('CARD_NOT_AVAILABLE')) {
+    return 'Эта карта уже раскрыта или не принадлежит вашей руке.';
+  }
   if (normalized.includes('RULE_NOT_APPROVED')) {
     return 'Это действие пока недоступно: соответствующая игровая процедура ещё не утверждена.';
   }
