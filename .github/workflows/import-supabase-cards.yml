@@ -1,0 +1,56 @@
+name: Import Supabase card catalog
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bunker-supabase-card-catalog-import
+  cancel-in-progress: false
+
+jobs:
+  import-catalog:
+    if: github.ref == 'refs/heads/work/neurotech-redesign-and-game-audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out working branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate the source catalog
+        run: npm run db:import-cards -- --dry-run
+
+      - name: Import and verify 180 cards in Supabase
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SUPABASE_URL}" ]]; then
+            echo "Missing GitHub Actions secret: SUPABASE_URL"
+            exit 1
+          fi
+
+          if [[ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]]; then
+            echo "Missing GitHub Actions secret: SUPABASE_SERVICE_ROLE_KEY"
+            exit 1
+          fi
+
+          if [[ "${SUPABASE_URL}" != https://*.supabase.co ]]; then
+            echo "SUPABASE_URL must be the base Project URL, without /rest/v1/."
+            exit 1
+          fi
+
+          npm run db:import-cards
