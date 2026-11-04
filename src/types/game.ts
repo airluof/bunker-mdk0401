@@ -54,6 +54,8 @@ export interface Player {
   votesReceived: number;
   votedForId: string | null;
   eliminatedInRound?: number;
+  /** True only for synthetic participants in a local test simulation. */
+  isBot?: boolean;
 }
 
 export type GamePhase = 
