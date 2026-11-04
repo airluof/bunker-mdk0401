@@ -152,7 +152,7 @@ begin
 
   if p_command_id is null
      or p_invite_code is null
-     or upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})
+     or upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'
      or p_display_name is null
      or char_length(btrim(p_display_name)) not between 2 and 24 then
     raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
@@ -172,95 +172,6 @@ begin
 
   v_hash := encode(
     extensions.digest(convert_to(upper(btrim(p_invite_code)), 'UTF8'), 'sha256'),
-    'hex'
-  );
-
-  select r.id, r.status, r.max_players
-    into v_room_id, v_room_status, v_max_players
-  from public.room_invites i
-  join public.rooms r on r.id = i.room_id
-  where i.code_hash = v_hash and i.is_active = true
-  for update of r;
-
-  if v_room_id is null then
-    raise exception using errcode = 'P0001', message = 'ROOM_NOT_FOUND';
-  end if;
-
-  if v_room_status <> 'lobby' then
-    raise exception using errcode = 'P0001', message = 'ROOM_NOT_JOINABLE';
-  end if;
-
-  select m.id, m.membership_status
-    into v_member_id, v_existing_status
-  from public.room_members m
-  where m.room_id = v_room_id and m.user_id = v_user_id
-  for update;
-
-  if v_member_id is not null then
-    if v_existing_status = 'left' then
-      update public.room_members
-      set membership_status = 'active',
-          display_name = btrim(p_display_name),
-          last_seen_at = now()
-      where id = v_member_id;
-    else
-      update public.room_members
-      set last_seen_at = now()
-      where id = v_member_id;
-    end if;
-  else
-    select count(*) into v_active_count
-    from public.room_members m
-    where m.room_id = v_room_id and m.membership_status = 'active';
-
-    if v_active_count >= v_max_players then
-      raise exception using errcode = 'P0001', message = 'ROOM_FULL';
-    end if;
-
-    v_member_id := gen_random_uuid();
-    insert into public.room_members (
-      id, room_id, user_id, display_name, technical_role, membership_status, last_seen_at
-    )
-    values (
-      v_member_id, v_room_id, v_user_id, btrim(p_display_name), 'player', 'active', now()
-    );
-  end if;
-
-  v_result := jsonb_build_object(
-    'ok', true,
-    'room_id', v_room_id,
-    'member_id', v_member_id,
-    'status', 'lobby'
-  );
-
-  insert into public.command_receipts (user_id, command_id, command_name, response_json)
-  values (v_user_id, p_command_id, 'api_join_room', v_result);
-
-  return v_result;
-exception
-  when unique_violation then
-    raise exception using errcode = '23505', message = 'ACTIVE_ROOM_OR_DUPLICATE_NAME';
-end;
-$$;
-     or p_display_name is null
-     or char_length(btrim(p_display_name)) not between 2 and 24 then
-    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
-  end if;
-
-  select cr.response_json, cr.command_name
-    into v_existing_result, v_command_name
-  from public.command_receipts cr
-  where cr.user_id = v_user_id and cr.command_id = p_command_id;
-
-  if found then
-    if v_command_name <> 'api_join_room' then
-      raise exception using errcode = '22023', message = 'COMMAND_ID_REUSED';
-    end if;
-    return v_existing_result;
-  end if;
-
-  v_hash := encode(
-    extensions.digest(convert_to(upper(p_invite_code), 'UTF8'), 'sha256'),
     'hex'
   );
 
