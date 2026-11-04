@@ -101,7 +101,9 @@ function mapServerCardToGameCard(source: { card_id: string; category?: string; t
 }
 
 function createOnlineBotSimulation(snapshot: RoomSnapshot, botData: Awaited<ReturnType<typeof getOnlineTestBotData>>, roomCode: string): GameState {
-  const activePlayers = snapshot.players.filter((player) => player.membership_status === 'active');
+  const activePlayers = snapshot.players
+    .filter((player) => player.membership_status === 'active')
+    .sort((left, right) => Number(right.technical_role === 'host') - Number(left.technical_role === 'host'));
   const realPlayers = activePlayers.filter((player) => !player.is_bot);
   if (realPlayers.length !== 1 || realPlayers[0].member_id !== snapshot.my_member_id) throw new Error('BOT_SIMULATION_REQUIRES_SINGLE_HOST');
   const cardsByMember = new Map<string, Card[]>();
