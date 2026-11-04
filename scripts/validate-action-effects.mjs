@@ -72,7 +72,7 @@ requireText(service, /export async function useOnlineHotfixCard/i, 'Client servi
 requireText(gameView, /canUseEmergencyGenerator/i, 'Online game UI must gate the Emergency Generator button.');
 requireText(gameView, /canUseHotfix/i, 'Online game UI must gate Hotfix by player/card state.');
 requireText(gameView, /onUseHotfixCard\(hotfixInstanceId, vulnerabilityInstanceId\)/i, 'Online game UI must pass the owned Vulnerability card to Hotfix.');
-requireText(localApp, /vulnerabilityDiscarded: true/i, 'Local demo must apply Hotfix to the player's own Vulnerability.');
+requireText(localApp, /vulnerabilityDiscarded: true/i, "Local demo must apply Hotfix to the player\u0027s own Vulnerability.");
 requireText(handView, /player\.vulnerabilityDiscarded/i, 'Local hand must hide the discarded Vulnerability.');
 requireText(rosterView, /player\.vulnerabilityDiscarded/i, 'Local public roster must remove the discarded Vulnerability.');
 requireText(importer, /\['action_04', 'action_28'\]\.includes\(card\.card_id\)/i, 'Catalog importer must preserve approved status for action_04 and action_28.');
