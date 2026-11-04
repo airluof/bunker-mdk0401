@@ -12,15 +12,15 @@ const [manifestText, migration, service, gameView, localApp] = await Promise.all
 
 const manifest = JSON.parse(manifestText.replace(/^\uFEFF/, ''));
 const actions = (manifest.assets || []).filter((card) => card.category === 'actions');
-const expectedIds = Array.from({ length: 30 }, (_, index) => \`action_${String(index + 1).padStart(2, '0')}\`);
+const expectedIds = Array.from({ length: 30 }, (_, index) => `action_${String(index + 1).padStart(2, '0')}`);
 const failures = [];
 const requireText = (source, pattern, message) => {
   if (!pattern.test(source)) failures.push(message);
 };
 
-if (actions.length !== 30) failures.push(\`Expected 30 action cards, found ${actions.length}.\`);
+if (actions.length !== 30) failures.push(`Expected 30 action cards, found ${actions.length}.`);
 for (const id of expectedIds) {
-  if (!actions.some((card) => card.card_id === id)) failures.push(\`Missing action card in source catalog: ${id}.\`);
+  if (!actions.some((card) => card.card_id === id)) failures.push(`Missing action card in source catalog: ${id}.`);
 }
 
 const generator = actions.find((card) => card.card_id === 'action_28');
