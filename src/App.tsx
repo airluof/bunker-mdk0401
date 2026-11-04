@@ -6,14 +6,12 @@ import {
   PlayerSlotCategory, 
   GameLogEntry, 
   GamePhase,
-  CardCategory,
 } from './types/game';
 import { 
   ALL_CARDS, 
   dealNewGame, 
   shuffleArray, 
   CARDS_BY_CATEGORY,
-  CATEGORY_CONFIG,
 } from './data/cards';
 import { Navbar } from './components/Navbar';
 import { ActiveCrisesBanner } from './components/ActiveCrisesBanner';
@@ -30,6 +28,7 @@ import { OnlineRoomLobby } from './components/OnlineRoomLobby';
 import { OnlineGameView } from './components/OnlineGameView';
 import {
   createOnlineRoom,
+  createOnlineTestRoom,
   joinOnlineRoom,
   getOnlineRoomSnapshot,
   subscribeToOnlineRoom,
@@ -38,8 +37,12 @@ import {
   updateOnlineRoomSettings,
   startOnlineGame,
   addOnlineTestBots,
-  getOnlineTestBotData,
   exitOnlineTestRoom,
+  revealOnlineCard,
+  transitionOnlineGamePhase,
+  submitOnlineVote,
+  resolveOnlineVote,
+  advanceOnlineGameRound,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -82,81 +85,6 @@ interface OnlineRoomSession {
 
 const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
 const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
-
-const TEST_HAND_CATEGORIES: PlayerSlotCategory[] = ['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'];
-
-function mapServerCardToGameCard(source: { card_id: string; category?: string; title: string; description: string; image_path?: string | null }, fallbackCategory: CardCategory): Card {
-  const category: CardCategory = source.category === 'crises' ? 'crises' : TEST_HAND_CATEGORIES.includes(source.category as PlayerSlotCategory) ? source.category as PlayerSlotCategory : fallbackCategory;
-  return {
-    card_id: source.card_id,
-    category,
-    category_name_ru: CATEGORY_CONFIG[category].nameRu,
-    card_number: 0,
-    original_title: source.title,
-    source_description: source.description,
-    exported_title: source.title,
-    file_name: source.image_path?.split('/').pop() || '',
-    relative_path: source.image_path || '',
-  };
-}
-
-function createOnlineBotSimulation(snapshot: RoomSnapshot, botData: Awaited<ReturnType<typeof getOnlineTestBotData>>, roomCode: string): GameState {
-  const activePlayers = snapshot.players
-    .filter((player) => player.membership_status === 'active')
-    .sort((left, right) => Number(right.technical_role === 'host') - Number(left.technical_role === 'host'));
-  const realPlayers = activePlayers.filter((player) => !player.is_bot);
-  if (realPlayers.length !== 1 || realPlayers[0].member_id !== snapshot.my_member_id) throw new Error('BOT_SIMULATION_REQUIRES_SINGLE_HOST');
-  const cardsByMember = new Map<string, Card[]>();
-  cardsByMember.set(snapshot.my_member_id, snapshot.my_cards.map((card) => mapServerCardToGameCard(card, 'roles')));
-  for (const botHand of botData.bot_hands) cardsByMember.set(botHand.member_id, botHand.cards.map((card) => mapServerCardToGameCard(card, 'roles')));
-  const baseDeal = dealNewGame(activePlayers.map((player) => player.display_name));
-  const players: Player[] = activePlayers.map((member, index) => {
-    const cards = cardsByMember.get(member.member_id) || [];
-    const cardFor = (category: PlayerSlotCategory) => cards.find((card) => card.category === category);
-    const roles = cardFor('roles');
-    const skills = cardFor('skills');
-    const baggage = cardFor('baggage');
-    const vulnerabilities = cardFor('vulnerabilities');
-    const actions = cardFor('actions');
-    if (!roles || !skills || !baggage || !vulnerabilities || !actions) throw new Error(member.is_bot ? 'TEST_BOT_HAND_INCOMPLETE' : 'PLAYER_HAND_INCOMPLETE');
-    return {
-      ...baseDeal.players[index],
-      id: member.member_id,
-      name: member.display_name,
-      isHost: member.technical_role === 'host',
-      isReady: true,
-      isAlive: true,
-      hand: { roles, skills, baggage, vulnerabilities, actions },
-      revealed: { roles: false, skills: false, baggage: false, vulnerabilities: false, actions: false },
-      actionUsed: false,
-      votesReceived: 0,
-      votedForId: null,
-      isBot: member.is_bot,
-    } as Player;
-  });
-  const activeCrises = snapshot.active_crises.map((card) => mapServerCardToGameCard(card as { card_id: string; category?: string; title: string; description: string; image_path?: string | null }, 'crises'));
-  const crisisDeck = botData.crisis_deck.map((card) => mapServerCardToGameCard(card, 'crises'));
-  return {
-    isLocalDemo: true,
-    isOnlineBotTest: true,
-    roomCode,
-    hostId: snapshot.my_member_id,
-    round: 1,
-    maxRounds: 5,
-    phase: 'reveal',
-    players,
-    revealedThisRoundPlayerIds: [],
-    activeCrises,
-    crisisDeck,
-    bunkerCapacity: baseDeal.bunkerCapacity,
-    timerSeconds: 60,
-    timerActive: false,
-    activeSpeakerId: snapshot.my_member_id,
-    lastEliminatedPlayerId: null,
-    recoveryPlan: [],
-    log: [{ id: 'bot_test_' + Date.now(), timestamp: new Date().toLocaleTimeString('ru-RU'), round: 1, type: 'system', message: 'Тестовая партия запущена: ' + players.length + ' участников, включая ' + players.filter((player) => (player as Player & { isBot?: boolean }).isBot).length + ' ботов.' }],
-  };
-}
 
 function formatOnlineError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error || '');
@@ -328,7 +256,7 @@ export function App() {
   };
 
 
-  const handleCreateOnlineRoom = async () => {
+  const handleCreateOnlineRoom = async (roomMode: 'players' | 'test' = 'players') => {
     const displayName = currentUser.name.trim();
     if (displayName.length < 2 || displayName.length > 24) {
       setOnlineError('Позывной должен содержать от 2 до 24 символов.');
@@ -338,7 +266,9 @@ export function App() {
     setOnlineBusy(true);
     setOnlineError(null);
     try {
-      const result = await createOnlineRoom(displayName);
+      const result = roomMode === 'test'
+        ? await createOnlineTestRoom(displayName)
+        : await createOnlineRoom(displayName);
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       if (result.invite_code) {
         sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
@@ -355,7 +285,9 @@ export function App() {
       clearGameState();
       sound.playCrisisAlert();
     } catch (error: unknown) {
-      setOnlineError(formatOnlineError(error, 'Не удалось создать онлайн-комнату.'));
+      setOnlineError(formatOnlineError(error, roomMode === 'test'
+        ? 'Не удалось создать тестовую комнату.'
+        : 'Не удалось создать онлайн-комнату.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -438,28 +370,17 @@ export function App() {
   const handleStartOnlineGame = async () => {
     if (!onlineRoom) return;
 
-    const hasBots = onlineRoom.snapshot.players.some((player) => player.membership_status === 'active' && player.is_bot);
-    const realPlayers = onlineRoom.snapshot.players.filter((player) => player.membership_status === 'active' && !player.is_bot);
-    if (hasBots && (realPlayers.length !== 1 || realPlayers[0]?.member_id !== onlineRoom.memberId)) {
-      setOnlineError('Полная тестовая симуляция рассчитана на ведущего и ботов. Уберите других реальных участников из комнаты.');
-      return;
-    }
-
     setOnlineBusy(true);
     setOnlineError(null);
     try {
       await startOnlineGame(onlineRoom.roomId);
       const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
-      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId ? { ...current, snapshot } : current);
-      if (hasBots) {
-        const botData = await getOnlineTestBotData(onlineRoom.roomId);
-        const simulation = createOnlineBotSimulation(snapshot, botData, onlineRoom.inviteCode?.slice(0, 8) || onlineRoom.roomId.slice(0, 8).toUpperCase());
-        setGameState(simulation);
-        setCurrentView('game');
-        showToast('Тестовая партия запущена. Боты участвуют в раскрытии карт и голосовании.');
-      } else {
-        showToast('Партия запущена. Личные карты выданы участникам.');
-      }
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(snapshot.room.room_mode === 'test'
+        ? 'Тестовая партия запущена. Игроки и боты работают в общей серверной сессии.'
+        : 'Партия запущена. Личные карты выданы участникам.');
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось запустить онлайн-партию.'));
     } finally {
@@ -488,6 +409,64 @@ export function App() {
     }
   };
 
+  const runOnlineGameAction = async (
+    action: () => Promise<unknown>,
+    successMessage: string,
+    fallbackMessage: string,
+  ) => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await action();
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(successMessage);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, fallbackMessage));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleRevealOnlineCard = (instanceId: string) => runOnlineGameAction(
+    () => revealOnlineCard(onlineRoom!.roomId, instanceId),
+    'Карта раскрыта всем участникам.',
+    'Не удалось раскрыть карту.',
+  );
+
+  const handleStartBriefing = () => runOnlineGameAction(
+    () => transitionOnlineGamePhase(onlineRoom!.roomId, 'briefing'),
+    'Брифинг начался. Таймер установлен сервером на 60 секунд.',
+    'Не удалось перейти к брифингу.',
+  );
+
+  const handleOpenVoting = () => runOnlineGameAction(
+    () => transitionOnlineGamePhase(onlineRoom!.roomId, 'voting'),
+    'Голосование открыто. Тестовые боты уже подали свои голоса.',
+    'Не удалось открыть голосование.',
+  );
+
+  const handleSubmitOnlineVote = (targetMemberId: string) => runOnlineGameAction(
+    () => submitOnlineVote(onlineRoom!.roomId, targetMemberId),
+    'Ваш голос учтён и виден участникам.',
+    'Не удалось подать голос.',
+  );
+
+  const handleResolveOnlineVote = () => runOnlineGameAction(
+    () => resolveOnlineVote(onlineRoom!.roomId),
+    'Результат голосования зафиксирован.',
+    'Не удалось подвести итоги голосования.',
+  );
+
+  const handleAdvanceOnlineRound = () => runOnlineGameAction(
+    () => advanceOnlineGameRound(onlineRoom!.roomId),
+    'Игровое состояние обновлено.',
+    'Не удалось перейти к следующему этапу.',
+  );
+
   const handleExitOnlineRoom = async () => {
     if (!onlineRoom) return;
     setOnlineBusy(true);
@@ -496,8 +475,8 @@ export function App() {
       const ownMember = onlineRoom.snapshot.players.find(
         (player) => player.member_id === onlineRoom.memberId
       );
-      const isTestMode = onlineRoom.snapshot.public_state?.test_mode === true
-        || onlineRoom.snapshot.players.some((player) => player.is_bot);
+      const isTestMode = onlineRoom.snapshot.room.room_mode === 'test'
+        || onlineRoom.snapshot.public_state?.test_mode === true;
 
       if (isTestMode && onlineRoom.snapshot.room.status === 'in_progress') {
         const result = await exitOnlineTestRoom(onlineRoom.roomId);
@@ -990,7 +969,7 @@ export function App() {
           ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
           : gameState?.players[0]?.isHost}
         onExitGame={onlineRoom
-          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || gameState?.isLocalDemo
+          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || onlineRoom.snapshot.room.room_mode === 'test'
             ? handleExitCurrentRoom
             : undefined
           : gameState ? handleExitCurrentRoom : undefined}
@@ -1008,14 +987,23 @@ export function App() {
       <main className="bunker-main flex-1">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
-        ) : onlineRoom && !gameState?.isLocalDemo ? (
+        ) : onlineRoom ? (
           onlineRoom.snapshot.room.status === 'in_progress' ? (
             <OnlineGameView
               snapshot={onlineRoom.snapshot}
+              myMemberId={onlineRoom.memberId}
+              isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
               busy={onlineBusy}
               error={onlineError}
               onRefresh={handleRefreshOnlineRoom}
               onExit={handleExitCurrentRoom}
+              onInspectCard={setInspectingCard}
+              onRevealCard={handleRevealOnlineCard}
+              onStartBriefing={handleStartBriefing}
+              onOpenVoting={handleOpenVoting}
+              onVote={handleSubmitOnlineVote}
+              onResolveVote={handleResolveOnlineVote}
+              onNextRound={handleAdvanceOnlineRound}
             />
           ) : (
             <OnlineRoomLobby
