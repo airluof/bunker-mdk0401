@@ -10,7 +10,9 @@
     "preview": "vite preview --host 0.0.0.0 --port 3000",
     "db:import-cards": "node scripts/import-cards-to-supabase.mjs",
     "db:validate-migration": "node scripts/validate-supabase-migration.mjs",
-    "db:validate-actions": "node scripts/validate-action-effects.mjs"
+    "db:validate-actions": "node scripts/validate-action-effects.mjs",
+    "db:validate-runtime": "node scripts/validate-runtime-contract.mjs",
+    "db:smoke": "node scripts/smoke-test-multiplayer.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
