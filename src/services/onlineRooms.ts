@@ -147,19 +147,6 @@ export async function startOnlineGame(roomId: string): Promise<RoomCommandResult
   return data as RoomCommandResult;
 }
 
-export async function startOnlineTestGame(roomId: string): Promise<RoomCommandResult> {
-  const client = getClient();
-  await ensureAnonymousSession();
-
-  const { data, error } = await client.rpc('api_start_test_game', {
-    p_room_id: roomId,
-    p_command_id: crypto.randomUUID(),
-  });
-  throwIfError(error);
-
-  return data as RoomCommandResult;
-}
-
 
 export async function addOnlineTestBots(roomId: string): Promise<{
   ok: boolean;
