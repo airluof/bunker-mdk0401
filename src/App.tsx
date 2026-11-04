@@ -36,6 +36,7 @@ import {
   updateOnlineRoomSettings,
   startOnlineGame,
   startOnlineTestGame,
+  exitOnlineTestRoom,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -402,10 +403,20 @@ export function App() {
       const ownMember = onlineRoom.snapshot.players.find(
         (player) => player.member_id === onlineRoom.memberId
       );
+      const isTestMode = onlineRoom.snapshot.public_state?.test_mode === true;
+
+      if (isTestMode && onlineRoom.snapshot.room.status === 'in_progress') {
+        const result = await exitOnlineTestRoom(onlineRoom.roomId);
+        localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        setOnlineRoom(null);
+        showToast(result.status === 'archived' ? 'Тестовая комната закрыта.' : 'Вы вышли из тестовой партии.');
+        return;
+      }
+
       if (ownMember?.technical_role === 'host' && onlineRoom.snapshot.room.status === 'lobby') {
         await closeOnlineRoom(onlineRoom.roomId);
       }
-      // Leave the active membership after room closure, freeing this user to join another room.
       await leaveOnlineRoom(onlineRoom.roomId);
 
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
@@ -883,6 +894,7 @@ export function App() {
               busy={onlineBusy}
               error={onlineError}
               onRefresh={handleRefreshOnlineRoom}
+              onExit={handleExitCurrentRoom}
             />
           ) : (
             <OnlineRoomLobby
