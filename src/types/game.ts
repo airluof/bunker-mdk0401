@@ -51,9 +51,12 @@ export interface Player {
   hand: PlayerHand;
   revealed: PlayerRevealedState;
   actionUsed: boolean;
+  vulnerabilityDiscarded?: boolean;
   votesReceived: number;
   votedForId: string | null;
   eliminatedInRound?: number;
+  /** True only for synthetic participants in a local test simulation. */
+  isBot?: boolean;
 }
 
 export type GamePhase = 
@@ -88,6 +91,10 @@ export interface RecoveryPlanStep {
 }
 
 export interface GameState {
+  /** True for browser-only test sessions populated with simulated engineers. */
+  isLocalDemo?: boolean;
+  /** Full bot test session backed by a temporary online room. */
+  isOnlineBotTest?: boolean;
   roomCode: string;
   hostId: string;
   round: number;
@@ -103,4 +110,6 @@ export interface GameState {
   lastEliminatedPlayerId: string | null;
   log: GameLogEntry[];
   recoveryPlan: RecoveryPlanStep[];
+  /** Per-round reveal lock used by the bot test simulator. */
+  revealedThisRoundPlayerIds?: string[];
 }

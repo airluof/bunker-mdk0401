@@ -1,7 +1,7 @@
 import React from 'react';
 import { Player, Card, PlayerSlotCategory } from '../types/game';
 import { CardView } from './CardView';
-import { Zap, Shield, User, HelpCircle } from 'lucide-react';
+import { Zap, ShieldCheck, LockKeyhole } from 'lucide-react';
 import { sound } from '../services/sound';
 
 interface PersonalHandProps {
@@ -10,6 +10,7 @@ interface PersonalHandProps {
   onRevealCard: (category: PlayerSlotCategory) => void;
   onUseAction: () => void;
   onInspectCard: (card: Card) => void;
+  hasRevealedThisRound?: boolean;
 }
 
 export const PersonalHand: React.FC<PersonalHandProps> = ({
@@ -18,6 +19,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
   onRevealCard,
   onUseAction,
   onInspectCard,
+  hasRevealedThisRound = false,
 }) => {
   const categories: PlayerSlotCategory[] = ['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'];
 
@@ -27,55 +29,42 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-2xl relative">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
-            <User className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-tactical font-bold text-white tracking-wide">
-                ЛИЧНОЕ ДОСЬЕ ИНЖЕНЕРА: {player.name}
-              </h3>
-              {player.isHost && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono-tech bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  ВЕДУЩИЙ
-                </span>
-              )}
-            </div>
-            <p className="text-xs font-mono-tech text-slate-400 mt-0.5">
-              5 оригинальных карт спецификации МДК.04.01 // Раскройте карту в соответствии с раундом
-            </p>
-          </div>
+    <section className="bunker-hand" aria-labelledby="bunker-hand-title">
+      <header className="bunker-hand-heading">
+        <div>
+          <span className="bunker-kicker">Ваш набор</span>
+          <h2 id="bunker-hand-title">Личные карты</h2>
+          <p>{player.name} · {player.vulnerabilityDiscarded ? '4 из 5 карт в руке' : '5 карт в руке'}</p>
         </div>
 
-        {/* Action card trigger button if action is revealed and not used */}
-        {player.revealed.actions && !player.actionUsed && (
-          <button
-            onClick={handleUseActionClick}
-            className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-          >
-            <Zap className="w-4 h-4 fill-slate-950" />
-            <span>ПРИМЕНИТЬ ДЕЙСТВИЕ [{player.hand.actions.original_title}]</span>
+        {['action_04', 'action_28'].includes(player.hand.actions.card_id) && !player.actionUsed && player.isAlive && !['audit', 'gameover', 'lobby'].includes(currentPhase) && (
+          <button type="button" onClick={handleUseActionClick} className="bunker-action-card-button">
+            {player.hand.actions.card_id === 'action_28' ? (
+              <><Zap aria-hidden="true" /> Аварийный генератор · +1 место</>
+            ) : (
+              <><ShieldCheck aria-hidden="true" /> Hotfix · сбросить Уязвимость</>
+            )}
           </button>
         )}
-      </div>
+        {player.revealed.actions && !player.actionUsed && !['action_04', 'action_28'].includes(player.hand.actions.card_id) && (
+          <span className="bunker-help">Эффект этой карты пока не автоматизирован.</span>
+        )}
+      </header>
 
-      {/* Grid of 5 Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4 justify-items-center">
-        {categories.map((cat) => {
-          const card = player.hand[cat];
-          const isRevealed = player.revealed[cat];
-          const canReveal = !isRevealed && (currentPhase === 'reveal' || currentPhase === 'briefing');
+      <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
+      <div className="bunker-hand-grid">
+        {categories.filter((category) => !(category === 'vulnerabilities' && player.vulnerabilityDiscarded)).map((category) => {
+          const card = player.hand[category];
+          const isRevealed = player.revealed[category];
+          const canReveal = !isRevealed && !hasRevealedThisRound && (currentPhase === 'reveal' || currentPhase === 'briefing');
 
           return (
-            <div key={cat} className="flex flex-col items-center gap-2 w-full max-w-[190px]">
+            <div key={category} className="bunker-hand-slot">
               <CardView
                 card={card}
                 isRevealed={isRevealed}
                 canReveal={canReveal}
-                onReveal={() => onRevealCard(cat)}
+                onReveal={() => onRevealCard(category)}
                 onInspect={() => onInspectCard(card)}
                 size="md"
                 className="w-full h-64"
@@ -85,17 +74,10 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
         })}
       </div>
 
-      {/* Instructional helper text */}
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs font-mono-tech text-slate-400">
-        <div className="flex items-center gap-2">
-          <Shield className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Конфиденциальность: закрытые карты видны только вам в текущем окне терминала</span>
-        </div>
-        <div className="flex items-center gap-1 text-slate-400">
-          <HelpCircle className="w-3.5 h-3.5" />
-          <span>Кликните по любой карте для увеличения</span>
-        </div>
-      </div>
-    </div>
+      <p className="bunker-hand-note">
+        <LockKeyhole aria-hidden="true" />
+        Закрытые карты видны только вам.
+      </p>
+    </section>
   );
 };

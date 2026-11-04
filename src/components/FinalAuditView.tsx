@@ -90,7 +90,7 @@ export const FinalAuditView: React.FC<FinalAuditViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="incident-page incident-game-page incident-final-audit-page space-y-6 py-4 sm:py-8">
       {/* Banner */}
       <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/60 via-slate-900 to-emerald-950/60 p-5 sm:p-7 shadow-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-tactical-grid opacity-20 pointer-events-none" />

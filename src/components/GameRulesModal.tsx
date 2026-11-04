@@ -21,11 +21,11 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+      className="bunker-rules-modal fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="bunker-rules-panel w-full max-w-3xl max-h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -36,7 +36,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-tactical font-bold text-white uppercase tracking-wider">
-                РЕГЛАМЕНТ И ПАСПОРТ ИГРЫ «БУНКЕР — МДК.04.01»
+                Правила игры «Бункер — МДК.04.01»
               </h2>
               <p className="text-xs font-mono-tech text-slate-400">
                 Спецификация аварийного восстановления ЦОД «НейроТех» 2036
@@ -62,7 +62,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            ОСНОВНЫЕ ПРАВИЛА
+            Правила
           </button>
 
           <button
@@ -73,7 +73,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            6 КАТЕГОРИЙ КАРТОЧЕК
+            Категории карт
           </button>
 
           <button
@@ -84,7 +84,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            ОТКРЫТЫЕ ВОПРОСЫ (Q-01..Q-26)
+            Вопросы для ведущего
           </button>
         </div>
 
@@ -94,7 +94,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
                 <h4 className="text-sm font-tactical font-bold text-amber-300 uppercase mb-1">
-                  1. СЕТТИНГ И ЛЕГЕНДА
+                  1. Сеттинг
                 </h4>
                 <p>
                   2036 год. Главный дата-центр корпорации «НейроТех» подвергся масштабной кибератаке вируса 
@@ -106,7 +106,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
 
               <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
                 <h4 className="text-sm font-tactical font-bold text-sky-300 uppercase mb-1">
-                  2. ПОДГОТОВКА И СЕЙФ-ПАКЕТ (СЕТАП)
+                  2. Подготовка
                 </h4>
                 <ul className="list-disc pl-5 space-y-1 text-slate-300">
                   <li>Каждому инженеру выдается 5 карт: <strong>1 Роль</strong>, <strong>1 Навык</strong>, <strong>1 Багаж</strong>, <strong>1 Уязвимость</strong>, <strong>1 Действие</strong>.</li>
@@ -117,7 +117,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
 
               <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
                 <h4 className="text-sm font-tactical font-bold text-emerald-300 uppercase mb-1">
-                  3. ФАЗЫ КАЖДОГО РАУНДА
+                  3. Этапы раунда
                 </h4>
                 <div className="space-y-2 mt-2">
                   <div className="flex items-start gap-2">
@@ -141,7 +141,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
 
               <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
                 <h4 className="text-sm font-tactical font-bold text-yellow-300 uppercase mb-1">
-                  4. ФИНАЛ: ПЛАН ПО ГОСТ Р ИСО/МЭК 12207
+                  4. Финал
                 </h4>
                 <p>
                   После 5 раундов оставшиеся в Бункере специалисты формируют пошаговый план ликвидации последствий аварии и реанимации серверного комплекса, подписывая Акт приемо-сдаточных испытаний (ПСИ).
@@ -208,7 +208,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-tactical text-xs uppercase tracking-wider transition-colors"
           >
-            ПОНЯТНО
+            Закрыть
           </button>
         </div>
       </div>

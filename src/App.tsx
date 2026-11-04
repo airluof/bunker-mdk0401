@@ -5,13 +5,13 @@ import {
   Card, 
   PlayerSlotCategory, 
   GameLogEntry, 
-  GamePhase 
+  GamePhase,
 } from './types/game';
 import { 
   ALL_CARDS, 
   dealNewGame, 
   shuffleArray, 
-  CARDS_BY_CATEGORY 
+  CARDS_BY_CATEGORY,
 } from './data/cards';
 import { Navbar } from './components/Navbar';
 import { ActiveCrisesBanner } from './components/ActiveCrisesBanner';
@@ -24,6 +24,33 @@ import { CardCatalogView } from './components/CardCatalogView';
 import { CardInspectModal } from './components/CardInspectModal';
 import { GameRulesModal } from './components/GameRulesModal';
 import { IncidentLog } from './components/IncidentLog';
+import { OnlineRoomLobby } from './components/OnlineRoomLobby';
+import { OnlineGameView } from './components/OnlineGameView';
+import {
+  createOnlineRoom,
+  createOnlineTestRoom,
+  joinOnlineRoom,
+  getOnlineRoomSnapshot,
+  subscribeToOnlineRoom,
+  leaveOnlineRoom,
+  closeOnlineRoom,
+  updateOnlineRoomSettings,
+  startOnlineGame,
+  addOnlineTestBots,
+  exitOnlineTestRoom,
+  revealOnlineCard,
+  useOnlineActionCard,
+  useOnlineActionEffect,
+  useOnlineHotfixCard,
+  transitionOnlineGamePhase,
+  submitOnlineVote,
+  resolveOnlineVote,
+  advanceOnlineGameRound,
+  submitOnlineAuditPlan,
+  finishOnlineGame,
+} from './services/onlineRooms';
+import type { RoomSnapshot } from './services/onlineRooms';
+import { isSupabaseConfigured } from './services/supabase';
 import { 
   saveGameState, 
   loadGameState, 
@@ -54,8 +81,119 @@ import {
   Info
 } from 'lucide-react';
 
+interface OnlineRoomSession {
+  roomId: string;
+  memberId: string;
+  inviteCode?: string;
+  snapshot: RoomSnapshot;
+}
+
+const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
+const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
+
+function formatOnlineError(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message : String(error || '');
+  const normalized = message.toUpperCase();
+
+  if (normalized.includes('SUPABASE_NOT_CONFIGURED')) {
+    return 'Онлайн-режим не настроен. Проверьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY.';
+  }
+  if (normalized.includes('UNAUTHENTICATED') || normalized.includes('ANONYMOUS_SIGN_IN_FAILED')) {
+    return 'Не удалось создать гостевую сессию. Обновите страницу и попробуйте снова.';
+  }
+  if (normalized.includes('ROOM_NOT_FOUND')) {
+    return 'Комната не найдена. Проверьте код приглашения.';
+  }
+  if (normalized.includes('ROOM_NOT_JOINABLE')) {
+    return 'Эта комната уже запущена или закрыта и не принимает новых участников.';
+  }
+  if (normalized.includes('ROOM_FULL')) {
+    return 'В комнате уже максимальное количество участников — 16.';
+  }
+  if (normalized.includes('ACTIVE_ROOM_OR_DUPLICATE_NAME')) {
+    return 'Вы уже участвуете в другой комнате или такой позывной занят.';
+  }
+  if (normalized.includes('PLAYER_COUNT_OUT_OF_RANGE')) {
+    return 'Для запуска нужно от 8 до 16 активных участников.';
+  }
+  if (normalized.includes('INVALID_MAX_PLAYERS')) {
+    return 'Лимит комнаты должен быть от 8 до 16 участников.';
+  }
+  if (normalized.includes('ROOM_CAPACITY_BELOW_CURRENT')) {
+    return 'Нельзя установить лимит ниже числа уже подключённых игроков.';
+  }
+  if (normalized.includes('ROOM_NOT_EDITABLE')) {
+    return 'Настройки можно менять только до начала игры.';
+  }
+  if (normalized.includes('FORBIDDEN')) {
+    return 'Изменять настройки комнаты может только её создатель.';
+  }
+  if (normalized.includes('CARD_CATALOG_INCOMPLETE')) {
+    return 'Каталог карточек ещё не загружен в Supabase. Обратитесь к создателю игры.';
+  }
+  if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
+    return 'Создатель должен закрыть комнату, прежде чем выйти из неё.';
+  }
+  if (normalized.includes('BOTS_ALLOWED_ONLY_IN_TEST_ROOMS')) {
+    return 'Боты разрешены только в тестовых комнатах. Создайте тестовую комнату, чтобы добавить их.';
+  }
+  if (normalized.includes('PLAYERS_MUST_REVEAL_FIRST')) {
+    return 'Сначала каждый живой участник должен раскрыть одну карту текущего раунда.';
+  }
+  if (normalized.includes('BRIEFING_TIMER_RUNNING')) {
+    return 'Брифинг ещё идёт. Голосование откроется после завершения 60 секунд.';
+  }
+  if (normalized.includes('ALREADY_VOTED_THIS_ROUND')) {
+    return 'Вы уже проголосовали в этом раунде.';
+  }
+  if (normalized.includes('WAITING_FOR_PLAYER_VOTES')) {
+    return 'Не все реальные участники ещё проголосовали.';
+  }
+  if (normalized.includes('VOTE_TIE_NEEDS_RULE')) {
+    return 'Получилась ничья. Для обычной партии способ её разрешения ещё не утверждён.';
+  }
+  if (normalized.includes('AUDIT_PLAN_INVALID')) {
+    return 'План восстановления должен содержать от 20 до 12 000 символов.';
+  }
+  if (normalized.includes('AUDIT_NOT_OPEN')) {
+    return 'Финальный аудит ещё не открыт.';
+  }
+  if (normalized.includes('AUDIT_PLAN_REQUIRED')) {
+    return 'Сначала сохраните общий план восстановления, затем завершите партию.';
+  }
+  if (normalized.includes('ACTIVE_GAME_CANNOT_BE_LEFT')) {
+    return 'Нельзя покинуть обычную партию до её завершения.';
+  }
+  if (normalized.includes('NOT_ACTIVE_PLAYER')) {
+    return 'Вы не можете выполнять это действие: возможно, вы выбыли из партии.';
+  }
+  if (normalized.includes('NOT_ELIGIBLE_TO_VOTE')) {
+    return 'Вы не можете голосовать в текущем состоянии партии.';
+  }
+  if (normalized.includes('VOTING_NOT_OPEN')) {
+    return 'Голосование пока не открыто.';
+  }
+  if (normalized.includes('REVEAL_PHASE_CLOSED')) {
+    return 'Этап вскрытия уже завершён.';
+  }
+  if (normalized.includes('CARD_NOT_AVAILABLE')) {
+    return 'Эта карта уже раскрыта или не принадлежит вашей руке.';
+  }
+  if (normalized.includes('RULE_NOT_APPROVED')) {
+    return 'Это действие пока недоступно: соответствующая игровая процедура ещё не утверждена.';
+  }
+  return message || fallback;
+}
+
 export function App() {
-  const [gameState, setGameState] = useState<GameState | null>(() => loadGameState());
+  const [gameState, setGameState] = useState<GameState | null>(() => {
+    const savedGame = loadGameState();
+    if (savedGame?.isLocalDemo && !savedGame?.isOnlineBotTest) {
+      clearGameState();
+      return null;
+    }
+    return savedGame;
+  });
   const [currentUser, setCurrentUser] = useState(() => loadLocalUser());
   const [currentView, setCurrentView] = useState<'game' | 'catalog'>('game');
   const [inspectingCard, setInspectingCard] = useState<Card | null>(null);
@@ -64,6 +202,78 @@ export function App() {
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [onlineRoom, setOnlineRoom] = useState<OnlineRoomSession | null>(null);
+  const [onlineBusy, setOnlineBusy] = useState(false);
+  const [onlineError, setOnlineError] = useState<string | null>(null);
+
+
+  // Restore the last online room after a page refresh, using the persisted Supabase Auth session.
+  useEffect(() => {
+    const savedRoomId = localStorage.getItem(ONLINE_ROOM_STORAGE_KEY);
+    if (!savedRoomId) return;
+
+    let cancelled = false;
+    void getOnlineRoomSnapshot(savedRoomId)
+      .then((snapshot) => {
+        if (cancelled) return;
+        setOnlineRoom({
+          roomId: savedRoomId,
+          memberId: snapshot.my_member_id,
+          inviteCode: sessionStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+          snapshot,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+          sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Realtime messages are invalidation signals; always reload the permitted server snapshot.
+  useEffect(() => {
+    if (!onlineRoom?.roomId) return;
+
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+
+    void subscribeToOnlineRoom(onlineRoom.roomId, () => {
+      void getOnlineRoomSnapshot(onlineRoom.roomId)
+        .then((snapshot) => {
+          if (cancelled) return;
+          if (snapshot.room.status === 'archived') {
+            showToast('Комната закрыта создателем. Нажмите «Вернуться на главную».');
+          }
+          setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+            ? { ...current, snapshot }
+            : current);
+        })
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
+          }
+        });
+    })
+      .then((stop) => {
+        if (cancelled) stop();
+        else unsubscribe = stop;
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setOnlineError(formatOnlineError(error, 'Не удалось подключить обновления комнаты.'));
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [onlineRoom?.roomId]);
 
   // Sync state changes with session storage
   useEffect(() => {
@@ -95,6 +305,298 @@ export function App() {
     return entry;
   };
 
+
+  const handleCreateOnlineRoom = async (roomMode: 'players' | 'test' = 'players') => {
+    const displayName = currentUser.name.trim();
+    if (displayName.length < 2 || displayName.length > 24) {
+      setOnlineError('Позывной должен содержать от 2 до 24 символов.');
+      return;
+    }
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = roomMode === 'test'
+        ? await createOnlineTestRoom(displayName)
+        : await createOnlineRoom(displayName);
+      localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
+      if (result.invite_code) {
+        sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
+      }
+
+      const snapshot = await getOnlineRoomSnapshot(result.room_id);
+      setOnlineRoom({
+        roomId: result.room_id,
+        memberId: result.member_id,
+        inviteCode: result.invite_code,
+        snapshot,
+      });
+      setGameState(null);
+      clearGameState();
+      sound.playCrisisAlert();
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, roomMode === 'test'
+        ? 'Не удалось создать тестовую комнату.'
+        : 'Не удалось создать онлайн-комнату.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleJoinOnlineRoom = async () => {
+    const displayName = currentUser.name.trim();
+    const inviteCode = roomCodeInput.trim().toUpperCase();
+
+    if (displayName.length < 2 || displayName.length > 24) {
+      setOnlineError('Позывной должен содержать от 2 до 24 символов.');
+      return;
+    }
+    if (!/^[0-9A-F]{32}$/.test(inviteCode)) {
+      setOnlineError('Код комнаты должен состоять из 32 символов A–F и 0–9.');
+      return;
+    }
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = await joinOnlineRoom(inviteCode, displayName);
+      localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
+      sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+
+      const snapshot = await getOnlineRoomSnapshot(result.room_id);
+      setOnlineRoom({
+        roomId: result.room_id,
+        memberId: result.member_id,
+        inviteCode,
+        snapshot,
+      });
+      setGameState(null);
+      clearGameState();
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось подключиться к комнате.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleRefreshOnlineRoom = async () => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      if (snapshot.room.status === 'archived') {
+        showToast('Комната закрыта. Нажмите «Вернуться на главную», чтобы выйти.');
+      }
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleSaveOnlineRoomSettings = async (maxPlayers: number) => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await updateOnlineRoomSettings(onlineRoom.roomId, maxPlayers);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(`Лимит комнаты изменён: до ${maxPlayers} участников.`);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось сохранить настройки комнаты.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleStartOnlineGame = async () => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await startOnlineGame(onlineRoom.roomId);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(snapshot.room.room_mode === 'test'
+        ? 'Тестовая партия запущена. Игроки и боты работают в общей серверной сессии.'
+        : 'Партия запущена. Личные карты выданы участникам.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось запустить онлайн-партию.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleAddOnlineTestBots = async () => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = await addOnlineTestBots(onlineRoom.roomId);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(result.added > 0
+        ? `Добавлено ботов: ${result.added}. В лобби теперь ${result.active_players} игроков.`
+        : 'Минимум игроков уже набран.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось добавить тестовых ботов.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const runOnlineGameAction = async (
+    action: () => Promise<unknown>,
+    successMessage: string,
+    fallbackMessage: string,
+  ) => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await action();
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(successMessage);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, fallbackMessage));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleRevealOnlineCard = (instanceId: string) => runOnlineGameAction(
+    () => revealOnlineCard(onlineRoom!.roomId, instanceId),
+    'Карта раскрыта всем участникам.',
+    'Не удалось раскрыть карту.',
+  );
+
+  const handleUseOnlineActionCard = (instanceId: string) => runOnlineGameAction(
+    () => useOnlineActionCard(onlineRoom!.roomId, instanceId),
+    'Аварийный генератор активирован. Вместимость Бункера увеличена на одно место.',
+    'Не удалось применить карту действия.',
+  );
+
+  const handleUseOnlineActionEffect = (
+    cardInstanceId: string,
+    targetMemberId?: string,
+    targetCardInstanceId?: string,
+  ) => runOnlineGameAction(
+    () => useOnlineActionEffect(
+      onlineRoom!.roomId,
+      cardInstanceId,
+      targetMemberId,
+      targetCardInstanceId,
+    ),
+    'Карта действия применена. Состояние синхронизировано с сервером.',
+    'Не удалось применить карту действия.',
+  );
+
+  const handleUseOnlineHotfix = (actionInstanceId: string, vulnerabilityInstanceId: string) => runOnlineGameAction(
+    () => useOnlineHotfixCard(onlineRoom!.roomId, actionInstanceId, vulnerabilityInstanceId),
+    'Hotfix применён. Ваша карта Уязвимости отправлена в отбой.',
+    'Не удалось применить Hotfix.',
+  );
+
+  const handleStartBriefing = () => runOnlineGameAction(
+    () => transitionOnlineGamePhase(onlineRoom!.roomId, 'briefing'),
+    'Брифинг начался. Таймер установлен сервером на 60 секунд.',
+    'Не удалось перейти к брифингу.',
+  );
+
+  const handleOpenVoting = () => runOnlineGameAction(
+    () => transitionOnlineGamePhase(onlineRoom!.roomId, 'voting'),
+    'Голосование открыто. Тестовые боты уже подали свои голоса.',
+    'Не удалось открыть голосование.',
+  );
+
+  const handleSubmitOnlineVote = (targetMemberId: string) => runOnlineGameAction(
+    () => submitOnlineVote(onlineRoom!.roomId, targetMemberId),
+    'Ваш голос учтён и виден участникам.',
+    'Не удалось подать голос.',
+  );
+
+  const handleResolveOnlineVote = () => runOnlineGameAction(
+    () => resolveOnlineVote(onlineRoom!.roomId),
+    'Результат голосования зафиксирован.',
+    'Не удалось подвести итоги голосования.',
+  );
+
+  const handleAdvanceOnlineRound = () => runOnlineGameAction(
+    () => advanceOnlineGameRound(onlineRoom!.roomId),
+    'Игровое состояние обновлено.',
+    'Не удалось перейти к следующему этапу.',
+  );
+
+  const handleSubmitOnlineAuditPlan = (planText: string) => runOnlineGameAction(
+    () => submitOnlineAuditPlan(onlineRoom!.roomId, planText),
+    'План восстановления сохранён на сервере.',
+    'Не удалось сохранить план восстановления.',
+  );
+
+  const handleFinishOnlineGame = () => runOnlineGameAction(
+    () => finishOnlineGame(onlineRoom!.roomId),
+    'Партия завершена. Можно покинуть комнату.',
+    'Не удалось завершить партию.',
+  );
+
+  const handleExitOnlineRoom = async () => {
+    if (!onlineRoom) return;
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const ownMember = onlineRoom.snapshot.players.find(
+        (player) => player.member_id === onlineRoom.memberId
+      );
+      const isTestMode = onlineRoom.snapshot.room.room_mode === 'test'
+        || onlineRoom.snapshot.public_state?.test_mode === true
+        || onlineRoom.snapshot.players.some((player) => player.is_bot);
+
+      if (isTestMode && ['in_progress', 'finished'].includes(onlineRoom.snapshot.room.status)) {
+        const result = await exitOnlineTestRoom(onlineRoom.roomId);
+        localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        setOnlineRoom(null);
+        setGameState(null);
+        clearGameState();
+        showToast(result.status === 'archived' ? 'Тестовая комната закрыта.' : 'Вы вышли из тестовой партии.');
+        return;
+      }
+
+      if (ownMember?.technical_role === 'host' && onlineRoom.snapshot.room.status === 'lobby') {
+        await closeOnlineRoom(onlineRoom.roomId);
+      }
+      await leaveOnlineRoom(onlineRoom.roomId);
+
+      localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+      setOnlineRoom(null);
+      setGameState(null);
+      clearGameState();
+      showToast(ownMember?.technical_role === 'host' ? 'Комната закрыта.' : 'Вы покинули комнату.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось выйти из комнаты.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
   // Launch instant simulation mode
   const handleLaunchSimulation = () => {
     const defaultEngineers = [
@@ -110,6 +612,7 @@ export function App() {
     const roomCode = `DRP-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newGame: GameState = {
+      isLocalDemo: true,
       roomCode,
       hostId: deal.players[0].id,
       round: 1,
@@ -152,6 +655,7 @@ export function App() {
     const roomCode = `BUNKER-${Math.floor(100 + Math.random() * 900)}`;
 
     const newGame: GameState = {
+      isLocalDemo: true,
       roomCode,
       hostId: deal.players[0].id,
       round: 1,
@@ -274,36 +778,30 @@ export function App() {
   // Reveal player card
   const handleRevealCard = (category: PlayerSlotCategory) => {
     if (!gameState) return;
-    const myPlayer = gameState.players[0]; // Host or current player
+    const myPlayer = gameState.players[0];
     if (!myPlayer) return;
+    const revealedThisRound = gameState.revealedThisRoundPlayerIds || [];
+    if (revealedThisRound.includes(myPlayer.id)) {
+      showToast('В этом раунде вы уже раскрыли одну карту.');
+      return;
+    }
 
     const card = myPlayer.hand[category];
-
-    const updatedPlayers = gameState.players.map((p, idx) => {
-      if (idx === 0) {
-        return {
-          ...p,
-          revealed: {
-            ...p.revealed,
-            [category]: true,
-          },
-        };
+    const newlyRevealedBots: Array<{ memberId: string; category: PlayerSlotCategory }> = [];
+    const updatedPlayers = gameState.players.map((player, index) => {
+      if (index === 0) {
+        return { ...player, revealed: { ...player.revealed, [category]: true } };
       }
-      // Simulate bots revealing a card in the round too
-      if (gameState.phase === 'reveal' && !p.revealed[category]) {
-        // Pick an unrevealed category for bot
+      if (gameState.isLocalDemo && (gameState.phase === 'reveal' || gameState.phase === 'briefing') && player.isAlive && player.isBot && !revealedThisRound.includes(player.id)) {
         const unrevealed = (['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'] as PlayerSlotCategory[])
-          .filter(c => !p.revealed[c]);
-        const pickCat = unrevealed[0] || category;
-        return {
-          ...p,
-          revealed: {
-            ...p.revealed,
-            [pickCat]: true,
-          },
-        };
+          .filter((candidate) => !player.revealed[candidate]);
+        if (unrevealed.length > 0) {
+          const chosenCategory = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+          newlyRevealedBots.push({ memberId: player.id, category: chosenCategory });
+          return { ...player, revealed: { ...player.revealed, [chosenCategory]: true } };
+        }
       }
-      return p;
+      return player;
     });
 
     const newLog: GameLogEntry = {
@@ -315,36 +813,83 @@ export function App() {
       actorName: myPlayer.name,
       cardId: card.card_id,
     };
+    const botLogs: GameLogEntry[] = newlyRevealedBots.map(({ memberId, category: openedCategory }) => {
+      const bot = updatedPlayers.find((player) => player.id === memberId)!;
+      const openedCard = bot.hand[openedCategory];
+      return {
+        id: `bot_reveal_${Date.now()}_${memberId}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'reveal',
+        message: `Бот раскрыл карту [${openedCard.category_name_ru}: ${openedCard.original_title}]`,
+        actorName: bot.name,
+        cardId: openedCard.card_id,
+      };
+    });
 
     setGameState({
       ...gameState,
       players: updatedPlayers,
-      log: [...gameState.log, newLog],
+      revealedThisRoundPlayerIds: [...revealedThisRound, myPlayer.id, ...newlyRevealedBots.map((bot) => bot.memberId)],
+      log: [...gameState.log, newLog, ...botLogs],
     });
-    showToast(`Карта «${card.original_title}» раскрыта для всех инженеров`);
+    showToast('Карта раскрыта. Тестовые боты также раскрыли по одной карте.');
   };
 
-  // Trigger special Action card
+  // Apply only action effects that have an explicit, implemented rule.
   const handleUseAction = () => {
     if (!gameState) return;
     const myPlayer = gameState.players[0];
-    if (!myPlayer || myPlayer.actionUsed) return;
+    if (!myPlayer || !myPlayer.isAlive || myPlayer.actionUsed) return;
+    if (['audit', 'gameover', 'lobby'].includes(gameState.phase)) return;
 
     const actionCard = myPlayer.hand.actions;
+    if (actionCard.card_id === 'action_04') {
+      const updatedPlayers = gameState.players.map((player, index) =>
+        index === 0
+          ? {
+              ...player,
+              actionUsed: true,
+              vulnerabilityDiscarded: true,
+              revealed: { ...player.revealed, actions: true },
+            }
+          : player
+      );
+      const hotfixLog: GameLogEntry = {
+        id: `log_${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'action',
+        message: 'Hotfix применён: собственная карта Уязвимости сброшена в отбой.',
+        actorName: myPlayer.name,
+        cardId: actionCard.card_id,
+      };
+      setGameState({ ...gameState, players: updatedPlayers, log: [...gameState.log, hotfixLog] });
+      showToast('Hotfix применён. Ваша Уязвимость сброшена.');
+      return;
+    }
+    if (actionCard.card_id !== 'action_28') {
+      showToast('Эффект этой карты пока не автоматизирован. Карта не потрачена.');
+      return;
+    }
 
-    const updatedPlayers = gameState.players.map((p, idx) => {
-      if (idx === 0) {
-        return { ...p, actionUsed: true };
-      }
-      return p;
-    });
+    const updatedPlayers = gameState.players.map((player, index) =>
+      index === 0
+        ? {
+            ...player,
+            actionUsed: true,
+            revealed: { ...player.revealed, actions: true },
+          }
+        : player
+    );
 
+    const newCapacity = gameState.bunkerCapacity + 1;
     const newLog: GameLogEntry = {
       id: `log_${Date.now()}`,
       timestamp: new Date().toLocaleTimeString('ru-RU'),
       round: gameState.round,
       type: 'action',
-      message: `Применено действие [${actionCard.original_title}]: ${actionCard.source_description}`,
+      message: `Аварийный генератор активирован: вместимость Бункера увеличена с ${gameState.bunkerCapacity} до ${newCapacity} мест.`,
       actorName: myPlayer.name,
       cardId: actionCard.card_id,
     };
@@ -352,48 +897,59 @@ export function App() {
     setGameState({
       ...gameState,
       players: updatedPlayers,
+      bunkerCapacity: newCapacity,
       log: [...gameState.log, newLog],
     });
-    showToast(`Действие «${actionCard.original_title}» активировано`);
+    showToast('Аварийный генератор активирован. Вместимость увеличена на одно место.');
   };
 
   // Submit vote in voting phase
   const handleCastVote = (targetPlayerId: string) => {
     if (!gameState) return;
-    const target = gameState.players.find(p => p.id === targetPlayerId);
+    const target = gameState.players.find((player) => player.id === targetPlayerId);
     if (!target) return;
 
-    // Distribute simulated votes among other players for realistic team dynamics
-    const alivePlayers = gameState.players.filter(p => p.isAlive);
-    const updatedPlayers = gameState.players.map((p) => {
-      let votes = 0;
-      if (p.id === targetPlayerId) {
-        votes += 1; // My vote
-      }
-      // Add a couple bot votes realistically
-      if (Math.random() > 0.4 && p.id !== gameState.players[0].id) {
-        votes += Math.floor(Math.random() * 2);
-      }
+    const alivePlayers = gameState.players.filter((player) => player.isAlive);
+    const hostPlayer = gameState.players[0];
+    const voteByPlayer = new Map<string, string>();
+    voteByPlayer.set(hostPlayer.id, targetPlayerId);
+
+    // Test bots cast one visible vote each; their choices are random test data, not official strategy.
+    if (gameState.isLocalDemo) {
+      alivePlayers.filter((player) => player.isBot).forEach((bot) => {
+        const candidates = alivePlayers.filter((player) => player.id !== bot.id);
+        if (candidates.length > 0) {
+          const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          voteByPlayer.set(bot.id, chosen.id);
+        }
+      });
+    }
+
+    const voteCounts = new Map<string, number>();
+    voteByPlayer.forEach((chosenId) => voteCounts.set(chosenId, (voteCounts.get(chosenId) || 0) + 1));
+    const updatedPlayers = gameState.players.map((player) => ({
+      ...player,
+      votesReceived: voteCounts.get(player.id) || 0,
+      votedForId: voteByPlayer.get(player.id) || null,
+    }));
+    const voteLogs: GameLogEntry[] = Array.from(voteByPlayer.entries()).map(([voterId, chosenId]) => {
+      const voter = gameState.players.find((player) => player.id === voterId)!;
+      const chosen = gameState.players.find((player) => player.id === chosenId)!;
       return {
-        ...p,
-        votesReceived: votes,
+        id: `vote_${Date.now()}_${voterId}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'vote',
+        message: `Голос против [${chosen.name}]`,
+        actorName: voter.name,
       };
     });
-
-    const newLog: GameLogEntry = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString('ru-RU'),
-      round: gameState.round,
-      type: 'vote',
-      message: `Голос отдан против кандидата [${target.name}]`,
-      actorName: gameState.players[0].name,
-    };
 
     setGameState({
       ...gameState,
       phase: 'elimination',
       players: updatedPlayers,
-      log: [...gameState.log, newLog],
+      log: [...gameState.log, ...voteLogs],
     });
   };
 
@@ -478,6 +1034,7 @@ export function App() {
       round: nextRound,
       phase: 'reveal',
       players: updatedPlayers,
+      revealedThisRoundPlayerIds: [],
       activeCrises: newCrises,
       crisisDeck: nextCrisisDeck,
       lastEliminatedPlayerId: mostVoted.id,
@@ -498,8 +1055,20 @@ export function App() {
 
   // Exit game
   const handleExitGame = () => {
+    if (onlineRoom) {
+      void handleExitOnlineRoom();
+      return;
+    }
     clearGameState();
     setGameState(null);
+  };
+
+  const handleExitCurrentRoom = () => {
+    if (onlineRoom) {
+      void handleExitOnlineRoom();
+      return;
+    }
+    handleExitGame();
   };
 
   // Copy share invite link
@@ -513,161 +1082,233 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="bunker-app min-h-screen flex flex-col">
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
         onViewChange={setCurrentView}
         onOpenRules={() => setIsRulesOpen(true)}
-        roomCode={gameState?.roomCode}
-        isHost={gameState?.players[0]?.isHost}
-        onExitGame={gameState ? handleExitGame : undefined}
+        roomCode={onlineRoom?.inviteCode ?? gameState?.roomCode}
+        isHost={onlineRoom
+          ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
+          : gameState?.players[0]?.isHost}
+        onExitGame={onlineRoom
+          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || onlineRoom.snapshot.room.status === 'finished' || onlineRoom.snapshot.room.room_mode === 'test' || onlineRoom.snapshot.players.some((player) => player.is_bot)
+            ? handleExitCurrentRoom
+            : undefined
+          : gameState ? handleExitCurrentRoom : undefined}
       />
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-200 text-xs font-mono-tech shadow-2xl flex items-center gap-2 animate-in slide-in-from-bottom duration-200">
-          <Info className="w-4 h-4 text-cyan-400" />
+        <div className="bunker-toast fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom duration-200">
+          <Info aria-hidden="true" />
           <span>{toastMsg}</span>
         </div>
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="bunker-main flex-1">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
+        ) : onlineRoom ? (
+          ['in_progress', 'finished'].includes(onlineRoom.snapshot.room.status) ? (
+            <OnlineGameView
+              snapshot={onlineRoom.snapshot}
+              myMemberId={onlineRoom.memberId}
+              isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
+              busy={onlineBusy}
+              error={onlineError}
+              onRefresh={handleRefreshOnlineRoom}
+              onExit={handleExitCurrentRoom}
+              onInspectCard={setInspectingCard}
+              onRevealCard={handleRevealOnlineCard}
+              onUseActionCard={handleUseOnlineActionCard}
+              onUseHotfixCard={handleUseOnlineHotfix}
+              onUseActionEffect={handleUseOnlineActionEffect}
+              onStartBriefing={handleStartBriefing}
+              onOpenVoting={handleOpenVoting}
+              onVote={handleSubmitOnlineVote}
+              onResolveVote={handleResolveOnlineVote}
+              onNextRound={handleAdvanceOnlineRound}
+              onSubmitAuditPlan={handleSubmitOnlineAuditPlan}
+              onFinishGame={handleFinishOnlineGame}
+            />
+          ) : (
+            <OnlineRoomLobby
+              snapshot={onlineRoom.snapshot}
+              inviteCode={onlineRoom.snapshot.room.status === 'lobby' ? onlineRoom.inviteCode : undefined}
+              isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
+              busy={onlineBusy}
+              error={onlineError}
+              onRefresh={handleRefreshOnlineRoom}
+              onExit={handleExitCurrentRoom}
+              onSaveSettings={handleSaveOnlineRoomSettings}
+              onStartGame={handleStartOnlineGame}
+              onAddTestBots={handleAddOnlineTestBots}
+            />
+          )
         ) : !gameState ? (
           /* ==============================================================
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL
              ============================================================== */
-          <div className="space-y-8 animate-in fade-in duration-300 py-4 sm:py-8">
-            {/* Incident Alert Hero */}
-            <div className="relative rounded-3xl border border-rose-500/40 bg-gradient-to-b from-rose-950/40 via-slate-900 to-slate-950 p-6 sm:p-10 shadow-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-tactical-grid opacity-25 pointer-events-none" />
-              
-              <div className="relative z-10 max-w-3xl space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-mono-tech uppercase tracking-wider">
-                  <Flame className="w-3.5 h-3.5 animate-pulse" />
-                  <span>ТРЕВОГА // КАТАСТРОФА ДАТА-ЦЕНТРА 2036</span>
-                </div>
-
-                <h1 className="text-3xl sm:text-5xl font-tactical font-bold text-white tracking-tight leading-tight">
-                  БУНКЕР // МДК.04.01
-                </h1>
-
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                  Вирус <strong className="text-rose-400 font-mono-tech">«Zero-Day: Oblivion»</strong> уничтожил центральный кластер корпорации «НейроТех». 
-                  Для холодного пуска аварийного дата-центра в изолированном Резервном Серверном Бункере (DRP-Site) 
-                  требуется сформировать команду специалистов по ГОСТ Р ИСО/МЭК 12207. 
-                  Ресурсы жизнеобеспечения ограничены: <strong className="text-amber-400">мест вдвое меньше, чем инженеров!</strong>
+          <div className="bunker-home">
+            <section className="bunker-hero">
+              <div className="bunker-hero-copy">
+                <p className="bunker-eyebrow">МДК.04.01 · Браузерная игра</p>
+                <h1>ЦОД уничтожен<span>.</span></h1>
+                <p className="bunker-hero-description">
+                  Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
+                  Остался резервный контур — DRP-Site. Мест в Бункере вдвое меньше, чем участников.
                 </p>
-
-                {/* Name Input */}
-                <div className="pt-2 max-w-md">
-                  <label className="block text-xs font-mono-tech uppercase text-slate-400 mb-1.5">
-                    Позывной инженера:
-                  </label>
-                  <input
-                    type="text"
-                    value={currentUser.name}
-                    onChange={(e) => {
-                      const updated = { ...currentUser, name: e.target.value };
-                      setCurrentUser(updated);
-                      saveLocalUser(updated);
-                    }}
-                    placeholder="Введите ваше имя или позывной..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono-tech transition-colors shadow-inner"
-                  />
-                </div>
-
-                {/* Primary Action Buttons */}
-                <div className="pt-4 flex flex-wrap items-center gap-3.5">
-                  <button
-                    onClick={handleLaunchSimulation}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 via-cyan-500 to-teal-500 hover:from-sky-400 hover:to-teal-400 text-slate-950 font-tactical font-bold text-sm uppercase tracking-wider shadow-lg shadow-cyan-900/40 active:scale-95 transition-all flex items-center gap-2"
-                  >
-                    <Play className="w-4 h-4 fill-slate-950" />
-                    <span>БЫСТРЫЙ СТАРТ СИМУЛЯЦИИ (6 ИНЖЕНЕРОВ)</span>
-                  </button>
-
-                  <button
-                    onClick={handleCreateRoom}
-                    className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-tactical text-xs uppercase tracking-wider transition-colors flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>СОЗДАТЬ СВОЮ КОМНАТУ</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsRulesOpen(true)}
-                    className="px-4 py-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-amber-300 border border-amber-500/30 font-tactical text-xs uppercase tracking-wider transition-colors"
-                  >
-                    РЕГЛАМЕНТ И ПРАВИЛА
-                  </button>
-                </div>
               </div>
-            </div>
+              <aside className="bunker-game-facts" aria-label="Параметры игры">
+                <div><strong>8–16</strong><span>игроков</span></div>
+                <div><strong>5</strong><span>раундов</span></div>
+                <div><strong>180</strong><span>карточек</span></div>
+              </aside>
+            </section>
 
-            {/* 6 Categories Overview Cards */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
+            <section className="bunker-section">
+              <header className="bunker-section-heading">
                 <div>
-                  <h3 className="text-lg font-tactical font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-sky-400" />
-                    <span>СТРУКТУРА КОМПЛЕКТА // 180 КАРТ В 6 КАТЕГОРИЯХ</span>
-                  </h3>
-                  <p className="text-xs font-mono-tech text-slate-400">
-                    Каждому инженеру выдается по 1 карте из 5 категорий; Кризисы выкладываются на общий игровой стол
-                  </p>
+                  <p className="bunker-eyebrow">Начать партию</p>
+                  <h2>Играть с друзьями</h2>
                 </div>
+                <p>Создай комнату и отправь код друзьям. Или введи код, который тебе прислали.</p>
+              </header>
 
-                <button
-                  onClick={() => setCurrentView('catalog')}
-                  className="text-xs font-mono-tech text-sky-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
-                >
-                  <span>Открыть весь каталог</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+              <div className="bunker-name-field">
+                <label htmlFor="engineer-call-sign">Твоё имя</label>
+                <input
+                  id="engineer-call-sign"
+                  type="text"
+                  value={currentUser.name}
+                  onChange={(event) => {
+                    const updated = { ...currentUser, name: event.target.value };
+                    setCurrentUser(updated);
+                    saveLocalUser(updated);
+                  }}
+                  maxLength={24}
+                  placeholder="Как тебя показывать в игре?"
+                  className="bunker-input"
+                />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                {[
-                  { name: 'Роли', color: 'Синий', count: 30, border: 'border-sky-500/50', bg: 'bg-sky-950/40', text: 'text-sky-400', desc: 'Специализация в ЦОД' },
-                  { name: 'Навыки', color: 'Зелёный', count: 30, border: 'border-emerald-500/50', bg: 'bg-emerald-950/40', text: 'text-emerald-400', desc: 'Компетенции и ГОСТ' },
-                  { name: 'Багаж', color: 'Оранжевый', count: 30, border: 'border-orange-500/50', bg: 'bg-orange-950/40', text: 'text-orange-400', desc: 'Оборудование и бэкапы' },
-                  { name: 'Уязвимости', color: 'Алый', count: 30, border: 'border-rose-500/50', bg: 'bg-rose-950/40', text: 'text-rose-400', desc: 'Факторы риска' },
-                  { name: 'Кризисы', color: 'Фиолетовый', count: 30, border: 'border-purple-500/50', bg: 'bg-purple-950/40', text: 'text-purple-400', desc: 'Аварии оборудования' },
-                  { name: 'Действия', color: 'Золотой', count: 30, border: 'border-amber-500/50', bg: 'bg-amber-950/40', text: 'text-amber-400', desc: 'Привилегии и вето' },
-                ].map((item) => (
-                  <div
-                    key={item.name}
-                    onClick={() => setCurrentView('catalog')}
-                    className={`p-3.5 rounded-xl border ${item.border} ${item.bg} hover:brightness-125 transition-all cursor-pointer`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-mono-tech font-bold uppercase ${item.text}`}>
-                        {item.name}
-                      </span>
-                      <span className="text-[10px] font-mono-tech text-slate-400">
-                        {item.count}
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-mono-tech text-slate-400">
-                      Цвет: {item.color}
-                    </div>
-                    <p className="text-[11px] text-slate-300 mt-1 line-clamp-1">
-                      {item.desc}
-                    </p>
+              <div className="bunker-access-grid">
+                <section className="bunker-panel bunker-access-panel">
+                  <div>
+                    <h3>Создать комнату</h3>
+                    <p>Ты станешь ведущим и получишь код приглашения.</p>
                   </div>
+                  <div className="bunker-room-create-options">
+                    <button
+                      type="button"
+                      onClick={() => handleCreateOnlineRoom('players')}
+                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                      className="bunker-button bunker-button-primary"
+                    >
+                      <Plus aria-hidden="true" />
+                      {onlineBusy ? 'Создаём…' : 'Обычная игра · люди'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCreateOnlineRoom('test')}
+                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                      className="bunker-button bunker-button-secondary"
+                    >
+                      <Users aria-hidden="true" />
+                      {onlineBusy ? 'Создаём…' : 'Тест · люди + боты'}
+                    </button>
+                  </div>
+                  <p className="bunker-help">
+                    Обычная комната рассчитана на реальных участников. В тестовой можно добавить ботов, чтобы проверить полный игровой цикл вместе с друзьями.
+                  </p>
+                  {!isSupabaseConfigured && (
+                    <p className="bunker-help">
+                      Онлайн-режим пока не настроен. Для запуска нужно подключить Supabase.
+                    </p>
+                  )}
+                </section>
+
+                <section className="bunker-panel bunker-access-panel">
+                  <div>
+                    <h3>Присоединиться</h3>
+                    <p>Введи код приглашения от ведущего.</p>
+                  </div>
+                  <label htmlFor="room-invite-code" className="bunker-visually-hidden">Код приглашения</label>
+                  <input
+                    id="room-invite-code"
+                    type="text"
+                    value={roomCodeInput}
+                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
+                    maxLength={32}
+                    placeholder="Код приглашения"
+                    autoComplete="off"
+                    className="bunker-input bunker-code-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleJoinOnlineRoom}
+                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
+                    className="bunker-button bunker-button-secondary"
+                  >
+                    {onlineBusy ? 'Подключаемся…' : 'Войти в комнату'}
+                    <ArrowRight aria-hidden="true" />
+                  </button>
+                </section>
+              </div>
+
+              {onlineError && <div role="alert" className="bunker-error">{onlineError}</div>}
+            </section>
+
+            <section className="bunker-section bunker-categories-section">
+              <header className="bunker-section-heading">
+                <div>
+                  <p className="bunker-eyebrow">Состав колоды</p>
+                  <h2>Карточки игры</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('catalog')}
+                  className="bunker-text-button"
+                >
+                  Весь каталог <ArrowRight aria-hidden="true" />
+                </button>
+              </header>
+
+              <div className="bunker-category-grid">
+                {[
+                  { name: 'Роли', description: 'Профессия и опыт участника', color: '#66816b' },
+                  { name: 'Навыки', description: 'Знания и технические умения', color: '#718b78' },
+                  { name: 'Багаж', description: 'Предметы и ресурсы', color: '#aa8258' },
+                  { name: 'Уязвимости', description: 'Слабые стороны и риски', color: '#ac6a60' },
+                  { name: 'Кризисы', description: 'Угрозы для бункера', color: '#8c789f' },
+                  { name: 'Действия', description: 'Особые игровые эффекты', color: '#a38a54' },
+                ].map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => setCurrentView('catalog')}
+                    className="bunker-category-card"
+                    style={{ '--category-color': item.color } as React.CSSProperties}
+                  >
+                    <span className="bunker-category-dot" />
+                    <span className="bunker-category-copy">
+                      <strong>{item.name}</strong>
+                      <small>{item.description}</small>
+                    </span>
+                    <span className="bunker-category-count">30</span>
+                  </button>
                 ))}
               </div>
-            </div>
+            </section>
           </div>
         ) : gameState.phase === 'lobby' ? (
           /* ==============================================================
              SCREEN 2: ROOM LOBBY
              ============================================================== */
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="incident-page incident-local-room-page py-4 sm:py-8">
             {/* Room Info Banner */}
             <div className="rounded-2xl border border-cyan-500/40 bg-slate-900/90 p-5 sm:p-6 shadow-xl flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -685,6 +1326,11 @@ export function App() {
                 <p className="text-xs font-mono-tech text-slate-400 mt-0.5">
                   Подключено инженеров: {gameState.players.length} из 16 максимум
                 </p>
+                {gameState.isLocalDemo !== false && (
+                  <p className="mt-2 text-[10px] font-mono-tech uppercase tracking-wider text-amber-400">
+                    ЛОКАЛЬНЫЙ ТЕСТ / БОТЫ / ДРУГИЕ УСТРОЙСТВА НЕ ПОДКЛЮЧАЮТСЯ
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -763,110 +1409,72 @@ export function App() {
           /* ==============================================================
              SCREEN 3 & 4: MAIN TACTICAL COMMAND GAME TABLE
              ============================================================== */
-          <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Top Tactical Status Bar */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-mono-tech text-slate-400">РАУНД:</span>
-                  <span className="text-sm font-mono-tech font-bold text-amber-400">
-                    {gameState.round}/5
-                  </span>
+          <div className="bunker-game-board">
+            {/* Раунд и текущий этап */}
+            <section className="bunker-round-header" aria-label="Текущий раунд и этап игры">
+              <div className="bunker-round-summary">
+                <div className="bunker-round-number">
+                  <span>Раунд</span>
+                  <strong>{gameState.round}<small> / 5</small></strong>
                 </div>
-
-                <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                  <span className="text-xs font-mono-tech text-slate-400">ТЕКУЩАЯ ФАЗА:</span>
-                  <span className="text-xs font-tactical font-bold text-cyan-300 uppercase">
-                    {gameState.phase === 'reveal' && '1. Вскрытие характеристик'}
-                    {gameState.phase === 'briefing' && '2. Технический брифинг'}
-                    {gameState.phase === 'voting' && '3. Открытое голосование'}
-                    {gameState.phase === 'elimination' && '4. Протокол изгнания'}
-                  </span>
+                <div className="bunker-phase-detail">
+                  <span>Текущий этап</span>
+                  <strong>
+                    {gameState.phase === 'reveal' && 'Вскрытие карт'}
+                    {gameState.phase === 'briefing' && 'Обсуждение'}
+                    {gameState.phase === 'voting' && 'Голосование'}
+                    {gameState.phase === 'elimination' && 'Итоги голосования'}
+                  </strong>
                 </div>
-
-                <div className="hidden sm:flex px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 items-center gap-2">
-                  <span className="text-xs font-mono-tech text-slate-400">МЕСТ В БУНКЕРЕ:</span>
-                  <span className="text-xs font-mono-tech font-bold text-emerald-400">
-                    {gameState.bunkerCapacity}
-                  </span>
+                <div className="bunker-capacity-detail">
+                  <span>Мест в Бункере</span>
+                  <strong>{gameState.bunkerCapacity}</strong>
                 </div>
+                {gameState.isLocalDemo !== false && (
+                  <span className="bunker-demo-label">{gameState.isOnlineBotTest ? 'ТЕСТ С БОТАМИ · СОСТОЯНИЕ НА ЭТОМ УСТРОЙСТВЕ' : 'Локальный тест с ботами'}</span>
+                )}
               </div>
 
-              {/* Phase Progression Controller */}
-              <div className="flex items-center gap-2">
+              <div className="bunker-round-actions">
                 {gameState.phase === 'reveal' && (
-                  <button
-                    onClick={() => {
-                      setGameState({ ...gameState, phase: 'briefing' });
-                      sound.playCrisisAlert();
-                      showToast('Фаза брифинга: включите 60-секундный таймер и начните аргументацию');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <span>ПЕРЕЙТИ К БРИФИНГУ</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <button type="button" onClick={() => {
+                    setGameState({ ...gameState, phase: 'briefing' });
+                    sound.playCrisisAlert();
+                    showToast('Фаза брифинга: включите таймер и начните обсуждение.');
+                  }} className="bunker-game-action">
+                    К обсуждению <ArrowRight aria-hidden="true" />
                   </button>
                 )}
-
                 {gameState.phase === 'briefing' && (
-                  <button
-                    onClick={() => {
-                      setIsVotingOpen(true);
-                      setGameState({ ...gameState, phase: 'voting' });
-                      sound.playVoteCast();
-                    }}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <Vote className="w-4 h-4" />
-                    <span>ОТКРЫТЬ ГОЛОСОВАНИЕ</span>
+                  <button type="button" onClick={() => {
+                    setIsVotingOpen(true);
+                    setGameState({ ...gameState, phase: 'voting' });
+                    sound.playVoteCast();
+                  }} className="bunker-game-action is-danger">
+                    <Vote aria-hidden="true" /> Открыть голосование
                   </button>
                 )}
-
                 {gameState.phase === 'voting' && (
-                  <button
-                    onClick={() => setIsVotingOpen(true)}
-                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-all active:scale-95"
-                  >
-                    <Vote className="w-4 h-4" />
-                    <span>ОТДАТЬ ГОЛОС</span>
+                  <button type="button" onClick={() => setIsVotingOpen(true)} className="bunker-game-action is-danger">
+                    <Vote aria-hidden="true" /> Отдать голос
                   </button>
                 )}
-
                 {gameState.phase === 'elimination' && (
-                  <button
-                    onClick={handleConfirmElimination}
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-tactical font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg active:scale-95 transition-all"
-                  >
-                    <span>УТВЕРДИТЬ ИЗГНАНИЕ И СЛЕДУЮЩИЙ РАУНД</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <button type="button" onClick={handleConfirmElimination} className="bunker-game-action">
+                    Следующий раунд <ArrowRight aria-hidden="true" />
                   </button>
                 )}
               </div>
-            </div>
+            </section>
 
-            {/* Active Crises Section */}
-            <ActiveCrisesBanner
-              crises={gameState.activeCrises}
-              currentRound={gameState.round}
-              onInspectCrisis={setInspectingCard}
-            />
-
-            {/* Middle Section: Briefing Timer & Team Roster */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-1 space-y-5">
-                {/* 60s / 30s Tactical Briefing Timer */}
-                <BriefingTimer
-                  initialSeconds={60}
-                  activeSpeakerName={gameState.players.find(p => p.id === gameState.activeSpeakerId)?.name}
+            {/* Игровой стол: кризисы и игроки, таймер и хроника */}
+            <div className="bunker-table-layout">
+              <div className="bunker-table-main">
+                <ActiveCrisesBanner
+                  crises={gameState.activeCrises}
+                  currentRound={gameState.round}
+                  onInspectCrisis={setInspectingCard}
                 />
-
-                {/* System Incident Terminal Log */}
-                <IncidentLog logs={gameState.log} />
-              </div>
-
-              {/* Team Composition & Revealed Cards Matrix */}
-              <div className="lg:col-span-2">
                 <PlayerRoster
                   players={gameState.players}
                   activeSpeakerId={gameState.activeSpeakerId}
@@ -876,6 +1484,14 @@ export function App() {
                   onInspectCard={setInspectingCard}
                 />
               </div>
+
+              <aside className="bunker-table-sidebar" aria-label="Инструменты раунда">
+                <BriefingTimer
+                  initialSeconds={60}
+                  activeSpeakerName={gameState.players.find((player) => player.id === gameState.activeSpeakerId)?.name}
+                />
+                <IncidentLog logs={gameState.log} />
+              </aside>
             </div>
 
             {/* Bottom Section: My Personal Hand (5 Cards) */}
@@ -886,6 +1502,7 @@ export function App() {
                 onRevealCard={handleRevealCard}
                 onUseAction={handleUseAction}
                 onInspectCard={setInspectingCard}
+                hasRevealedThisRound={(gameState.revealedThisRoundPlayerIds || []).includes(gameState.players[0].id)}
               />
             )}
           </div>
