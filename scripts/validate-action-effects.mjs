@@ -7,6 +7,7 @@ const paths = {
   generatorMigration: 'supabase/migrations/202611040008_action_effects_phase_one.sql',
   hotfixMigration: 'supabase/migrations/202611040009_hotfix_action_effect.sql',
   unifiedMigration: 'supabase/migrations/202611040010_unified_action_engine.sql',
+  exploitMigration: 'supabase/migrations/202611040011_exploit_second_skill.sql',
   service: 'src/services/onlineRooms.ts',
   gameView: 'src/components/OnlineGameView.tsx',
   actionControls: 'src/components/ActionCardControls.tsx',
@@ -14,6 +15,8 @@ const paths = {
   importer: 'scripts/import-cards-to-supabase.mjs',
   seed: 'supabase/seeds/20261104_card_catalog_v1.sql',
   handView: 'src/components/PersonalHand.tsx',
+  finalAudit: 'src/components/FinalAuditView.tsx',
+  cardsData: 'src/data/cards.ts',
   rosterView: 'src/components/PlayerRoster.tsx',
 };
 
@@ -30,6 +33,7 @@ const supportedHandlers = {
   action_06: 'vmotion_swap_roles',
   action_08: 'smart_peek_future_crisis',
   action_10: 'cmdb_reveal_all_baggage',
+  action_11: 'exploit_draw_second_skill',
   action_12: 'write_off_target_baggage',
   action_15: 'cr_replace_selected_crisis',
   action_16: 'confiscate_expelled_baggage',
@@ -79,11 +83,21 @@ requireText(files.unifiedMigration, /create or replace function public\.api_get_
 requireText(files.unifiedMigration, /create trigger game_sessions_watchdog_deadline/i, 'Watchdog deadline trigger is missing.');
 requireText(files.unifiedMigration, /ignored_crisis_ids/i, 'Workaround must persist the selected crisis.');
 requireText(files.unifiedMigration, /vulnerabilities_disabled_round/i, 'Safe Boot round state is missing.');
+requireText(files.exploitMigration, /create or replace function public\\.api_use_exploit_skill_card/i, 'Exploit RPC is missing.');
+requireText(files.exploitMigration, /effect_handler_id = 'exploit_draw_second_skill'/i, 'Exploit handler approval is missing.');
+requireText(files.exploitMigration, /cc\\.category = 'skills'/i, 'Exploit must draw from the Skills category.');
+requireText(files.exploitMigration, /ci\\.zone = 'category_deck'/i, 'Exploit must draw from the server-owned Skills deck.');
+requireText(files.exploitMigration, /set zone = 'hand',[\\s\\S]*?owner_member_id = v_actor_id/i, 'Exploit must assign the drawn Skill to its owner.');
+requireText(files.exploitMigration, /instance_status = 'hidden'/i, 'The additional Skill must remain hidden after drawing.');
 
 for (const [id, handler] of Object.entries(supportedHandlers)) {
   if (id === 'action_04' || id === 'action_28') continue;
-  if (!files.unifiedMigration.includes(`when '${id}' then '${handler}'`)) {
-    failures.push(`Unified migration does not map ${id} to ${handler}.`);
+  const migration = id === 'action_11' ? files.exploitMigration : files.unifiedMigration;
+  const handlerIsRegistered = id === 'action_11'
+    ? migration.includes(`effect_handler_id = '${handler}'`)
+    : migration.includes(`when '${id}' then '${handler}'`);
+  if (!handlerIsRegistered) {
+    failures.push(`SQL migration does not register ${id} with ${handler}.`);
   }
   if (!files.importer.includes(`${id}: '${handler}'`)) {
     failures.push(`Importer does not preserve the approved handler for ${id}.`);
@@ -105,21 +119,25 @@ const approvedFromSql = [...new Set([
   ...[...files.generatorMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.hotfixMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.unifiedMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
+  ...[...files.exploitMigration.matchAll(/where card_id = '(action_\\d+)'/gi)].map((match) => match[1]),
 ])].sort();
 const expectedApproved = Object.keys(supportedHandlers).sort();
 if (approvedFromSql.join(',') !== expectedApproved.join(',')) {
-  failures.push('SQL migrations do not map exactly the 15 approved action cards.');
+  failures.push('SQL migrations do not map exactly the 16 approved action cards.');
 }
 
 requireText(files.service, /export async function useOnlineActionEffect/i, 'Generic action RPC client is missing.');
+requireText(files.service, /export async function useOnlineExploitSkillCard/i, 'Exploit RPC client is missing.');
 requireText(files.service, /api_get_my_action_private_data/i, 'Client does not fetch private action results.');
 requireText(files.gameView, /ActionCardControls/i, 'Online game view does not render action controls.');
 requireText(files.gameView, /onUseActionEffect/i, 'Online game view does not pass the generic action callback.');
 requireText(files.actionControls, /AVAILABLE_EFFECTS/i, 'Action controls do not define supported action cards.');
 requireText(files.actionControls, /action_20/i, 'Memory Dump target selection is missing.');
+requireText(files.actionControls, /action_11: \\{ description: .*вторую карту Навыка/i, 'Exploit is missing from online action controls.');
 requireText(files.actionControls, /privateEvents\.slice/i, 'Private action results are not rendered.');
 requireText(files.actionControls, /myMemberId/i, 'Target selection must exclude the acting player.');
 requireText(files.localApp, /vulnerabilityDiscarded: true/i, 'Local demo Hotfix effect is missing.');
+requireText(files.localApp, /actionCard\\.card_id === 'action_11'/i, 'Local demo Exploit effect is missing.');
 requireText(files.handView, /player\.vulnerabilityDiscarded/i, 'Local hand must hide a discarded Vulnerability.');
 requireText(files.rosterView, /player\.vulnerabilityDiscarded/i, 'Local public roster must hide a discarded Vulnerability.');
 requireText(files.importer, /action_04: 'hotfix_discard_own_vulnerability'/i, 'Importer must preserve the Hotfix handler.');
@@ -134,5 +152,5 @@ if (failures.length) {
 }
 
 console.log('Action-effect validation passed.');
-console.log('30 source action cards verified; 15 have server-side handlers registered.');
-console.log('15 additional cards remain draft until their rule wording and edge cases are approved.');
+console.log('30 source action cards verified; 16 have server-side handlers registered.');
+console.log('14 additional cards remain draft until their rule wording and edge cases are approved.');
