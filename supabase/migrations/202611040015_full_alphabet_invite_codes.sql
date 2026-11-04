@@ -149,11 +149,23 @@ begin
     raise exception using errcode = '28000', message = 'UNAUTHENTICATED';
   end if;
 
-  if p_command_id is null
-     or p_invite_code is null
-     or upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})$'
-     or p_display_name is null
-     or char_length(btrim(p_display_name)) not between 2 and 24 then
+  if p_command_id is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  if p_invite_code is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  if upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})$' then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  if p_display_name is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  if char_length(btrim(p_display_name)) not between 2 and 24 then
     raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
   end if;
 
