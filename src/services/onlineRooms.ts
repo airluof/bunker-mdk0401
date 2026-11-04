@@ -225,6 +225,19 @@ export async function leaveOnlineRoom(roomId: string): Promise<{ ok: boolean; ro
   return data as { ok: boolean; room_id: string; status: 'left' };
 }
 
+export async function exitOnlineTestRoom(roomId: string): Promise<{ ok: boolean; room_id: string; status: 'left' | 'archived' }> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_exit_test_room', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as { ok: boolean; room_id: string; status: 'left' | 'archived' };
+}
+
 export async function closeOnlineRoom(roomId: string): Promise<{ ok: boolean; room_id: string; status: 'archived' }> {
   const client = getClient();
   await ensureAnonymousSession();
