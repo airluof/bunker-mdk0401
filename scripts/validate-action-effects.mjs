@@ -2,12 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const root = process.cwd();
-const [manifestText, migration, service, gameView, localApp] = await Promise.all([
+const [manifestText, migration, service, gameView, localApp, importer, seed] = await Promise.all([
   readFile(resolve(root, 'assets/manifest.json'), 'utf8'),
   readFile(resolve(root, 'supabase/migrations/202611040008_action_effects_phase_one.sql'), 'utf8'),
   readFile(resolve(root, 'src/services/onlineRooms.ts'), 'utf8'),
   readFile(resolve(root, 'src/components/OnlineGameView.tsx'), 'utf8'),
   readFile(resolve(root, 'src/App.tsx'), 'utf8'),
+  readFile(resolve(root, 'scripts/import-cards-to-supabase.mjs'), 'utf8'),
+  readFile(resolve(root, 'supabase/seeds/20261104_card_catalog_v1.sql'), 'utf8'),
 ]);
 
 const manifest = JSON.parse(manifestText.replace(/^\uFEFF/, ''));
@@ -53,6 +55,9 @@ requireText(gameView, /canUseEmergencyGenerator/i, 'Online game UI must gate the
 requireText(gameView, /onUseActionCard\(emergencyGeneratorInstanceId\)/i, 'Online game UI must call the action handler with the player card instance.');
 requireText(localApp, /const newCapacity = gameState\.bunkerCapacity \+ 1/i, 'Local demo must apply the same +1 capacity effect.');
 requireText(localApp, /actionCard\.card_id !== 'action_28'/i, 'Local demo must not consume unimplemented action cards.');
+requireText(importer, /effect_status: card\.card_id === 'action_28' \? 'approved'/i, 'Catalog importer must preserve the approved status for action_28.');
+requireText(importer, /effect_handler_id: card\.card_id === 'action_28' \? 'emergency_generator_capacity_plus_one'/i, 'Catalog importer must preserve the Emergency Generator handler id.');
+requireText(seed, /\('action_28',[^\n]+'approved', 'emergency_generator_capacity_plus_one'\)/i, 'SQL seed must preserve approved metadata for action_28.');
 
 if (failures.length) {
   console.error('Action-effect validation failed:');
