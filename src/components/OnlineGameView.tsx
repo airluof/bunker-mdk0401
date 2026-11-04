@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   RefreshCw, Users, Crown, DoorOpen, LockKeyhole, Radio, Timer,
-  Vote, ArrowRight, CheckCircle2, Circle, Skull, Bot, ShieldCheck,
+  Vote, ArrowRight, CheckCircle2, Circle, Skull, Bot, ShieldCheck, Zap,
 } from 'lucide-react';
 import type { Card, CardCategory } from '../types/game';
 import { CATEGORY_CONFIG } from '../data/cards';
@@ -18,6 +18,7 @@ interface OnlineGameViewProps {
   onExit: () => void;
   onInspectCard: (card: Card) => void;
   onRevealCard: (instanceId: string) => void;
+  onUseActionCard: (instanceId: string) => void;
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
@@ -81,6 +82,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onExit,
   onInspectCard,
   onRevealCard,
+  onUseActionCard,
   onStartBriefing,
   onOpenVoting,
   onVote,
@@ -102,6 +104,23 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   const phase = snapshot.session.phase;
   const isTestMode = snapshot.room.room_mode === 'test' || snapshot.public_state?.test_mode === true || botCount > 0;
   const phaseLabel = PHASE_LABELS[phase] || 'Игровой этап';
+
+  const revealedSnapshotCards = snapshot.revealed_cards as SnapshotCard[];
+  const ownEmergencyGenerator =
+    (snapshot.my_cards as SnapshotCard[]).find((card) => card.card_id === 'action_28') ||
+    revealedSnapshotCards.find((card) =>
+      card.card_id === 'action_28' && card.owner_member_id === myMemberId
+    );
+  const usedActionCardIds = Array.isArray(snapshot.public_state?.used_action_cards)
+    ? snapshot.public_state.used_action_cards.filter((value): value is string => typeof value === 'string')
+    : [];
+  const emergencyGeneratorInstanceId = ownEmergencyGenerator?.instance_id || ownEmergencyGenerator?.card_instance_id;
+  const canUseEmergencyGenerator = Boolean(
+    isAlive &&
+    emergencyGeneratorInstanceId &&
+    !usedActionCardIds.includes(emergencyGeneratorInstanceId) &&
+    !['lobby', 'audit', 'gameover'].includes(phase)
+  );
 
   const publicCards = (snapshot.revealed_cards as unknown as SnapshotCard[]).map((source) => ({
     ownerMemberId: source.owner_member_id || '',
@@ -444,6 +463,17 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                   {snapshot.my_revealed_this_round ? ' · карта этого раунда уже раскрыта' : ''}
                 </p>
               </div>
+              {canUseEmergencyGenerator && emergencyGeneratorInstanceId && (
+                <button
+                  type="button"
+                  className="bunker-action-card-button"
+                  onClick={() => onUseActionCard(emergencyGeneratorInstanceId)}
+                  disabled={busy}
+                >
+                  <Zap aria-hidden="true" />
+                  Аварийный генератор · +1 место
+                </button>
+              )}
               <span className="bunker-online-private-label"><LockKeyhole aria-hidden="true" /> Личная раздача</span>
             </header>
             <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
