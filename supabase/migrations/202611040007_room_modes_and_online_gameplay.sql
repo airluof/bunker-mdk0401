@@ -446,6 +446,7 @@ declare
   v_session public.game_sessions%rowtype;
   v_room_mode text;
   v_card public.card_instances%rowtype;
+  v_target_member_id uuid;
   v_existing jsonb;
   v_existing_name text;
   v_result jsonb;
@@ -664,20 +665,20 @@ begin
               and v.voter_member_id = m.id
           )
       loop
-        select m.id into v_card.id
+        select m.id into v_target_member_id
         from public.room_members m
         where m.room_id = p_room_id and m.membership_status = 'active' and m.is_alive
           and m.id <> v_bot.id
         order by random() limit 1;
 
-        if v_card.id is not null then
+        if v_target_member_id is not null then
           insert into public.votes (session_id, room_id, round_number, voter_member_id, target_member_id)
-          values (v_session.id, p_room_id, v_session.round_number, v_bot.id, v_card.id);
+          values (v_session.id, p_room_id, v_session.round_number, v_bot.id, v_target_member_id);
           insert into public.public_game_events (room_id, session_id, event_type, public_payload)
           values (p_room_id, v_session.id, 'bot_vote_cast',
-                  jsonb_build_object('voter_member_id', v_bot.id, 'target_member_id', v_card.id, 'round', v_session.round_number));
+                  jsonb_build_object('voter_member_id', v_bot.id, 'target_member_id', v_target_member_id, 'round', v_session.round_number));
         end if;
-        v_card.id := null;
+        v_target_member_id := null;
       end loop;
     end if;
 
