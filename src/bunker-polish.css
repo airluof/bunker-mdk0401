@@ -1,0 +1,896 @@
+/* Bunker visual polish — second pass.
+   Improve legibility, spacing and surface hierarchy without changing gameplay. */
+
+:root {
+  --bunker-radius: 10px;
+  --bunker-radius-control: 7px;
+  --bunker-radius-small: 5px;
+  --bunker-panel: #191919;
+  --bunker-panel-raised: #222120;
+  --bunker-line: rgba(255,255,255,.11);
+  --bunker-line-strong: rgba(255,255,255,.19);
+}
+
+/* Comfortable reading scale. Small uppercase text is now reserved for metadata. */
+body {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.bunker-main {
+  width: min(100%, 1380px);
+  padding-top: 34px;
+  padding-bottom: 76px;
+}
+
+.bunker-eyebrow,
+.bunker-kicker {
+  margin-bottom: 10px;
+  color: #ed8b73;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .055em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.bunker-section-heading h2,
+.bunker-page-heading h1,
+.bunker-room-heading h1 {
+  font-size: clamp(29px, 3.2vw, 41px);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+
+.bunker-section-heading > p,
+.bunker-page-description {
+  color: #b6b2aa;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.bunker-section {
+  gap: 22px;
+}
+
+.bunker-home {
+  gap: clamp(44px, 6vw, 72px);
+}
+
+/* A softer, less rigid header. */
+.bunker-nav {
+  background: rgba(14,14,14,.95);
+  border-bottom-color: rgba(255,255,255,.1);
+}
+
+.bunker-nav-inner {
+  min-height: 68px;
+}
+
+.bunker-brand {
+  gap: 11px;
+}
+
+.bunker-brand-mark {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  border-radius: 50%;
+  border-color: rgba(231,93,63,.4);
+  background: #211a18;
+}
+
+.bunker-brand-name {
+  font-size: 21px;
+}
+
+.bunker-brand-subtitle {
+  font-size: 10px;
+}
+
+.bunker-nav-actions {
+  gap: 5px;
+}
+
+.bunker-nav-link,
+.bunker-nav-icon,
+.bunker-nav-exit {
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.bunker-nav-icon,
+.bunker-nav-exit {
+  width: 40px;
+}
+
+.bunker-nav-link.is-active {
+  background: rgba(231,93,63,.12);
+  border-color: rgba(231,93,63,.22);
+}
+
+/* Hero: maintain the photographic atmosphere, but add breathing room and hierarchy. */
+.bunker-hero {
+  min-height: 445px;
+  border-radius: 10px;
+  border-color: rgba(255,255,255,.2);
+  padding: clamp(34px, 5.5vw, 70px);
+  background-position: center, center, center 48%;
+}
+
+.bunker-hero h1 {
+  max-width: 780px;
+  margin-bottom: 22px;
+  font-size: clamp(50px, 7.2vw, 88px);
+  line-height: .99;
+  letter-spacing: -.05em;
+}
+
+.bunker-hero-description {
+  max-width: 650px;
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.75;
+}
+
+.bunker-game-facts {
+  gap: clamp(22px, 4vw, 58px);
+  margin-top: 34px;
+  padding-top: 19px;
+}
+
+.bunker-game-facts strong {
+  font-size: 28px;
+}
+
+.bunker-game-facts span {
+  font-size: 12px;
+}
+
+/* Main surfaces: rounded enough to feel designed, not like a pile of widgets. */
+.bunker-panel,
+.bunker-access-panel,
+.bunker-online-crisis-panel,
+.bunker-online-roster,
+.bunker-online-status,
+.bunker-online-public-cards,
+.bunker-online-audit,
+.bunker-online-vote-ledger,
+.bunker-online-hand {
+  border-radius: 10px;
+  border-color: rgba(255,255,255,.13);
+  background: rgba(20,20,20,.92);
+}
+
+.bunker-access-panel {
+  min-height: 215px;
+  padding: 24px 25px;
+  gap: 16px;
+}
+
+.bunker-access-panel h3,
+.bunker-panel h2 {
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.bunker-access-panel p,
+.bunker-invite-panel > p,
+.bunker-panel-heading p {
+  color: #b2aea6;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* Form controls and buttons get real touch sizes. */
+.bunker-name-field {
+  max-width: 500px;
+  gap: 9px;
+}
+
+.bunker-name-field label,
+.bunker-field-label {
+  color: #d0ccc3;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bunker-input,
+.bunker-select {
+  min-height: 49px;
+  border-radius: var(--bunker-radius-control);
+  padding: 12px 15px;
+  font-size: 14px;
+}
+
+.bunker-button {
+  min-height: 45px;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.bunker-button svg,
+.bunker-text-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.bunker-room-create-options {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bunker-room-create-options .bunker-button {
+  min-height: 47px;
+}
+
+.bunker-help {
+  color: #aaa69e;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.bunker-text-button {
+  font-size: 13px;
+}
+
+/* Category index becomes a calm list, not another set of boxed tiles. */
+.bunker-category-grid {
+  gap: 0 26px;
+}
+
+.bunker-category-card {
+  min-height: 74px;
+  gap: 13px;
+  padding: 13px 8px;
+}
+
+.bunker-category-dot {
+  width: 4px;
+  flex-basis: 4px;
+  height: 28px;
+}
+
+.bunker-category-copy {
+  gap: 4px;
+}
+
+.bunker-category-copy strong {
+  font-size: 15px;
+}
+
+.bunker-category-copy small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.bunker-category-count {
+  font-size: 12px;
+}
+
+/* Lobby: let the roster breathe. Use soft hover states rather than hard cell borders. */
+.bunker-room-page {
+  gap: 22px;
+}
+
+.bunker-room-layout {
+  gap: 16px;
+}
+
+.bunker-players-panel {
+  padding: 25px;
+}
+
+.bunker-panel-heading {
+  gap: 18px;
+  margin-bottom: 19px;
+}
+
+.bunker-player-count {
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bunker-player-count strong {
+  font-size: 30px;
+}
+
+.bunker-player-list {
+  gap: 4px 14px;
+}
+
+.bunker-player-row,
+.bunker-player-seat {
+  min-height: 65px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.085);
+  border-radius: 7px;
+  padding: 9px 10px;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.bunker-player-row:hover,
+.bunker-player-seat:hover {
+  background: rgba(255,255,255,.035);
+}
+
+.bunker-player-avatar {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  font-size: 12px;
+}
+
+.bunker-player-details {
+  gap: 3px;
+}
+
+.bunker-player-details strong {
+  font-size: 14px;
+}
+
+.bunker-player-details small {
+  color: #aaa69f;
+  font-size: 12px;
+}
+
+.bunker-host-label {
+  gap: 5px;
+  font-size: 11px;
+}
+
+.bunker-host-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bunker-empty-copy {
+  padding: 14px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bunker-player-progress,
+.bunker-online-note {
+  margin-top: 18px;
+  padding-top: 14px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.bunker-room-sidebar {
+  gap: 14px;
+}
+
+.bunker-room-sidebar .bunker-panel {
+  padding: 22px;
+}
+
+.bunker-invite-code {
+  margin: 16px 0 13px;
+  border: 1px dashed rgba(255,255,255,.25);
+  border-left: 3px solid var(--bunker-accent);
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 13px;
+  line-height: 1.75;
+  letter-spacing: .02em;
+}
+
+.bunker-setting-value {
+  font-size: 32px;
+}
+
+.bunker-setting-value span {
+  font-size: 13px;
+}
+
+.bunker-online-note {
+  border-radius: 8px;
+  padding: 14px 17px;
+}
+
+/* Game HUD: strong readable title and less dense panels. */
+.bunker-online-game {
+  gap: 20px;
+}
+
+.bunker-online-game-heading {
+  gap: 20px;
+  padding-bottom: 19px;
+}
+
+.bunker-online-game-heading h1 {
+  font-size: clamp(32px, 3.7vw, 43px);
+  line-height: 1.08;
+}
+
+.bunker-online-game-heading .bunker-page-description {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.bunker-online-game-grid {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+}
+
+.bunker-online-game-main,
+.bunker-online-game-sidebar {
+  gap: 16px;
+}
+
+.bunker-online-crisis-panel,
+.bunker-online-roster,
+.bunker-online-status,
+.bunker-online-public-cards,
+.bunker-online-audit,
+.bunker-online-vote-ledger,
+.bunker-online-hand {
+  padding: 21px;
+}
+
+.bunker-online-crisis-cards {
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.bunker-online-crisis-cards .bunker-card {
+  max-width: 270px;
+}
+
+.bunker-online-private-label {
+  gap: 7px;
+  font-size: 12px;
+}
+
+.bunker-online-private-label svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bunker-online-hand-grid {
+  gap: 12px;
+}
+
+.bunker-online-hand-grid .bunker-card {
+  min-height: 285px;
+}
+
+.bunker-online-roster-list {
+  gap: 2px;
+  margin-top: 15px;
+}
+
+.bunker-online-roster-list .bunker-player-row {
+  min-height: 59px;
+}
+
+.bunker-online-status h2 {
+  font-size: 17px;
+}
+
+.bunker-online-status p,
+.bunker-online-game-footnote {
+  color: #b5b1a9;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* Phase panel should feel like part of the game, not a generic alert box. */
+.bunker-online-action-panel {
+  align-items: center;
+  gap: 22px;
+  border-radius: 9px;
+  padding: 21px 24px;
+  background: rgba(22,22,22,.95);
+}
+
+.bunker-online-action-panel h2,
+.bunker-online-audit h2 {
+  margin: 4px 0 8px;
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.bunker-online-action-panel p,
+.bunker-online-audit p {
+  color: #b8b4ac;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.bunker-online-progress {
+  margin-top: 9px !important;
+  font-size: 13px !important;
+}
+
+.bunker-online-timer {
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.bunker-online-timer svg {
+  width: 19px;
+  height: 19px;
+}
+
+.bunker-online-timer strong {
+  font-size: 32px;
+}
+
+.bunker-online-timer span {
+  font-size: 12px;
+}
+
+.bunker-online-candidates {
+  min-width: min(100%, 320px);
+  gap: 8px;
+}
+
+.bunker-online-candidate {
+  min-height: 44px;
+  gap: 11px;
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.bunker-online-voted {
+  gap: 8px;
+  font-size: 13px;
+}
+
+/* Public cards: remove the nested "boxes inside boxes" look. */
+.bunker-online-public-grid {
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+
+.bunker-online-public-player {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.13);
+  border-radius: 0;
+  padding: 13px 4px 10px;
+  background: transparent;
+}
+
+.bunker-online-public-player > header {
+  align-items: center;
+  padding-bottom: 9px;
+}
+
+.bunker-online-public-player > header strong {
+  font-size: 13px;
+}
+
+.bunker-online-public-player > header small {
+  font-size: 11px;
+}
+
+.bunker-online-public-player > p {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.bunker-online-public-card-list {
+  gap: 5px;
+  padding-top: 9px;
+}
+
+.bunker-online-public-card-list button {
+  gap: 3px;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.045);
+}
+
+.bunker-online-public-card-list span {
+  font-size: 10px;
+  letter-spacing: .025em;
+}
+
+.bunker-online-public-card-list strong {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.bunker-online-vote-ledger .bunker-online-vote-row {
+  gap: 10px;
+  padding: 10px 2px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bunker-online-survivors {
+  gap: 8px;
+  margin-top: 15px;
+}
+
+/* Cards remain physical-paper-like, but details are no longer tiny. */
+.bunker-card {
+  border-radius: 7px;
+}
+
+.bunker-card-topline {
+  min-height: 39px;
+  padding: 8px 12px;
+}
+
+.bunker-card-category {
+  font-size: 11px;
+  letter-spacing: .035em;
+}
+
+.bunker-card-inspect {
+  border-radius: 50%;
+}
+
+.bunker-card-art {
+  flex-basis: 190px;
+}
+
+.bunker-card-copy {
+  min-height: 112px;
+  gap: 7px;
+  padding: 14px 15px 15px;
+}
+
+.bunker-card-copy h3 {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.bunker-card-copy p {
+  font-size: 12px;
+  line-height: 1.55;
+  -webkit-line-clamp: 3;
+}
+
+.bunker-card-sealed {
+  border-radius: 7px;
+}
+
+.bunker-card-sealed::before {
+  border-radius: 3px;
+}
+
+.bunker-card-lock {
+  width: 58px;
+  height: 58px;
+}
+
+.bunker-card-seal {
+  font-size: 18px;
+}
+
+.bunker-card-bottom {
+  padding: 11px;
+}
+
+.bunker-card-reveal {
+  min-height: 43px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.bunker-card-access {
+  min-height: 30px;
+  font-size: 12px;
+}
+
+/* Modal, toast and final audit use the same comfortable sizing. */
+.bunker-toast {
+  border-radius: 8px;
+  padding: 14px 17px;
+  font-size: 13px;
+}
+
+.bunker-online-audit-label {
+  margin-top: 19px;
+  font-size: 12px;
+}
+
+.bunker-online-audit-textarea,
+.bunker-online-audit-submission {
+  border-radius: 7px;
+  padding: 14px 15px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.bunker-online-audit-textarea {
+  min-height: 175px;
+}
+
+.bunker-online-audit-actions {
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.bunker-online-audit-actions > span {
+  font-size: 12px;
+}
+
+/* Catalog filters and list controls. */
+.bunker-catalog-toolbar {
+  gap: 17px;
+  padding-bottom: 21px;
+}
+
+.bunker-catalog-total {
+  font-size: 13px;
+}
+
+.bunker-search {
+  min-height: 46px;
+  border-radius: 8px;
+}
+
+@media (max-width: 1050px) {
+  .bunker-online-game-grid {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+
+  .bunker-online-hand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .bunker-main {
+    padding: 25px 18px 58px;
+  }
+
+  .bunker-hero {
+    border-radius: 9px;
+    min-height: 395px;
+  }
+
+  .bunker-room-layout,
+  .bunker-online-game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-online-game-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bunker-online-action-panel {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+
+  .bunker-main {
+    padding: 17px 13px 42px;
+  }
+
+  .bunker-brand-mark {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  .bunker-brand-name {
+    font-size: 19px;
+  }
+
+  .bunker-nav-link,
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    border-radius: 7px;
+  }
+
+  .bunker-hero {
+    min-height: 370px;
+    border-radius: 8px;
+    padding: 27px 21px;
+  }
+
+  .bunker-hero h1 {
+    font-size: clamp(46px, 13.5vw, 66px);
+  }
+
+  .bunker-hero-description {
+    max-width: 100%;
+    font-size: 14px;
+  }
+
+  .bunker-game-facts {
+    gap: 12px 20px;
+    margin-top: 24px;
+  }
+
+  .bunker-game-facts strong {
+    font-size: 23px;
+  }
+
+  .bunker-game-facts span {
+    font-size: 11px;
+  }
+
+  .bunker-access-grid,
+  .bunker-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-access-panel,
+  .bunker-players-panel,
+  .bunker-room-sidebar .bunker-panel,
+  .bunker-online-crisis-panel,
+  .bunker-online-roster,
+  .bunker-online-status,
+  .bunker-online-public-cards,
+  .bunker-online-audit,
+  .bunker-online-vote-ledger,
+  .bunker-online-hand {
+    padding: 17px;
+    border-radius: 9px;
+  }
+
+  .bunker-player-list {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-player-row,
+  .bunker-player-seat {
+    min-height: 62px;
+  }
+
+  .bunker-online-action-panel {
+    gap: 14px;
+    border-radius: 8px;
+    padding: 17px;
+  }
+
+  .bunker-online-action-panel h2,
+  .bunker-online-audit h2 {
+    font-size: 21px;
+  }
+
+  .bunker-online-action-panel p,
+  .bunker-online-audit p {
+    font-size: 13px;
+  }
+
+  .bunker-online-hand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .bunker-online-hand-grid .bunker-card {
+    min-height: 250px;
+  }
+
+  .bunker-card-copy {
+    min-height: 105px;
+    padding: 11px;
+  }
+
+  .bunker-card-copy h3 {
+    font-size: 14px;
+  }
+
+  .bunker-card-copy p {
+    font-size: 11px;
+  }
+
+  .bunker-online-public-grid,
+  .bunker-online-survivors {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-online-game-sidebar {
+    display: flex;
+  }
+}
