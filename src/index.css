@@ -4649,3 +4649,269 @@ button.bunker-player-card-slot:hover {
     padding: 13px;
   }
 }
+
+
+/* Explicit room entry and synchronized multiplayer phases */
+.bunker-room-create-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 10px;
+}
+.bunker-room-create-options .bunker-button {
+  flex: 1 1 180px;
+}
+.bunker-online-game-heading .bunker-room-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bunker-online-action-wrap {
+  min-width: 0;
+}
+.bunker-online-action-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid var(--bunker-line-strong);
+  border-left: 3px solid var(--bunker-accent);
+  border-radius: 3px;
+  padding: 18px 20px;
+  background: linear-gradient(110deg, #242b23, #1c221d);
+}
+.bunker-online-action-panel h2,
+.bunker-online-audit h2 {
+  margin: 3px 0 5px;
+  color: var(--bunker-paper);
+  font-family: 'IBM Plex Sans Condensed', sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+}
+.bunker-online-action-panel p,
+.bunker-online-audit p {
+  max-width: 720px;
+  margin: 4px 0;
+  color: var(--bunker-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.bunker-online-progress {
+  color: var(--bunker-accent-bright) !important;
+  font-weight: 600;
+}
+.bunker-online-timer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 11px;
+  color: var(--bunker-accent-bright);
+}
+.bunker-online-timer svg {
+  width: 17px;
+  height: 17px;
+}
+.bunker-online-timer strong {
+  color: var(--bunker-paper);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+}
+.bunker-online-timer span {
+  color: var(--bunker-muted);
+  font-size: 11px;
+}
+.bunker-online-voting {
+  align-items: flex-start;
+}
+.bunker-online-candidates {
+  display: grid;
+  min-width: min(100%, 310px);
+  gap: 7px;
+}
+.bunker-online-candidate {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--bunker-line);
+  border-radius: 3px;
+  padding: 8px 10px;
+  background: #171d18;
+  color: var(--bunker-paper);
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+}
+.bunker-online-candidate:hover:not(:disabled),
+.bunker-online-candidate.is-selected {
+  border-color: var(--bunker-accent);
+  background: #292b20;
+}
+.bunker-online-candidate svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  color: var(--bunker-accent-bright);
+}
+.bunker-online-candidate:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.bunker-online-voted {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--bunker-good) !important;
+  font-size: 12px;
+}
+.bunker-online-voted svg {
+  width: 16px;
+  height: 16px;
+}
+.bunker-online-public-cards,
+.bunker-online-audit,
+.bunker-online-vote-ledger {
+  border: 1px solid var(--bunker-line);
+  border-radius: 3px;
+  padding: 18px;
+  background: var(--bunker-panel);
+}
+.bunker-online-public-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 13px;
+}
+.bunker-online-public-player {
+  min-width: 0;
+  border: 1px solid var(--bunker-line);
+  border-radius: 3px;
+  padding: 11px;
+  background: #171d18;
+}
+.bunker-online-public-player > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 9px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--bunker-line);
+}
+.bunker-online-public-player > header strong {
+  color: var(--bunker-paper);
+  font-size: 12px;
+}
+.bunker-online-public-player > header small {
+  color: var(--bunker-muted);
+  font-size: 10px;
+}
+.bunker-online-public-player > p {
+  margin: 9px 0 0;
+  color: var(--bunker-muted);
+  font-size: 11px;
+}
+.bunker-online-public-card-list {
+  display: grid;
+  gap: 5px;
+  padding-top: 8px;
+}
+.bunker-online-public-card-list button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 5px 6px;
+  background: #202720;
+  color: var(--bunker-paper);
+  text-align: left;
+  cursor: pointer;
+}
+.bunker-online-public-card-list button:hover {
+  border-color: var(--bunker-accent);
+}
+.bunker-online-public-card-list span {
+  color: var(--bunker-accent-bright);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+.bunker-online-public-card-list strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+.bunker-online-vote-ledger .bunker-online-vote-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--bunker-line);
+  padding: 8px 0;
+  color: var(--bunker-muted);
+  font-size: 11px;
+}
+.bunker-online-vote-row svg {
+  width: 13px;
+  height: 13px;
+  color: var(--bunker-accent);
+}
+.bunker-online-vote-row strong {
+  color: var(--bunker-paper);
+}
+.bunker-online-survivors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 14px;
+}
+.bunker-online-roster-list .bunker-player-row.is-eliminated {
+  opacity: .48;
+}
+.bunker-online-status .bunker-help {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+}
+.bunker-online-status .bunker-help svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  color: var(--bunker-accent-bright);
+}
+@media (max-width: 820px) {
+  .bunker-online-action-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .bunker-online-action-panel > .bunker-button {
+    width: 100%;
+  }
+  .bunker-online-candidates {
+    width: 100%;
+  }
+}
+@media (max-width: 560px) {
+  .bunker-room-create-options {
+    flex-direction: column;
+  }
+  .bunker-room-create-options .bunker-button {
+    width: 100%;
+  }
+  .bunker-online-public-grid,
+  .bunker-online-survivors {
+    grid-template-columns: 1fr;
+  }
+  .bunker-online-game-heading .bunker-room-actions {
+    width: 100%;
+  }
+  .bunker-online-game-heading .bunker-room-actions .bunker-button {
+    flex: 1 1 100%;
+  }
+  .bunker-online-public-cards,
+  .bunker-online-audit,
+  .bunker-online-vote-ledger {
+    padding: 13px;
+  }
+}
