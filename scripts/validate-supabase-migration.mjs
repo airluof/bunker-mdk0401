@@ -94,6 +94,18 @@ requireText(invite015, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 requireText(invite015, /v_random_byte < 234/i, 'Migration 015 must use unbiased rejection sampling.');
 requireText(invite015, /v_random_byte % 26/i, 'Migration 015 must select from all 26 letters.');
 requireText(invite015, /\[A-Z\]\{5\}/i, 'Migration 015 must accept any five-letter A-Z code.');
+if ((invite015.match(/create or replace function/g) || []).length !== 2) {
+  failures.push('Migration 015 must contain exactly the room creation and join RPC functions.');
+}
+if (/^\s+or p_display_name is null\s*$/m.test(invite015)) {
+  failures.push('Migration 015 contains a duplicated/orphaned SQL fragment after a function body.');
+}
+const invite015JoinStart = invite015.indexOf('create or replace function public.api_join_room(');
+const invite015JoinEnd = invite015.indexOf('$$;', invite015JoinStart);
+const invite015Tail = invite015.slice(invite015JoinEnd + 3).trim();
+if (!invite015Tail.startsWith('revoke all on function public.api_create_room')) {
+  failures.push('Migration 015 must end after the join function with only privilege statements.');
+}
 if (!invite015.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})$'")) {
   failures.push('Migration 015 must use a complete five-letter validation pattern.');
 }
