@@ -738,6 +738,18 @@ export function App() {
     const shuffledBaggage = shuffleArray(CARDS_BY_CATEGORY.baggage);
     const shuffledVulns = shuffleArray(CARDS_BY_CATEGORY.vulnerabilities);
     const shuffledActions = shuffleArray(CARDS_BY_CATEGORY.actions);
+    const availableSkills = gameState.skillDeck ?? shuffleArray(CARDS_BY_CATEGORY.skills.filter((skill) =>
+      !gameState.players.some((player) =>
+        player.hand.skills.card_id === skill.card_id
+        || (player.hand.extraSkills || []).some((extraSkill) => extraSkill.card_id === skill.card_id)
+      )
+    ));
+    const newPlayerSkill = availableSkills[0];
+
+    if (!newPlayerSkill) {
+      showToast('В колоде Навыков больше нет карт. Нельзя добавить участника.');
+      return;
+    }
 
     const newPlayer: Player = {
       id: `p_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
@@ -748,7 +760,7 @@ export function App() {
       avatarSeed: `eng_${gameState.players.length + 1}`,
       hand: {
         roles: shuffledRoles[0],
-        skills: shuffledSkills[0],
+        skills: newPlayerSkill,
         baggage: shuffledBaggage[0],
         vulnerabilities: shuffledVulns[0],
         actions: shuffledActions[0],
@@ -767,13 +779,7 @@ export function App() {
 
     const newPlayers = [...gameState.players, newPlayer];
     const updatedCapacity = Math.max(2, Math.floor(newPlayers.length / 2));
-    const availableSkills = gameState.skillDeck ?? shuffleArray(CARDS_BY_CATEGORY.skills.filter((skill) =>
-      !gameState.players.some((player) =>
-        player.hand.skills.card_id === skill.card_id
-        || (player.hand.extraSkills || []).some((extraSkill) => extraSkill.card_id === skill.card_id)
-      )
-    ));
-    const nextSkillDeck = availableSkills.filter((skill) => skill.card_id !== newPlayer.hand.skills.card_id);
+    const nextSkillDeck = availableSkills.slice(1);
 
     setGameState({
       ...gameState,
