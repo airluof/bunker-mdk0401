@@ -56,7 +56,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
       : 'игроков';
 
   return (
-    <main className="bunker-page bunker-room-page">
+    <section className="bunker-page bunker-room-page">
       <header className="bunker-room-heading">
         <div>
           <p className="bunker-eyebrow">{snapshot.room.room_mode === 'test' ? 'Тестовая комната · люди и боты' : 'Онлайн-партия · только люди'}</p>
