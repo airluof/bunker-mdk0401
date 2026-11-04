@@ -177,7 +177,9 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
           <section className="bunker-panel bunker-invite-panel">
             <h2>Приглашение</h2>
             <p>Отправь этот код друзьям, чтобы они вошли в комнату.</p>
-            <div className="bunker-invite-code">{inviteCode || 'Код доступен создателю комнаты'}</div>
+            <div className="bunker-invite-code">
+              {inviteCode ? <code>{inviteCode}</code> : <span>Код доступен создателю комнаты</span>}
+            </div>
             {inviteCode && (
               <button
                 type="button"
