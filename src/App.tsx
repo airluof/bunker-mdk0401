@@ -1287,6 +1287,9 @@ export function App() {
                   Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
                   Остался резервный контур — DRP-Site. Мест в Бункере вдвое меньше, чем участников.
                 </p>
+                <a href="#game-entry" className="bunker-button bunker-button-primary bunker-hero-cta">
+                  Играть <ArrowRight aria-hidden="true" />
+                </a>
               </div>
               <aside className="bunker-game-facts" aria-label="Параметры игры">
                 <div><strong>8–16</strong><span>игроков</span></div>
@@ -1295,7 +1298,7 @@ export function App() {
               </aside>
             </section>
 
-            <section className="bunker-section">
+            <section id="game-entry" className="bunker-section bunker-game-entry">
               <header className="bunker-section-heading">
                 <div>
                   <p className="bunker-eyebrow">Начать партию</p>
