@@ -99,33 +99,46 @@ export const PlayerRoster: React.FC<PlayerRosterProps> = ({
               )}
 
               <div className="bunker-player-card-slots" aria-label="Карты игрока">
-                {categories.filter((category) => !(category === 'vulnerabilities' && player.vulnerabilityDiscarded)).map((category) => {
-                  const card = player.hand[category];
-                  const isRevealed = player.revealed[category];
-                  const config = CATEGORY_CONFIG[category];
+                {categories
+                  .filter((category) => !(category === 'vulnerabilities' && player.vulnerabilityDiscarded))
+                  .flatMap((category) => {
+                    const cards = category === 'skills'
+                      ? [player.hand.skills, ...(player.hand.extraSkills || [])]
+                      : [player.hand[category]];
+                    const config = CATEGORY_CONFIG[category];
 
-                  return isRevealed ? (
-                    <button
-                      key={category}
-                      type="button"
-                      className="bunker-player-card-slot is-revealed"
-                      onClick={() => onInspectCard(card)}
-                      title={`${config.nameRu}: ${card.original_title}`}
-                    >
-                      <span>{config.nameRu}</span>
-                      <strong>{card.original_title}</strong>
-                      <Eye aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <div key={category} className="bunker-player-card-slot is-hidden">
-                      <span>{config.nameRu}</span>
-                      <strong>Закрыта</strong>
-                      <LockKeyhole aria-hidden="true" />
-                    </div>
-                  );
-                })}
+                    return cards.map((card, index) => {
+                      const isExtraSkill = category === 'skills' && index > 0;
+                      const isRevealed = isExtraSkill
+                        ? (player.hand.revealedExtraSkills || []).includes(card.card_id)
+                        : player.revealed[category];
+                      const label = category === 'skills' && cards.length > 1
+                        ? `Навык ${index + 1}`
+                        : config.nameRu;
+
+                      return isRevealed ? (
+                        <button
+                          key={card.card_id}
+                          type="button"
+                          className="bunker-player-card-slot is-revealed"
+                          onClick={() => onInspectCard(card)}
+                          title={`${label}: ${card.original_title}`}
+                        >
+                          <span>{label}</span>
+                          <strong>{card.original_title}</strong>
+                          <Eye aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <div key={card.card_id} className="bunker-player-card-slot is-hidden">
+                          <span>{label}</span>
+                          <strong>Закрыта</strong>
+                          <LockKeyhole aria-hidden="true" />
+                        </div>
+                      );
+                    });
+                  })}
               </div>
-            </article>
+          </article>
           );
         })}
       </div>
