@@ -31,6 +31,7 @@ const approvedActionHandlers = {
   action_06: 'vmotion_swap_roles',
   action_08: 'smart_peek_future_crisis',
   action_10: 'cmdb_reveal_all_baggage',
+  action_11: 'exploit_draw_second_skill',
   action_12: 'write_off_target_baggage',
   action_15: 'cr_replace_selected_crisis',
   action_16: 'confiscate_expelled_baggage',
