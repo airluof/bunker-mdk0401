@@ -693,6 +693,6 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
           </section>
         </aside>
       </section>
-    </main>
+    </section>
   );
 };
