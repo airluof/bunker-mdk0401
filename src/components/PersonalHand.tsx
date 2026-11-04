@@ -37,11 +37,14 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
           <p>{player.name} · 5 карт в руке</p>
         </div>
 
-        {player.revealed.actions && !player.actionUsed && (
+        {player.hand.actions.card_id === 'action_28' && !player.actionUsed && player.isAlive && !['audit', 'gameover'].includes(currentPhase) && (
           <button type="button" onClick={handleUseActionClick} className="bunker-action-card-button">
             <Zap aria-hidden="true" />
-            Проверить карту действия
+            Аварийный генератор · +1 место
           </button>
+        )}
+        {player.revealed.actions && !player.actionUsed && player.hand.actions.card_id !== 'action_28' && (
+          <span className="bunker-help">Эффект этой карты пока не автоматизирован.</span>
         )}
       </header>
 
