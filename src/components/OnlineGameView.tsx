@@ -98,7 +98,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   const isTestMode = snapshot.room.room_mode === 'test';
   const phaseLabel = PHASE_LABELS[phase] || 'Игровой этап';
 
-  const publicCards = (snapshot.revealed_cards as SnapshotCard[]).map((source) => ({
+  const publicCards = (snapshot.revealed_cards as unknown as SnapshotCard[]).map((source) => ({
     ownerMemberId: source.owner_member_id || '',
     card: toDisplayCard(source),
   }));
@@ -118,7 +118,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     ...myPublicCards.map((card) => ({ instanceId: '', card, revealed: true })),
   ].sort((left, right) => HAND_ORDER.indexOf(left.card.category) - HAND_ORDER.indexOf(right.card.category));
 
-  const crisisCards = (snapshot.active_crises as SnapshotCard[]).map((source) => toDisplayCard({
+  const crisisCards = (snapshot.active_crises as unknown as SnapshotCard[]).map((source) => toDisplayCard({
     ...source,
     category: 'crises',
   }));
