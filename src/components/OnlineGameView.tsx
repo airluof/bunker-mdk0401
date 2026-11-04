@@ -191,7 +191,8 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     ...myPublicCards.map((card) => ({ instanceId: '', card, revealed: true })),
   ].sort((left, right) => HAND_ORDER.indexOf(left.card.category) - HAND_ORDER.indexOf(right.card.category));
 
-  const crisisCards = (snapshot.active_crises as unknown as SnapshotCard[]).map((source) => toDisplayCard({
+  const crisisInstances = snapshot.active_crises as unknown as SnapshotCard[];
+  const crisisCards = crisisInstances.map((source) => toDisplayCard({
     ...source,
     category: 'crises',
   }));
@@ -495,9 +496,19 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               <span className="bunker-round-stamp">Раунд {snapshot.session.round_number}</span>
             </div>
             <div className="bunker-online-crisis-cards">
-              {crisisCards.map((card) => (
-                <CardView key={card.card_id} card={card} size="md" className="w-full" />
-              ))}
+              {crisisInstances.map((source) => {
+                const card = toDisplayCard({ ...source, category: 'crises' });
+                const crisisInstanceId = source.instance_id || source.card_instance_id || '';
+                const ignoredForAudit = ignoredCrisisIds.includes(crisisInstanceId);
+                return (
+                  <div key={crisisInstanceId || card.card_id} className="bunker-online-crisis-card-wrap">
+                    {ignoredForAudit && (
+                      <span className="bunker-online-crisis-ignore">Workaround · отмечен для игнорирования в финальном аудите</span>
+                    )}
+                    <CardView card={card} size="md" className="w-full" />
+                  </div>
+                );
+              })}
               {crisisCards.length === 0 && <p className="bunker-empty-copy">Активные кризисы не найдены.</p>}
             </div>
           </section>
