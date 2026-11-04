@@ -19,6 +19,7 @@ interface OnlineGameViewProps {
   onInspectCard: (card: Card) => void;
   onRevealCard: (instanceId: string) => void;
   onUseActionCard: (instanceId: string) => void;
+  onUseHotfixCard: (actionInstanceId: string, vulnerabilityInstanceId: string) => void;
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
@@ -83,6 +84,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onInspectCard,
   onRevealCard,
   onUseActionCard,
+  onUseHotfixCard,
   onStartBriefing,
   onOpenVoting,
   onVote,
@@ -111,14 +113,33 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     revealedSnapshotCards.find((card) =>
       card.card_id === 'action_28' && card.owner_member_id === myMemberId
     );
+  const ownHotfixCard =
+    (snapshot.my_cards as SnapshotCard[]).find((card) => card.card_id === 'action_04') ||
+    revealedSnapshotCards.find((card) =>
+      card.card_id === 'action_04' && card.owner_member_id === myMemberId
+    );
+  const ownVulnerability =
+    (snapshot.my_cards as SnapshotCard[]).find((card) => card.category === 'vulnerabilities') ||
+    revealedSnapshotCards.find((card) =>
+      card.category === 'vulnerabilities' && card.owner_member_id === myMemberId
+    );
   const usedActionCardIds = Array.isArray(snapshot.public_state?.used_action_cards)
     ? snapshot.public_state.used_action_cards.filter((value): value is string => typeof value === 'string')
     : [];
   const emergencyGeneratorInstanceId = ownEmergencyGenerator?.instance_id || ownEmergencyGenerator?.card_instance_id;
+  const hotfixInstanceId = ownHotfixCard?.instance_id || ownHotfixCard?.card_instance_id;
+  const vulnerabilityInstanceId = ownVulnerability?.instance_id || ownVulnerability?.card_instance_id;
   const canUseEmergencyGenerator = Boolean(
     isAlive &&
     emergencyGeneratorInstanceId &&
     !usedActionCardIds.includes(emergencyGeneratorInstanceId) &&
+    !['lobby', 'audit', 'gameover'].includes(phase)
+  );
+  const canUseHotfix = Boolean(
+    isAlive &&
+    hotfixInstanceId &&
+    vulnerabilityInstanceId &&
+    !usedActionCardIds.includes(hotfixInstanceId) &&
     !['lobby', 'audit', 'gameover'].includes(phase)
   );
 
@@ -472,6 +493,17 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 >
                   <Zap aria-hidden="true" />
                   Аварийный генератор · +1 место
+                </button>
+              )}
+              {canUseHotfix && hotfixInstanceId && vulnerabilityInstanceId && (
+                <button
+                  type="button"
+                  className="bunker-action-card-button"
+                  onClick={() => onUseHotfixCard(hotfixInstanceId, vulnerabilityInstanceId)}
+                  disabled={busy}
+                >
+                  <ShieldCheck aria-hidden="true" />
+                  Hotfix · сбросить Уязвимость
                 </button>
               )}
               <span className="bunker-online-private-label"><LockKeyhole aria-hidden="true" /> Личная раздача</span>
