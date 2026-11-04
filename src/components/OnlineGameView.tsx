@@ -78,12 +78,13 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     .map((card) => toDisplayCard({ ...card, category: 'crises' }, 'crises'));
 
   const phaseLabel = PHASE_LABELS[snapshot.session.phase] || 'Игровой этап';
+  const isTestMode = snapshot.public_state?.test_mode === true;
 
   return (
     <main className="bunker-page bunker-online-game">
       <header className="bunker-online-game-heading">
         <div>
-          <p className="bunker-eyebrow">Онлайн-партия · {snapshot.players.length} участников</p>
+          <p className="bunker-eyebrow">{isTestMode ? 'ТЕСТОВЫЙ ЗАПУСК' : 'Онлайн-партия'} · {snapshot.players.length} участников</p>
           <h1>Игровой стол</h1>
           <p className="bunker-page-description">
             Раунд {snapshot.session.round_number} из {snapshot.session.max_rounds} · {phaseLabel}

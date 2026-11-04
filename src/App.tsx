@@ -35,6 +35,7 @@ import {
   closeOnlineRoom,
   updateOnlineRoomSettings,
   startOnlineGame,
+  startOnlineTestGame,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -369,6 +370,25 @@ export function App() {
       showToast('Партия запущена. Личные карты выданы участникам.');
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось запустить онлайн-партию.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleStartOnlineTestGame = async () => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await startOnlineTestGame(onlineRoom.roomId);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast('Тестовый запуск выполнен. Карты выданы текущим участникам.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось выполнить тестовый запуск.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -875,6 +895,7 @@ export function App() {
               onExit={handleExitCurrentRoom}
               onSaveSettings={handleSaveOnlineRoomSettings}
               onStartGame={handleStartOnlineGame}
+              onStartTestGame={handleStartOnlineTestGame}
             />
           )
         ) : !gameState ? (

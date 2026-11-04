@@ -9,6 +9,7 @@ export interface RoomCommandResult {
   round?: number;
   phase?: string;
   state_version?: number;
+  test_mode?: boolean;
 }
 
 export interface RoomSnapshot {
@@ -137,6 +138,19 @@ export async function startOnlineGame(roomId: string): Promise<RoomCommandResult
   await ensureAnonymousSession();
 
   const { data, error } = await client.rpc('api_start_game', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as RoomCommandResult;
+}
+
+export async function startOnlineTestGame(roomId: string): Promise<RoomCommandResult> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_start_test_game', {
     p_room_id: roomId,
     p_command_id: crypto.randomUUID(),
   });

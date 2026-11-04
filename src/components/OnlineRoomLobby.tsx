@@ -12,6 +12,7 @@ interface OnlineRoomLobbyProps {
   onExit: () => void;
   onSaveSettings: (maxPlayers: number) => void;
   onStartGame: () => void;
+  onStartTestGame: () => void;
 }
 
 export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
@@ -24,6 +25,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   onExit,
   onSaveSettings,
   onStartGame,
+  onStartTestGame,
 }) => {
   const [copied, setCopied] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(snapshot.room.max_players);
@@ -81,6 +83,17 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                 : 'Раздать карты и начать партию'}
             >
               {busy ? 'Запускаем…' : 'Начать игру'}
+            </button>
+          )}
+          {isHost && snapshot.room.status === 'lobby' && (
+            <button
+              type="button"
+              onClick={onStartTestGame}
+              disabled={busy || activePlayers.length === 0}
+              className="bunker-button bunker-button-secondary"
+              title="Тестовый запуск выдаёт карты текущим участникам и не требует 8 игроков"
+            >
+              {busy ? 'Запускаем тест…' : 'Тестовый запуск'}
             </button>
           )}
           <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
@@ -220,6 +233,13 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             : isHost
               ? 'Минимум участников набран. Ведущий может запустить партию.'
               : 'Минимум участников набран. Ожидаем запуска от ведущего.'}
+        </p>
+      )}
+      {isHost && snapshot.room.status === 'lobby' && (
+        <p className="bunker-online-note">
+          Тестовый запуск проверяет раздачу для текущих участников, даже если вы один.
+          Он переводит комнату в состояние игры; для обычной партии после проверки
+          потребуется создать новую комнату.
         </p>
       )}
     </main>
