@@ -92,6 +92,9 @@ requireText(invite015, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 requireText(invite015, /v_random_byte < 234/i, 'Migration 015 must use unbiased rejection sampling.');
 requireText(invite015, /v_random_byte % 26/i, 'Migration 015 must select from all 26 letters.');
 requireText(invite015, /\[A-Z\]\{5\}/i, 'Migration 015 must accept any five-letter A-Z code.');
+if (!invite015.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})$'")) {
+  failures.push('Migration 015 must use a complete five-letter A-Z validation pattern.');
+}
 requireText(invite015, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 015 must hash normalized invite codes.');
 requireText(invite015, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 015 must revoke room creation from PUBLIC and anon.');
 requireText(invite015, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 015 must grant room creation to authenticated users.');
