@@ -813,27 +813,36 @@ export function App() {
     showToast('Карта раскрыта. Тестовые боты также раскрыли по одной карте.');
   };
 
-  // Trigger special Action card
+  // Apply only action effects that have an explicit, implemented rule.
   const handleUseAction = () => {
     if (!gameState) return;
     const myPlayer = gameState.players[0];
-    if (!myPlayer || myPlayer.actionUsed) return;
+    if (!myPlayer || !myPlayer.isAlive || myPlayer.actionUsed) return;
+    if (['audit', 'gameover', 'lobby'].includes(gameState.phase)) return;
 
     const actionCard = myPlayer.hand.actions;
+    if (actionCard.card_id !== 'action_28') {
+      showToast('Эффект этой карты пока не автоматизирован. Карта не потрачена.');
+      return;
+    }
 
-    const updatedPlayers = gameState.players.map((p, idx) => {
-      if (idx === 0) {
-        return { ...p, actionUsed: true };
-      }
-      return p;
-    });
+    const updatedPlayers = gameState.players.map((player, index) =>
+      index === 0
+        ? {
+            ...player,
+            actionUsed: true,
+            revealed: { ...player.revealed, actions: true },
+          }
+        : player
+    );
 
+    const newCapacity = gameState.bunkerCapacity + 1;
     const newLog: GameLogEntry = {
       id: `log_${Date.now()}`,
       timestamp: new Date().toLocaleTimeString('ru-RU'),
       round: gameState.round,
       type: 'action',
-      message: `Карта действия выбрана для проверки [${actionCard.original_title}]. Автоматический эффект в текущей тестовой сборке не применяется. Исходное описание: ${actionCard.source_description}`,
+      message: `Аварийный генератор активирован: вместимость Бункера увеличена с ${gameState.bunkerCapacity} до ${newCapacity} мест.`,
       actorName: myPlayer.name,
       cardId: actionCard.card_id,
     };
@@ -841,9 +850,10 @@ export function App() {
     setGameState({
       ...gameState,
       players: updatedPlayers,
+      bunkerCapacity: newCapacity,
       log: [...gameState.log, newLog],
     });
-    showToast(`Карта «${actionCard.original_title}» отмечена. Её специальный эффект пока не автоматизирован.`);
+    showToast('Аварийный генератор активирован. Вместимость увеличена на одно место.');
   };
 
   // Submit vote in voting phase
