@@ -83,9 +83,9 @@ requireText(sql, /grant select, insert, update, delete on public\.card_catalog t
 requireText(sql, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'RPC execute privileges must be revoked from PUBLIC and anon.');
 requireText(sql, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Authenticated room creation RPC grant is missing.');
 
-requireText(invite014, /v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Migration 014 must include five-letter invite generation.');
+requireText(invite014, /v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Migration 014 must include its five-letter invite alphabet.');
 requireText(invite014, /for v_char_index in 1\.\.5 loop/i, 'Migration 014 must generate five-letter invite codes.');
-requireText(invite014, /v_random_byte < 240/i, 'Migration 014 invite generation must use unbiased rejection sampling.');
+requireText(invite014, /v_random_byte < 240/i, 'Migration 014 must use unbiased rejection sampling.');
 requireText(invite014, /v_random_byte % 24/i, 'Migration 014 must select from all 24 configured letters.');
 requireText(invite014, /\[A-HJ-NP-Z\]\{5\}/i, 'Migration 014 must accept its five-letter alphabet.');
 requireText(invite014, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 014 must hash normalized invite codes.');
@@ -95,16 +95,19 @@ requireText(invite015, /v_random_byte < 234/i, 'Migration 015 must use unbiased 
 requireText(invite015, /v_random_byte % 26/i, 'Migration 015 must select from all 26 letters.');
 requireText(invite015, /\[A-Z\]\{5\}/i, 'Migration 015 must accept any five-letter A-Z code.');
 if (!invite015.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})$'")) {
-  failures.push('Migration 015 must use a complete five-letter A-Z validation pattern.');
+  failures.push('Migration 015 must use a complete five-letter validation pattern.');
 }
-requireText(invite015, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 015 must hash normalized invite codes.');
-requireText(invite015, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 015 must revoke room creation from PUBLIC and anon.');
-requireText(invite015, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 015 must grant room creation to authenticated users.');
+
 requireText(invite016, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'/i, 'Migration 016 must use A-Z and 0-9.');
 requireText(invite016, /v_random_byte < 252/i, 'Migration 016 must use unbiased rejection sampling.');
-requireText(invite016, /v_random_byte % 36/i, 'Migration 016 must generate from 36 alphanumeric characters.');
+requireText(invite016, /v_random_byte % 36/i, 'Migration 016 must select from all 36 alphanumeric characters.');
 requireText(invite016, /\[A-Z0-9\]\{5\}/i, 'Migration 016 must accept any five-character alphanumeric code.');
-if (!invite016.includes("upper(btrim(p_invite_code)) !~ '^([A-Z0-9]{5}|[0-9A-F]{32})
+if (!invite016.includes("upper(btrim(p_invite_code)) !~ '^([A-Z0-9]{5}|[0-9A-F]{32})$'")) {
+  failures.push('Migration 016 must use a complete five-character alphanumeric validation pattern.');
+}
+requireText(invite016, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 016 must hash normalized invite codes.');
+requireText(invite016, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 016 must revoke room creation from PUBLIC and anon.');
+requireText(invite016, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 016 must grant room creation to authenticated users.');
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
   failures.push('The base schema migration must not grant database access to anon.');
@@ -119,21 +122,3 @@ if (failures.length) {
 console.log('Supabase migration structure validated.');
 console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
 console.log('Five-character alphanumeric invite generation, legacy-code compatibility and versioned catalog constraints are present.');
-")) {
-  failures.push('Migration 016 must use a complete five-character alphanumeric validation pattern.');
-}
-
-
-if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
-  failures.push('The base schema migration must not grant database access to anon.');
-}
-
-if (failures.length) {
-  console.error('Supabase migration validation failed:');
-  for (const failure of failures) console.error(' - ' + failure);
-  process.exit(1);
-}
-
-console.log('Supabase migration structure validated.');
-console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
-console.log('Five-letter full A-Z invite generation, legacy-code compatibility and versioned catalog constraints are present.');
