@@ -171,6 +171,35 @@ export async function addOnlineTestBots(roomId: string): Promise<{
   };
 }
 
+
+export interface OnlineTestBotCard {
+  card_id: string;
+  category: string;
+  title: string;
+  description: string;
+  image_path: string | null;
+}
+
+export interface OnlineTestBotData {
+  bot_hands: Array<{
+    member_id: string;
+    cards: OnlineTestBotCard[];
+  }>;
+  crisis_deck: OnlineTestBotCard[];
+}
+
+export async function getOnlineTestBotData(roomId: string): Promise<OnlineTestBotData> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_get_test_bot_data', {
+    p_room_id: roomId,
+  });
+  throwIfError(error);
+
+  return data as OnlineTestBotData;
+}
+
 export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapshot> {
   const client = getClient();
   await ensureAnonymousSession();
