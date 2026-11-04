@@ -96,7 +96,7 @@ const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
 
 function isValidOnlineInviteCode(value: string): boolean {
   const normalized = value.trim().toUpperCase();
-  return /^[A-HJ-NP-Z]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
+  return /^[A-Z]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
 }
 
 function formatOnlineError(error: unknown, fallback: string): string {
@@ -397,7 +397,7 @@ export function App() {
       return;
     }
     if (!isValidOnlineInviteCode(inviteCode)) {
-      setOnlineError('Новый код комнаты состоит из пяти букв A–Z (без I и O).');
+      setOnlineError('Новый код комнаты состоит из пяти латинских букв A–Z.');
       return;
     }
 
@@ -1375,7 +1375,7 @@ export function App() {
                     id="room-invite-code"
                     type="text"
                     value={roomCodeInput}
-                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^A-HJ-NP-Z0-9]/g, '').slice(0, 32))}
+                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32))}
                     maxLength={32}
                     placeholder="ABCDE"
                     autoComplete="off"
