@@ -1,21 +1,16 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const migrationPath = resolve(
-  process.cwd(),
-  'supabase/migrations/202611040001_initial_multiplayer_schema.sql',
-);
-const sql = await readFile(migrationPath, 'utf8');
-const inviteMigrationPath = resolve(
-  process.cwd(),
-  'supabase/migrations/202611040014_short_room_invite_codes.sql',
-);
-const inviteSql = await readFile(inviteMigrationPath, 'utf8');
-const fullAlphabetMigrationPath = resolve(
-  process.cwd(),
-  'supabase/migrations/202611040015_full_alphabet_invite_codes.sql',
-);
-const fullAlphabetSql = await readFile(fullAlphabetMigrationPath, 'utf8');
+const root = process.cwd();
+const migrationPath = resolve(root, 'supabase/migrations/202611040001_initial_multiplayer_schema.sql');
+const invite014Path = resolve(root, 'supabase/migrations/202611040014_short_room_invite_codes.sql');
+const invite015Path = resolve(root, 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql');
+
+const [sql, invite014, invite015] = await Promise.all([
+  readFile(migrationPath, 'utf8'),
+  readFile(invite014Path, 'utf8'),
+  readFile(invite015Path, 'utf8'),
+]);
 
 const expectedTables = [
   'rooms',
@@ -44,73 +39,68 @@ const expectedFunctions = [
 ];
 
 const failures = [];
-const count = (pattern) => [...sql.matchAll(pattern)].length;
-const requireText = (pattern, message) => {
-  if (!pattern.test(sql)) failures.push(message);
-};
-const requireInviteText = (pattern, message) => {
-  if (!pattern.test(inviteSql)) failures.push(message);
+const count = (source, pattern) => [...source.matchAll(pattern)].length;
+const requireText = (source, pattern, message) => {
+  if (!pattern.test(source)) failures.push(message);
 };
 
-const beginCount = count(/^begin;$/gim);
-const commitCount = count(/^commit;$/gim);
+const beginCount = count(sql, /^begin;$/gim);
+const commitCount = count(sql, /^commit;$/gim);
 if (beginCount !== 1) failures.push('Expected exactly one BEGIN;');
 if (commitCount !== 1) failures.push('Expected exactly one COMMIT;');
 
 for (const table of expectedTables) {
   const createPattern = new RegExp('^create table public\\.' + table + '\\s*\\(', 'gim');
   const rlsPattern = new RegExp('^alter table public\\.' + table + ' enable row level security;', 'gim');
-  if (count(createPattern) !== 1) failures.push('Table must be created exactly once: ' + table);
-  if (count(rlsPattern) !== 1) failures.push('RLS must be enabled exactly once: ' + table);
+  if (count(sql, createPattern) !== 1) failures.push('Table must be created exactly once: ' + table);
+  if (count(sql, rlsPattern) !== 1) failures.push('RLS must be enabled exactly once: ' + table);
 }
 
 for (const fn of expectedFunctions) {
   const pattern = new RegExp('^create or replace function ' + fn.replace('.', '\\.') + '\\s*\\(', 'gim');
-  if (count(pattern) !== 1) failures.push('Function must be defined exactly once: ' + fn);
+  if (count(sql, pattern) !== 1) failures.push('Function must be defined exactly once: ' + fn);
 }
 
-const functionOpeners = count(/^as \$\$$/gim);
-const anonymousBlockOpeners = count(/^do \$\$$/gim);
-const dollarClosers = count(/^\$\$;$/gim);
+const functionOpeners = count(sql, /^as \$\$$/gim);
+const anonymousBlockOpeners = count(sql, /^do \$\$$/gim);
+const dollarClosers = count(sql, /^\$\$;$/gim);
 if (functionOpeners !== expectedFunctions.length) {
   failures.push('Unexpected count of function dollar-quote openers: ' + functionOpeners);
 }
-if (anonymousBlockOpeners !== 1) {
-  failures.push('Expected exactly one DO $$ block.');
-}
-if (dollarClosers !== functionOpeners + anonymousBlockOpeners) {
-  failures.push('Dollar-quoted SQL blocks are not balanced.');
-}
+if (anonymousBlockOpeners !== 1) failures.push('Expected exactly one DO $$ block.');
+if (dollarClosers !== functionOpeners + anonymousBlockOpeners) failures.push('Dollar-quoted SQL blocks are not balanced.');
 
-requireText(/extensions\.gen_random_bytes\(16\)/, 'Room invitation must use 128 bits of random data.');
-requireText(/p_invite_code !~ '\^\[0-9A-Fa-f\]\{32\}\$'/, 'Join RPC must validate a 32-character hexadecimal invite code.');
-requireText(/extensions\.digest\(convert_to\(upper\(p_invite_code\), 'UTF8'\), 'sha256'\)/, 'Invite codes must be hashed before lookup.');
-requireText(/v_result - 'invite_code'/, 'Raw invite codes must not be stored in command receipts.');
-requireText(/primary key \(card_id, catalog_version\)/, 'Catalog records must preserve immutable catalog versions.');
-requireText(/foreign key \(card_id, catalog_version\)/, 'Card instances must reference a specific catalog version.');
-requireText(/revoke all on public\.rooms[\s\S]*?from public, anon, authenticated;/i, 'Direct table privileges must be revoked from public/anon/authenticated.');
-requireText(/grant select, insert, update, delete on public\.card_catalog to service_role;/i, 'Only the service role should receive direct catalog import privileges.');
-requireText(/revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'RPC execute privileges must be revoked from PUBLIC and anon.');
-requireText(/grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Authenticated room creation RPC grant is missing.');
-requireInviteText(/v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Short invite alphabet is missing or includes ambiguous letters.');
-if (!fullAlphabetSql.includes("v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'")) {
-  failures.push('Latest invite migration must generate codes using the full A-Z alphabet.');
-}
-if (!fullAlphabetSql.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32})
-requireInviteText(/for v_char_index in 1\.\.5 loop/i, 'Room creation must generate exactly five letters.');
-if (!inviteSql.includes("upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'")) {
-  failures.push('Join RPC must accept five-letter invite codes and keep legacy 32-character codes valid.');
-}
-if (!inviteSql.includes("extensions.digest(convert_to(upper(btrim(p_invite_code)), 'UTF8'), 'sha256')")) {
-  failures.push('Updated join RPC must hash normalized invite codes before lookup.');
-}
-requireInviteText(/INVITE_CODE_GENERATION_FAILED/, 'Short invite collision handling is missing.');
+requireText(sql, /extensions\.gen_random_bytes\(16\)/, 'Initial room invite must use 128 bits of random data.');
+requireText(sql, /p_invite_code !~ '\^\[0-9A-Fa-f\]\{32\}\$'/, 'Initial join RPC must validate legacy 32-character hexadecimal invite codes.');
+requireText(sql, /extensions\.digest\(convert_to\(upper\(p_invite_code\), 'UTF8'\), 'sha256'\)/, 'Initial invite codes must be hashed before lookup.');
+requireText(sql, /v_result - 'invite_code'/, 'Raw invite codes must not be stored in command receipts.');
+requireText(sql, /primary key \(card_id, catalog_version\)/, 'Catalog records must preserve immutable catalog versions.');
+requireText(sql, /foreign key \(card_id, catalog_version\)/, 'Card instances must reference a specific catalog version.');
+requireText(sql, /revoke all on public\.rooms[\s\S]*?from public, anon, authenticated;/i, 'Direct table privileges must be revoked from public/anon/authenticated.');
+requireText(sql, /grant select, insert, update, delete on public\.card_catalog to service_role;/i, 'Only the service role should receive direct catalog import privileges.');
+requireText(sql, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'RPC execute privileges must be revoked from PUBLIC and anon.');
+requireText(sql, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Authenticated room creation RPC grant is missing.');
+
+requireText(invite014, /v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ'/i, 'Migration 014 must include five-letter invite generation.');
+requireText(invite014, /for v_char_index in 1\.\.5 loop/i, 'Migration 014 must generate five-letter invite codes.');
+requireText(invite014, /v_random_byte < 240/i, 'Migration 014 invite generation must use unbiased rejection sampling.');
+requireText(invite014, /v_random_byte % 24/i, 'Migration 014 must select from all 24 configured letters.');
+requireText(invite014, /\[A-HJ-NP-Z\]\{5\}/i, 'Migration 014 must accept its five-letter alphabet.');
+requireText(invite014, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 014 must hash normalized invite codes.');
+
+requireText(invite015, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/i, 'Migration 015 must use the full A-Z alphabet.');
+requireText(invite015, /v_random_byte < 234/i, 'Migration 015 must use unbiased rejection sampling.');
+requireText(invite015, /v_random_byte % 26/i, 'Migration 015 must select from all 26 letters.');
+requireText(invite015, /\[A-Z\]\{5\}/i, 'Migration 015 must accept any five-letter A-Z code.');
+requireText(invite015, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 015 must hash normalized invite codes.');
+requireText(invite015, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 015 must revoke room creation from PUBLIC and anon.');
+requireText(invite015, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 015 must grant room creation to authenticated users.');
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
-  failures.push('The migration must not grant database access to anon.');
+  failures.push('The base schema migration must not grant database access to anon.');
 }
 
-if (failures.length > 0) {
+if (failures.length) {
   console.error('Supabase migration validation failed:');
   for (const failure of failures) console.error(' - ' + failure);
   process.exit(1);
@@ -119,32 +109,3 @@ if (failures.length > 0) {
 console.log('Supabase migration structure validated.');
 console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
 console.log('Five-letter full A-Z invite generation, legacy-code compatibility and versioned catalog constraints are present.');
-")) {
-  failures.push('Latest join RPC must accept all A-Z letters and legacy hexadecimal codes.');
-}
-if (!fullAlphabetSql.includes("v_random_byte < 234") || !fullAlphabetSql.includes("v_random_byte % 26")) {
-  failures.push('Full alphabet code generation must select letters without distribution bias.');
-}
-
-requireInviteText(/for v_char_index in 1\.\.5 loop/i, 'Room creation must generate exactly five letters.');
-if (!inviteSql.includes("upper(btrim(p_invite_code)) !~ '^([A-HJ-NP-Z]{5}|[0-9A-F]{32})$'")) {
-  failures.push('Join RPC must accept five-letter invite codes and keep legacy 32-character codes valid.');
-}
-if (!inviteSql.includes("extensions.digest(convert_to(upper(btrim(p_invite_code)), 'UTF8'), 'sha256')")) {
-  failures.push('Updated join RPC must hash normalized invite codes before lookup.');
-}
-requireInviteText(/INVITE_CODE_GENERATION_FAILED/, 'Short invite collision handling is missing.');
-
-if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
-  failures.push('The migration must not grant database access to anon.');
-}
-
-if (failures.length > 0) {
-  console.error('Supabase migration validation failed:');
-  for (const failure of failures) console.error(' - ' + failure);
-  process.exit(1);
-}
-
-console.log('Supabase migration structure validated.');
-console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
-console.log('Base schema hashing, five-letter invite generation, legacy-code compatibility and versioned catalog constraints are present.');
