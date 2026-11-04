@@ -44,12 +44,12 @@ const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 
   action_12: { description: 'Списать Багаж выбранного участника. Эффект сработает, если у него ровно одна карта Багажа.', target: 'player' },
   action_15: { description: 'Сбросить выбранный активный Кризис и открыть следующий из колоды.', target: 'crisis' },
   action_16: { description: 'Забрать Багаж у выбранного изгнанного участника.', target: 'expelled' },
-  action_17: { description: 'Сократить брифинг этого раунда до 30 секунд.', target: 'none' },
+  action_17: { description: 'Сократить текущий брифинг или задать 30 секунд для предстоящего брифинга этого раунда.', target: 'none' },
   action_18: { description: 'Поменять картами Уязвимостей с выбранным участником.', target: 'player' },
   action_20: { description: 'Посмотреть все скрытые карты выбранного участника. Результат увидите только вы.', target: 'player' },
   action_21: { description: 'Выбрать один активный Кризис, который будет отмечен для игнорирования при финальном аудите.', target: 'crisis' },
   action_24: { description: 'Взять дополнительную карту Багажа из колоды.', target: 'none' },
-  action_25: { description: 'Отметить, что Уязвимости отключены в этом раунде.', target: 'none' },
+  action_25: { description: 'Активировать Safe Boot и записать состояние Уязвимостей на этот раунд.', target: 'none' },
 };
 
 export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
@@ -176,7 +176,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
         <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Watchdog активирован: брифинг этого раунда рассчитан на 30 секунд.</p>
       )}
       {vulnerabilitiesDisabledRound === currentRound && (
-        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Safe Boot отмечен на этот раунд. Состояние эффекта записано сервером.</p>
+        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Safe Boot: сервер записал флаг действия на этот раунд. Автоматическое подавление эффектов Уязвимостей ещё не подключено.</p>
       )}
       {ignoredCrisisIds.length > 0 && (
         <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Есть Кризис, отмеченный картой Workaround для финального аудита.</p>
