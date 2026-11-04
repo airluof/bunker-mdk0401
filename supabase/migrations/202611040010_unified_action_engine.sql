@@ -513,6 +513,14 @@ begin
     set zone = 'discard', owner_member_id = null
     where id = v_crisis_card.id;
 
+    -- A replaced Crisis can no longer remain marked by Workaround.
+    v_state := jsonb_set(
+      v_state,
+      '{ignored_crisis_ids}',
+      coalesce(v_state->'ignored_crisis_ids', '[]'::jsonb) - v_crisis_card.id::text,
+      true
+    );
+
     update public.card_instances
     set zone = 'active_crisis', instance_status = 'revealed',
         revealed_at = now(), revealed_by_member_id = v_actor_id
@@ -546,6 +554,10 @@ begin
 
   -- Watchdog: shorten the current briefing or mark the coming briefing as 30s.
   elsif v_action.card_id = 'action_17' then
+    if v_session.phase not in ('reveal', 'briefing') then
+      raise exception using errcode = 'P0001', message = 'WATCHDOG_WINDOW_CLOSED';
+    end if;
+
     v_state := jsonb_set(v_state, '{watchdog_round}', to_jsonb(v_session.round_number), true);
 
     if v_session.phase = 'briefing' then
