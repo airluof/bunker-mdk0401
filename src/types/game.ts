@@ -51,6 +51,7 @@ export interface Player {
   hand: PlayerHand;
   revealed: PlayerRevealedState;
   actionUsed: boolean;
+  vulnerabilityDiscarded?: boolean;
   votesReceived: number;
   votedForId: string | null;
   eliminatedInRound?: number;
