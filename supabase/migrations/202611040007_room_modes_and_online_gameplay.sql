@@ -444,9 +444,7 @@ declare
   v_user_id uuid := auth.uid();
   v_member_id uuid;
   v_session public.game_sessions%rowtype;
-  v_room_mode text;
   v_card public.card_instances%rowtype;
-  v_target_member_id uuid;
   v_existing jsonb;
   v_existing_name text;
   v_result jsonb;
@@ -558,6 +556,7 @@ declare
   v_missing integer;
   v_bot record;
   v_card public.card_instances%rowtype;
+  v_target_member_id uuid;
   v_existing jsonb;
   v_existing_name text;
   v_result jsonb;
