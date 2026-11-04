@@ -112,7 +112,7 @@ if (approvedFromSql.join(',') !== expectedApproved.join(',')) {
 }
 
 requireText(files.service, /export async function useOnlineActionEffect/i, 'Generic action RPC client is missing.');
-requireText(files.service, /api_get_my_action_private_data/i, 'Client does not fetch the player's private action results.');
+requireText(files.service, /api_get_my_action_private_data/i, 'Client does not fetch private action results.');
 requireText(files.gameView, /ActionCardControls/i, 'Online game view does not render action controls.');
 requireText(files.gameView, /onUseActionEffect/i, 'Online game view does not pass the generic action callback.');
 requireText(files.actionControls, /AVAILABLE_EFFECTS/i, 'Action controls do not define supported action cards.');
