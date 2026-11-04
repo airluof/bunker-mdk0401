@@ -43,6 +43,8 @@ import {
   submitOnlineVote,
   resolveOnlineVote,
   advanceOnlineGameRound,
+  submitOnlineAuditPlan,
+  finishOnlineGame,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -500,6 +502,18 @@ export function App() {
     'Не удалось перейти к следующему этапу.',
   );
 
+  const handleSubmitOnlineAuditPlan = (planText: string) => runOnlineGameAction(
+    () => submitOnlineAuditPlan(onlineRoom!.roomId, planText),
+    'План восстановления сохранён на сервере.',
+    'Не удалось сохранить план восстановления.',
+  );
+
+  const handleFinishOnlineGame = () => runOnlineGameAction(
+    () => finishOnlineGame(onlineRoom!.roomId),
+    'Партия завершена. Можно покинуть комнату.',
+    'Не удалось завершить партию.',
+  );
+
   const handleExitOnlineRoom = async () => {
     if (!onlineRoom) return;
     setOnlineBusy(true);
@@ -509,9 +523,10 @@ export function App() {
         (player) => player.member_id === onlineRoom.memberId
       );
       const isTestMode = onlineRoom.snapshot.room.room_mode === 'test'
-        || onlineRoom.snapshot.public_state?.test_mode === true;
+        || onlineRoom.snapshot.public_state?.test_mode === true
+        || onlineRoom.snapshot.players.some((player) => player.is_bot);
 
-      if (isTestMode && onlineRoom.snapshot.room.status === 'in_progress') {
+      if (isTestMode && ['in_progress', 'finished'].includes(onlineRoom.snapshot.room.status)) {
         const result = await exitOnlineTestRoom(onlineRoom.roomId);
         localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
         sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
@@ -1002,7 +1017,7 @@ export function App() {
           ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
           : gameState?.players[0]?.isHost}
         onExitGame={onlineRoom
-          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || onlineRoom.snapshot.room.room_mode === 'test'
+          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || onlineRoom.snapshot.room.status === 'finished' || onlineRoom.snapshot.room.room_mode === 'test' || onlineRoom.snapshot.players.some((player) => player.is_bot)
             ? handleExitCurrentRoom
             : undefined
           : gameState ? handleExitCurrentRoom : undefined}
@@ -1021,7 +1036,7 @@ export function App() {
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
         ) : onlineRoom ? (
-          onlineRoom.snapshot.room.status === 'in_progress' ? (
+          ['in_progress', 'finished'].includes(onlineRoom.snapshot.room.status) ? (
             <OnlineGameView
               snapshot={onlineRoom.snapshot}
               myMemberId={onlineRoom.memberId}
@@ -1037,6 +1052,8 @@ export function App() {
               onVote={handleSubmitOnlineVote}
               onResolveVote={handleResolveOnlineVote}
               onNextRound={handleAdvanceOnlineRound}
+              onSubmitAuditPlan={handleSubmitOnlineAuditPlan}
+              onFinishGame={handleFinishOnlineGame}
             />
           ) : (
             <OnlineRoomLobby
