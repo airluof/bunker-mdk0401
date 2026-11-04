@@ -2632,3 +2632,418 @@ body {
     gap: 14px;
   }
 }
+
+
+/* Editorial game-table pass: clearer sections, fewer nested boxes, more breathing room. */
+.bunker-online-game {
+  width: min(100%, 1440px);
+  margin-inline: auto;
+  gap: clamp(30px, 3vw, 42px);
+}
+
+.bunker-online-game-heading {
+  align-items: flex-end;
+  gap: 32px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+}
+
+.bunker-online-game-heading > div {
+  max-width: 760px;
+}
+
+.bunker-online-game-heading h1 {
+  font-size: clamp(34px, 4vw, 46px);
+  line-height: 1.04;
+  letter-spacing: -.04em;
+}
+
+.bunker-online-game-heading .bunker-page-description {
+  margin-top: 9px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.bunker-online-action-wrap {
+  min-width: 0;
+}
+
+.bunker-online-action-panel {
+  align-items: center;
+  gap: 30px;
+  padding: clamp(23px, 2.8vw, 34px);
+  border-radius: 5px;
+  background: #1b1a18;
+}
+
+.bunker-online-action-panel h2,
+.bunker-online-audit h2 {
+  margin: 7px 0 10px;
+  font-size: clamp(21px, 2.2vw, 25px);
+  line-height: 1.25;
+}
+
+.bunker-online-action-panel p,
+.bunker-online-audit p {
+  max-width: 680px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.bunker-online-game-grid {
+  column-gap: clamp(28px, 3vw, 40px);
+  row-gap: 30px;
+  grid-template-columns: minmax(0, 1fr) minmax(285px, 320px);
+}
+
+.bunker-online-game-main {
+  gap: clamp(28px, 3vw, 38px);
+}
+
+.bunker-online-game-sidebar {
+  gap: 18px;
+  padding-top: 5px;
+}
+
+.bunker-online-crisis-panel,
+.bunker-online-hand,
+.bunker-online-public-cards {
+  padding: 27px 0;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.17);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bunker-online-crisis-panel {
+  border-top: 2px solid rgba(231,93,63,.72);
+}
+
+.bunker-panel-heading {
+  align-items: flex-end;
+  gap: 22px;
+  margin-bottom: 25px;
+}
+
+.bunker-online-crisis-cards {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 22px;
+  padding-top: 4px;
+}
+
+.bunker-online-crisis-cards .bunker-card {
+  max-width: 285px;
+}
+
+.bunker-hand-heading {
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.bunker-hand-heading h2,
+.bunker-panel-heading h2 {
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.bunker-hand-heading p {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bunker-online-private-label {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.bunker-online-action-tools {
+  margin: 1.6rem 0 1.8rem;
+  padding: 1.35rem 0;
+}
+
+.bunker-online-action-tool {
+  gap: 22px;
+  padding: 17px 0;
+}
+
+.bunker-online-action-tool-copy {
+  gap: 6px;
+}
+
+.bunker-online-action-tool-copy strong {
+  font-size: 14px;
+}
+
+.bunker-online-action-tool-copy span {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bunker-online-hand-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: start;
+  justify-items: start;
+  gap: 22px;
+  padding: 5px 0 14px;
+}
+
+.bunker-online-hand-grid .bunker-hand-slot,
+.bunker-online-hand-grid .bunker-card {
+  width: 100%;
+  max-width: 235px;
+}
+
+.bunker-online-hand-grid .bunker-card {
+  min-height: 285px;
+}
+
+.bunker-hand-note {
+  margin-top: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bunker-online-public-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 30px;
+  margin-top: 25px;
+}
+
+.bunker-online-public-player {
+  padding: 16px 0 13px;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.14);
+  border-radius: 0;
+  background: transparent;
+}
+
+.bunker-online-public-player > header {
+  gap: 8px 14px;
+  padding-bottom: 12px;
+}
+
+.bunker-online-public-player > header strong {
+  font-size: 14px;
+}
+
+.bunker-online-public-player > header small {
+  font-size: 11px;
+}
+
+.bunker-online-public-card-list {
+  gap: 0;
+  padding-top: 8px;
+}
+
+.bunker-online-public-card-list button {
+  gap: 5px;
+  min-height: 56px;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  border-radius: 0;
+  padding: 10px 2px;
+  background: transparent;
+}
+
+.bunker-online-public-card-list button:hover {
+  border-color: rgba(231,93,63,.48);
+  background: rgba(255,255,255,.025);
+}
+
+.bunker-online-public-card-list span {
+  font-size: 10px;
+}
+
+.bunker-online-public-card-list strong {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.bunker-online-roster,
+.bunker-online-vote-ledger,
+.bunker-online-status {
+  padding: 22px;
+  border-radius: 5px;
+  background: rgba(18,18,18,.88);
+}
+
+.bunker-online-roster-list {
+  gap: 5px;
+  margin-top: 18px;
+}
+
+.bunker-online-roster-list .bunker-player-row {
+  min-height: 64px;
+  gap: 13px;
+  padding: 10px 5px;
+}
+
+.bunker-online-roster-list .bunker-player-details strong {
+  font-size: 14px;
+}
+
+.bunker-online-roster-list .bunker-player-details small {
+  font-size: 12px;
+}
+
+.bunker-online-vote-ledger .bunker-online-vote-row {
+  gap: 11px;
+  padding: 12px 0;
+  font-size: 12px;
+}
+
+.bunker-online-status h2 {
+  margin: 12px 0 8px;
+  font-size: 18px;
+}
+
+.bunker-online-status p,
+.bunker-online-game-footnote {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1100px) {
+  .bunker-online-game-grid {
+    grid-template-columns: minmax(0, 1fr) 285px;
+    gap: 26px;
+  }
+
+  .bunker-online-hand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (max-width: 820px) {
+  .bunker-online-game-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .bunker-online-game-main {
+    gap: 27px;
+  }
+
+  .bunker-online-game-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .bunker-online-roster {
+    grid-column: 1 / -1;
+  }
+
+  .bunker-online-crisis-panel,
+  .bunker-online-hand,
+  .bunker-online-public-cards {
+    padding-block: 24px;
+  }
+
+  .bunker-online-action-panel {
+    align-items: flex-start;
+  }
+
+  .bunker-online-public-grid {
+    gap: 20px 26px;
+  }
+}
+
+@media (max-width: 600px) {
+  .bunker-online-game {
+    gap: 25px;
+  }
+
+  .bunker-online-game-heading {
+    gap: 16px;
+    padding-bottom: 19px;
+  }
+
+  .bunker-online-game-grid,
+  .bunker-online-game-main {
+    gap: 23px;
+  }
+
+  .bunker-online-game-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .bunker-online-action-panel {
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .bunker-online-action-panel p {
+    font-size: 13px;
+  }
+
+  .bunker-online-crisis-panel,
+  .bunker-online-hand,
+  .bunker-online-public-cards {
+    padding-block: 21px;
+  }
+
+  .bunker-online-crisis-cards {
+    grid-template-columns: 1fr;
+    gap: 19px;
+  }
+
+  .bunker-online-crisis-cards .bunker-card {
+    max-width: 100%;
+  }
+
+  .bunker-online-hand-grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(250px, 76vw);
+    justify-items: stretch;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    padding: 3px 2px 14px;
+  }
+
+  .bunker-online-hand-grid .bunker-hand-slot {
+    width: 100%;
+    max-width: none;
+    height: 330px;
+    min-height: 330px;
+    scroll-snap-align: start;
+  }
+
+  .bunker-online-hand-grid .bunker-card {
+    width: 100%;
+    max-width: none;
+    height: 330px;
+    min-height: 330px;
+    max-height: 330px;
+  }
+
+  .bunker-online-private-label {
+    margin-left: 0;
+  }
+
+  .bunker-online-public-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .bunker-online-public-player {
+    padding-block: 14px;
+  }
+
+  .bunker-online-roster,
+  .bunker-online-vote-ledger,
+  .bunker-online-status {
+    padding: 19px;
+  }
+}
