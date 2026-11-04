@@ -41,6 +41,7 @@ import {
   revealOnlineCard,
   useOnlineActionCard,
   useOnlineActionEffect,
+  useOnlineExploitSkillCard,
   useOnlineHotfixCard,
   transitionOnlineGamePhase,
   submitOnlineVote,
@@ -175,6 +176,9 @@ function formatOnlineError(error: unknown, fallback: string): string {
   }
   if (normalized.includes('REVEAL_PHASE_CLOSED')) {
     return 'Этап вскрытия уже завершён.';
+  }
+  if (normalized.includes('SKILL_DECK_EMPTY')) {
+    return 'В колоде Навыков больше нет карт. Эксплойт не был потрачен.';
   }
   if (normalized.includes('CARD_NOT_AVAILABLE')) {
     return 'Эта карта уже раскрыта или не принадлежит вашей руке.';
@@ -495,16 +499,21 @@ export function App() {
 
   const handleUseOnlineActionEffect = (
     cardInstanceId: string,
+    actionId: string,
     targetMemberId?: string,
     targetCardInstanceId?: string,
   ) => runOnlineGameAction(
-    () => useOnlineActionEffect(
-      onlineRoom!.roomId,
-      cardInstanceId,
-      targetMemberId,
-      targetCardInstanceId,
-    ),
-    'Карта действия применена. Состояние синхронизировано с сервером.',
+    () => actionId === 'action_11'
+      ? useOnlineExploitSkillCard(onlineRoom!.roomId, cardInstanceId)
+      : useOnlineActionEffect(
+          onlineRoom!.roomId,
+          cardInstanceId,
+          targetMemberId,
+          targetCardInstanceId,
+        ),
+    actionId === 'action_11'
+      ? 'Эксплойт применён. В личную руку добавлен второй Навык.'
+      : 'Карта действия применена. Состояние синхронизировано с сервером.',
     'Не удалось применить карту действия.',
   );
 
