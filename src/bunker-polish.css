@@ -2137,3 +2137,146 @@ body {
     display: none;
   }
 }
+
+
+/* Online action cards: compact controls that stay close to the player's hand. */
+.bunker-online-action-tools {
+  margin: 1.25rem 0 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(224, 103, 65, 0.28);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.bunker-online-action-tools-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.bunker-online-action-tools-heading p {
+  margin: 0;
+  color: rgba(235, 231, 224, 0.58);
+  font-size: 0.82rem;
+}
+.bunker-online-action-tool {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.bunker-online-action-tool:last-child {
+  border-bottom: 0;
+}
+.bunker-online-action-tool-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.bunker-online-action-tool-copy strong {
+  color: #f0ece5;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+.bunker-online-action-tool-copy span {
+  color: rgba(235, 231, 224, 0.62);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.bunker-online-action-tool-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex: 0 0 auto;
+}
+.bunker-action-target-select {
+  min-width: 15rem;
+  max-width: 21rem;
+  min-height: 2.65rem;
+}
+.bunker-online-action-tool-controls .bunker-button {
+  min-height: 2.65rem;
+  white-space: nowrap;
+}
+.bunker-online-action-state {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.65rem 0 0;
+  color: #e6ad87;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.bunker-online-private-action-results {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-left: 2px solid #d87955;
+  background: rgba(216, 121, 85, 0.07);
+}
+.bunker-online-private-action-results > .bunker-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.bunker-online-private-action-result {
+  padding-top: 0.7rem;
+  color: rgba(241, 236, 228, 0.86);
+  font-size: 0.84rem;
+}
+.bunker-online-private-action-result + .bunker-online-private-action-result {
+  margin-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.bunker-online-private-action-result p {
+  margin: 0.25rem 0 0;
+  color: rgba(235, 231, 224, 0.68);
+  line-height: 1.5;
+}
+.bunker-online-private-action-result ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.bunker-online-private-action-result li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.65rem;
+}
+.bunker-online-private-action-result li span {
+  color: rgba(235, 231, 224, 0.48);
+}
+.bunker-online-crisis-card-wrap {
+  min-width: 0;
+}
+.bunker-online-crisis-ignore {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #e5aa84;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+@media (max-width: 720px) {
+  .bunker-online-action-tool {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .bunker-online-action-tool-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .bunker-action-target-select {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+  .bunker-online-action-tool-controls .bunker-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
