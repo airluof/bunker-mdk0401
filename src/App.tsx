@@ -720,7 +720,7 @@ export function App() {
       if (index === 0) {
         return { ...player, revealed: { ...player.revealed, [category]: true } };
       }
-      if (gameState.isLocalDemo && gameState.phase === 'reveal' && player.isAlive && player.isBot && !revealedThisRound.includes(player.id)) {
+      if (gameState.isLocalDemo && (gameState.phase === 'reveal' || gameState.phase === 'briefing') && player.isAlive && player.isBot && !revealedThisRound.includes(player.id)) {
         const unrevealed = (['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'] as PlayerSlotCategory[])
           .filter((candidate) => !player.revealed[candidate]);
         if (unrevealed.length > 0) {
