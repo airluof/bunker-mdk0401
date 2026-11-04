@@ -387,7 +387,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
       <header className="bunker-online-game-heading">
         <div>
           <p className="bunker-eyebrow">
-            {isTestMode ? `ТЕСТОВАЯ ПАРТИЯ · ${botCount} БОТОВ` : 'ОБЫЧНАЯ ОНЛАЙН-ПАРТИЯ'}
+            {isTestMode ? `Тестовая партия · ${botCount} ботов` : 'Обычная онлайн-партия'}
             {' · '}{players.length} участников
           </p>
           <h1>Игровой стол</h1>
@@ -446,6 +446,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               </div>
               <span className="bunker-online-private-label"><LockKeyhole aria-hidden="true" /> Личная раздача</span>
             </header>
+            <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
             <div className="bunker-hand-grid bunker-online-hand-grid">
               {handCards.map(({ instanceId, card, revealed }) => (
                 <div key={card.card_id} className="bunker-hand-slot">
