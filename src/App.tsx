@@ -40,6 +40,7 @@ import {
   exitOnlineTestRoom,
   revealOnlineCard,
   useOnlineActionCard,
+  useOnlineActionEffect,
   useOnlineHotfixCard,
   transitionOnlineGamePhase,
   submitOnlineVote,
@@ -489,6 +490,21 @@ export function App() {
   const handleUseOnlineActionCard = (instanceId: string) => runOnlineGameAction(
     () => useOnlineActionCard(onlineRoom!.roomId, instanceId),
     'Аварийный генератор активирован. Вместимость Бункера увеличена на одно место.',
+    'Не удалось применить карту действия.',
+  );
+
+  const handleUseOnlineActionEffect = (
+    cardInstanceId: string,
+    targetMemberId?: string,
+    targetCardInstanceId?: string,
+  ) => runOnlineGameAction(
+    () => useOnlineActionEffect(
+      onlineRoom!.roomId,
+      cardInstanceId,
+      targetMemberId,
+      targetCardInstanceId,
+    ),
+    'Карта действия применена. Состояние синхронизировано с сервером.',
     'Не удалось применить карту действия.',
   );
 
@@ -1109,6 +1125,7 @@ export function App() {
               onRevealCard={handleRevealOnlineCard}
               onUseActionCard={handleUseOnlineActionCard}
               onUseHotfixCard={handleUseOnlineHotfix}
+              onUseActionEffect={handleUseOnlineActionEffect}
               onStartBriefing={handleStartBriefing}
               onOpenVoting={handleOpenVoting}
               onVote={handleSubmitOnlineVote}
