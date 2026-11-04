@@ -223,6 +223,77 @@ export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapsho
   return data as RoomSnapshot;
 }
 
+
+export async function revealOnlineCard(roomId: string, cardInstanceId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_reveal_card', {
+    p_room_id: roomId,
+    p_card_instance_id: cardInstanceId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; card_instance_id: string; card_id: string; round: number };
+}
+
+export async function transitionOnlineGamePhase(roomId: string, nextPhase: 'briefing' | 'voting') {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_transition_game_phase', {
+    p_room_id: roomId,
+    p_next_phase: nextPhase,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; phase: string; round: number; state_version: number };
+}
+
+export async function submitOnlineVote(roomId: string, targetMemberId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_submit_vote', {
+    p_room_id: roomId,
+    p_target_member_id: targetMemberId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; target_member_id: string; round: number };
+}
+
+export async function resolveOnlineVote(roomId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_resolve_vote', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    eliminated_member_id: string;
+    eliminated_name: string;
+    votes: number;
+    tie_break_used: boolean;
+  };
+}
+
+export async function advanceOnlineGameRound(roomId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_advance_game_round', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    phase: 'reveal' | 'audit';
+    round?: number;
+    survivors?: number;
+    bunker_capacity?: number;
+  };
+}
+
 export async function subscribeToOnlineRoom(
   roomId: string,
   onChange: (payload: unknown) => void,
