@@ -74,6 +74,13 @@ export interface RoomSnapshot {
     tie_break_used?: boolean;
   };
   bunker_capacity: number | null;
+  audit_plan: {
+    plan_text?: string;
+    status?: string;
+    submitted_by_member_id?: string;
+    submitted_by_name?: string;
+    updated_at?: string;
+  };
   events: Array<{
     event_type: string;
     public_payload: Record<string, unknown>;
@@ -292,6 +299,30 @@ export async function advanceOnlineGameRound(roomId: string) {
     survivors?: number;
     bunker_capacity?: number;
   };
+}
+
+
+export async function submitOnlineAuditPlan(roomId: string, planText: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_submit_audit_plan', {
+    p_room_id: roomId,
+    p_plan_text: planText,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; submission_id: string; status: 'submitted' };
+}
+
+export async function finishOnlineGame(roomId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_finish_game', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; status: 'finished'; phase: 'gameover' };
 }
 
 export async function subscribeToOnlineRoom(
