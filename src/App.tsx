@@ -674,6 +674,7 @@ export function App() {
       players: deal.players,
       activeCrises: deal.activeCrises,
       crisisDeck: deal.crisisDeck,
+      skillDeck: deal.skillDeck,
       bunkerCapacity: deal.bunkerCapacity,
       timerSeconds: 60,
       timerActive: false,
