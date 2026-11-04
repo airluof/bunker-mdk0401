@@ -94,6 +94,11 @@ interface OnlineRoomSession {
 const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
 const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
 
+function isValidOnlineInviteCode(value: string): boolean {
+  const normalized = value.trim().toUpperCase();
+  return /^[A-HJ-NP-Z]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
+}
+
 function formatOnlineError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error || '');
   const normalized = message.toUpperCase();
@@ -391,8 +396,8 @@ export function App() {
       setOnlineError('Позывной должен содержать от 2 до 24 символов.');
       return;
     }
-    if (!/^[0-9A-F]{32}$/.test(inviteCode)) {
-      setOnlineError('Код комнаты должен состоять из 32 символов A–F и 0–9.');
+    if (!isValidOnlineInviteCode(inviteCode)) {
+      setOnlineError('Новый код комнаты состоит из пяти букв A–Z (без I и O).');
       return;
     }
 
@@ -1370,16 +1375,18 @@ export function App() {
                     id="room-invite-code"
                     type="text"
                     value={roomCodeInput}
-                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^0-9A-F]/g, '').slice(0, 32))}
+                    onChange={(event) => setRoomCodeInput(event.target.value.toUpperCase().replace(/[^A-HJ-NP-Z0-9]/g, '').slice(0, 32))}
                     maxLength={32}
-                    placeholder="Код приглашения"
+                    placeholder="ABCDE"
                     autoComplete="off"
+                    autoCapitalize="characters"
+                    spellCheck={false}
                     className="bunker-input bunker-code-input"
                   />
                   <button
                     type="button"
                     onClick={handleJoinOnlineRoom}
-                    disabled={onlineBusy || !isSupabaseConfigured || roomCodeInput.trim().length !== 32 || currentUser.name.trim().length < 2}
+                    disabled={onlineBusy || !isSupabaseConfigured || !isValidOnlineInviteCode(roomCodeInput) || currentUser.name.trim().length < 2}
                     className="bunker-button bunker-button-secondary"
                   >
                     {onlineBusy ? 'Подключаемся…' : 'Войти в комнату'}
