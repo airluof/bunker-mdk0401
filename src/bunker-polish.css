@@ -1034,3 +1034,36 @@ body {
     font-size: 14px;
   }
 }
+
+
+/* Subtle Apple-like glass on the two room-entry surfaces only. */
+.bunker-access-grid > .bunker-access-panel {
+  border: 1px solid rgba(255,255,255,.17);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.012) 48%, rgba(255,255,255,.025)),
+    rgba(19,19,19,.73);
+  -webkit-backdrop-filter: blur(14px) saturate(118%);
+  backdrop-filter: blur(14px) saturate(118%);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.2),
+    inset 0 1px 0 rgba(255,255,255,.055);
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bunker-access-grid > .bunker-access-panel:hover {
+    border-color: rgba(255,255,255,.23);
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.018) 48%, rgba(255,255,255,.03)),
+      rgba(23,23,23,.76);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,.23),
+      inset 0 1px 0 rgba(255,255,255,.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bunker-access-grid > .bunker-access-panel {
+    transition: none;
+  }
+}
