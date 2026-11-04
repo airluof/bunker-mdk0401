@@ -23,6 +23,8 @@ interface OnlineGameViewProps {
   onVote: (targetMemberId: string) => void;
   onResolveVote: () => void;
   onNextRound: () => void;
+  onSubmitAuditPlan: (planText: string) => void;
+  onFinishGame: () => void;
 }
 
 interface SnapshotCard {
@@ -84,9 +86,12 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onVote,
   onResolveVote,
   onNextRound,
+  onSubmitAuditPlan,
+  onFinishGame,
 }) => {
   const [selectedVote, setSelectedVote] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [auditDraft, setAuditDraft] = useState(snapshot.audit_plan.plan_text || '');
 
   const players = snapshot.players;
   const alivePlayers = players.filter((player) => player.is_alive);
@@ -95,7 +100,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   const myPlayer = players.find((player) => player.member_id === myMemberId);
   const isAlive = myPlayer?.is_alive === true;
   const phase = snapshot.session.phase;
-  const isTestMode = snapshot.room.room_mode === 'test';
+  const isTestMode = snapshot.room.room_mode === 'test' || snapshot.public_state?.test_mode === true || botCount > 0;
   const phaseLabel = PHASE_LABELS[phase] || 'Игровой этап';
 
   const publicCards = (snapshot.revealed_cards as unknown as SnapshotCard[]).map((source) => ({
@@ -152,6 +157,10 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   useEffect(() => {
     setSelectedVote(null);
   }, [snapshot.session.round_number, phase]);
+
+  useEffect(() => {
+    setAuditDraft(snapshot.audit_plan.plan_text || '');
+  }, [snapshot.audit_plan.updated_at, phase]);
 
   const rosterCards = useMemo(() => {
     const map = new Map<string, Card[]>();
@@ -297,7 +306,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <section className="bunker-online-audit">
           <span className="bunker-kicker">Финальный этап</span>
           <h2>Команда для восстановления сформирована</h2>
-          <p>Оставшиеся участники должны подготовить пошаговый план восстановления инфраструктуры с учётом активных кризисов и раскрытых характеристик. Автоматическая проверка плана пока не включена.</p>
+          <p>Составьте общий пошаговый план восстановления инфраструктуры по ГОСТ Р ИСО/МЭК 12207 с учётом оставшихся специалистов, раскрытых карт и активных кризисов.</p>
           <div className="bunker-online-survivors">
             {alivePlayers.map((player) => (
               <div className="bunker-player-row" key={player.member_id}>
@@ -309,6 +318,63 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               </div>
             ))}
           </div>
+          <label className="bunker-online-audit-label" htmlFor="online-audit-plan">План восстановления</label>
+          {isHost ? (
+            <textarea
+              id="online-audit-plan"
+              value={auditDraft}
+              onChange={(event) => setAuditDraft(event.target.value)}
+              rows={7}
+              maxLength={12000}
+              placeholder="1. Локализовать инцидент…&#10;2. Восстановить питание и сеть…&#10;3. Развернуть резервную инфраструктуру…"
+              className="bunker-online-audit-textarea"
+              disabled={busy}
+            />
+          ) : (
+            <div className="bunker-online-audit-submission">
+              {snapshot.audit_plan.plan_text || 'Ведущий ещё не отправил общий план.'}
+            </div>
+          )}
+          <div className="bunker-online-audit-actions">
+            <span>
+              {snapshot.audit_plan.status === 'submitted'
+                ? `План сохранён · ${snapshot.audit_plan.submitted_by_name || 'ведущий'}`
+                : 'План ещё не отправлен'}
+            </span>
+            {isHost && (
+              <>
+                <button
+                  type="button"
+                  className="bunker-button bunker-button-secondary"
+                  onClick={() => onSubmitAuditPlan(auditDraft)}
+                  disabled={busy || auditDraft.trim().length < 20}
+                >
+                  Сохранить план
+                </button>
+                <button
+                  type="button"
+                  className="bunker-button bunker-button-primary"
+                  onClick={onFinishGame}
+                  disabled={busy || snapshot.audit_plan.status !== 'submitted'}
+                >
+                  Завершить партию
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    if (phase === 'gameover') {
+      return (
+        <section className="bunker-online-audit">
+          <span className="bunker-kicker">Система завершила сессию</span>
+          <h2>Партия завершена</h2>
+          <p>Финальный план восстановления сохранён и доступен всем участникам комнаты.</p>
+          {snapshot.audit_plan.plan_text && (
+            <div className="bunker-online-audit-submission">{snapshot.audit_plan.plan_text}</div>
+          )}
         </section>
       );
     }
