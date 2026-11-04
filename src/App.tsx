@@ -455,6 +455,7 @@ export function App() {
         const botData = await getOnlineTestBotData(onlineRoom.roomId);
         const simulation = createOnlineBotSimulation(snapshot, botData, onlineRoom.inviteCode?.slice(0, 8) || onlineRoom.roomId.slice(0, 8).toUpperCase());
         setGameState(simulation);
+        setCurrentView('game');
         showToast('Тестовая партия запущена. Боты участвуют в раскрытии карт и голосовании.');
       } else {
         showToast('Партия запущена. Личные карты выданы участникам.');
