@@ -43,8 +43,8 @@ requireText(sql, /grant execute on function public\.api_heartbeat_room\(uuid\) t
 requireText(sql, /revoke all on function public\.api_takeover_room_control\(uuid, uuid\) from public, anon/i, 'Takeover RPC must not be callable by anon/PUBLIC.');
 requireText(sql, /grant execute on function public\.api_takeover_room_control\(uuid, uuid\) to authenticated/i, 'Authenticated takeover RPC grant is missing.');
 
-const auditFunction = sql.match(/create or replace function public\.api_submit_audit_plan[\s\S]*?\\$\\$;/i)?.[0] || '';
-const finishFunction = sql.match(/create or replace function public\.api_finish_game[\s\S]*?\\$\\$;/i)?.[0] || '';
+const auditFunction = sql.match(/create or replace function public\.api_submit_audit_plan[\s\S]*?\$\$;/i)?.[0] || '';
+const finishFunction = sql.match(/create or replace function public\.api_finish_game[\s\S]*?\$\$;/i)?.[0] || '';
 requireText(auditFunction, /m\.is_alive\s*=\s*true/i, 'Audit plan must be restricted to surviving participants.');
 requireText(finishFunction, /m\.is_alive\s*=\s*true/i, 'Only a surviving participant may finish the game.');
 if (/created_by_user_id\s*=\s*v_user_id/i.test(auditFunction)) failures.push('Audit plan must not require the original room creator.');
