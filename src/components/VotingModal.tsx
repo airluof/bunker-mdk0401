@@ -66,7 +66,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
               >
                 <span className="bunker-vote-avatar">{player.name.trim().slice(0, 2).toUpperCase()}</span>
                 <span className="bunker-vote-person">
-                  <strong>{player.name}{isMe ? ' · вы' : ''}</strong>
+                  <strong>{player.name}{isMe ? ' · вы' : ''}{player.isBot ? ' · бот' : ''}</strong>
                   <small>
                     {player.revealed.roles ? player.hand.roles.original_title : 'Роль скрыта'}
                     {' · '}
