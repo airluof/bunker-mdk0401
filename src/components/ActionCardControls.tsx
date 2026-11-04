@@ -52,6 +52,24 @@ const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 
   action_25: { description: 'Активировать Safe Boot и записать состояние Уязвимостей на этот раунд.', target: 'none' },
 };
 
+const PENDING_RULES: Record<string, string> = {
+  action_01: 'Нужно определить, кто задаёт вопрос, кто оценивает ответ и как именно добавляется голос.',
+  action_02: 'Нужно определить момент отката и какие результаты или действия отменяются.',
+  action_05: 'Не указано, какую категорию закрытой карты нужно раскрыть.',
+  action_07: 'В исходнике два разных варианта эффекта: двойной голос или спасение при ничьей.',
+  action_09: 'Нужно определить точную область защиты и её взаимодействие с другими действиями.',
+  action_11: 'В исходнике конфликт: второй Навык или две профессии.',
+  action_13: 'Нужны критерий победы в дуэли, судья и длительность иммунитета.',
+  action_14: 'Нужно определить соседа справа/слева и что именно копируется.',
+  action_19: 'Не определено, кто считается похожим игроком и как округляется половина голосов.',
+  action_22: 'В базовых правилах нет процедуры ввода паролей и подсчёта ошибок.',
+  action_23: 'Нужно определить влияние пары на вместимость, голосование и изгнание.',
+  action_26: 'Нужен порядок отправки запроса преподавателю и получения подсказки.',
+  action_27: 'Нужно определить, как подтверждаются одинаковые роли и заменяет ли это обычное голосование.',
+  action_29: 'Нужно определить состав нового набора из четырёх карт и судьбу пятой карты.',
+  action_30: 'Нужно определить, что считается ошибкой и кто оценивает защиту плана.',
+};
+
 export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
   myMemberId,
   cards,
@@ -74,6 +92,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
   const availableCards = cards.filter((card) =>
     AVAILABLE_EFFECTS[card.card_id] && !usedCardInstanceIds.includes(card.instance_id)
   );
+  const pendingCards = cards.filter((card) => PENDING_RULES[card.card_id]);
 
   const submit = (card: ActionCard) => {
     const mode = AVAILABLE_EFFECTS[card.card_id]?.target;
@@ -170,6 +189,18 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
             })}
           </div>
         </>
+      )}
+
+      {pendingCards.length > 0 && (
+        <div className="bunker-online-pending-actions">
+          <span className="bunker-kicker">Ожидают уточнения правил</span>
+          {pendingCards.map((card) => (
+            <div className="bunker-online-pending-action" key={card.instance_id}>
+              <strong>{card.title}</strong>
+              <span>{PENDING_RULES[card.card_id]}</span>
+            </div>
+          ))}
+        </div>
       )}
 
       {watchdogRound === currentRound && (
