@@ -1259,3 +1259,97 @@ body {
     flex-basis: 122px;
   }
 }
+
+
+/* Typography pass: one strong voice, quieter supporting interface. */
+.bunker-brand-name {
+  font-weight: 600;
+}
+
+.bunker-hero h1 {
+  font-weight: 650;
+}
+
+.bunker-game-facts strong,
+.bunker-player-count strong,
+.bunker-setting-value {
+  font-weight: 600;
+}
+
+.bunker-section-heading h2,
+.bunker-page-heading h1,
+.bunker-room-heading h1,
+.bunker-online-game-heading h1,
+.bunker-access-panel h3,
+.bunker-panel h2,
+.bunker-online-action-panel h2,
+.bunker-online-audit h2,
+.bunker-hand-heading h2,
+.bunker-crises h2,
+.bunker-roster h2,
+.bunker-event-log h2,
+.bunker-briefing-timer h2,
+.bunker-modal-copy h2 {
+  font-weight: 550;
+}
+
+.bunker-eyebrow,
+.bunker-kicker {
+  color: #b8afa2;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+.bunker-name-field label,
+.bunker-field-label,
+.bunker-access-panel h3,
+.bunker-panel-heading p,
+.bunker-player-details strong,
+.bunker-player-name-line h3,
+.bunker-vote-person strong,
+.bunker-crisis-copy strong,
+.bunker-card-open .bunker-card-copy h3,
+.bunker-online-public-player > header strong,
+.bunker-online-public-card-list strong {
+  font-weight: 500;
+}
+
+.bunker-button,
+.bunker-game-action,
+.bunker-action-card-button,
+.bunker-card-reveal,
+.bunker-speaker-button,
+.bunker-vote-cancel,
+.bunker-vote-confirm {
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.bunker-online-progress,
+.bunker-host-label,
+.bunker-online-private-label,
+.bunker-category-label,
+.bunker-card-open .bunker-card-category {
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.bunker-demo-label,
+.bunker-online-audit-label {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Keep emphasis available for actual game state, not every label. */
+.bunker-player-details small,
+.bunker-player-status,
+.bunker-online-game-footnote,
+.bunker-card-open .bunker-card-copy p,
+.bunker-modal-copy p {
+  font-weight: 400;
+}
