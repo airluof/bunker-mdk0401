@@ -45,6 +45,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
         )}
       </header>
 
+      <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
       <div className="bunker-hand-grid">
         {categories.map((category) => {
           const card = player.hand[category];
