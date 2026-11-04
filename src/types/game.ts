@@ -107,4 +107,6 @@ export interface GameState {
   lastEliminatedPlayerId: string | null;
   log: GameLogEntry[];
   recoveryPlan: RecoveryPlanStep[];
+  /** Per-round reveal lock used by the bot test simulator. */
+  revealedThisRoundPlayerIds?: string[];
 }
