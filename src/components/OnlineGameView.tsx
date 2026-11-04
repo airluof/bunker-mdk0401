@@ -16,6 +16,7 @@ interface OnlineGameViewProps {
   busy: boolean;
   error: string | null;
   onRefresh: () => void;
+  onTakeover: () => void;
   onExit: () => void;
   onInspectCard: (card: Card) => void;
   onRevealCard: (instanceId: string) => void;
@@ -82,6 +83,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   busy,
   error,
   onRefresh,
+  onTakeover,
   onExit,
   onInspectCard,
   onRevealCard,
@@ -388,7 +390,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             ))}
           </div>
           <label className="bunker-online-audit-label" htmlFor="online-audit-plan">План восстановления</label>
-          {isHost ? (
+          {isAlive ? (
             <textarea
               id="online-audit-plan"
               value={auditDraft}
@@ -410,7 +412,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 ? `План сохранён · ${snapshot.audit_plan.submitted_by_name || 'ведущий'}`
                 : 'План ещё не отправлен'}
             </span>
-            {isHost && (
+            {isAlive && (
               <>
                 <button
                   type="button"
@@ -418,7 +420,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                   onClick={() => onSubmitAuditPlan(auditDraft)}
                   disabled={busy || auditDraft.trim().length < 20}
                 >
-                  Сохранить план
+                  Сохранить общий план
                 </button>
                 <button
                   type="button"
@@ -470,6 +472,12 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             <RefreshCw aria-hidden="true" />
             {busy ? 'Синхронизируем…' : 'Синхронизировать'}
           </button>
+          {!isHost && isAlive && (
+            <button type="button" onClick={onTakeover} disabled={busy} className="bunker-button bunker-button-secondary">
+              <Crown aria-hidden="true" />
+              Перехватить управление
+            </button>
+          )}
           {isTestMode && (
             <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-online-exit-test">
               <DoorOpen aria-hidden="true" />
