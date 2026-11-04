@@ -3047,3 +3047,67 @@ body {
     padding: 19px;
   }
 }
+
+
+/* The landing page introduces the incident before asking the visitor to join. */
+html {
+  scroll-behavior: smooth;
+}
+
+.bunker-hero {
+  min-height: clamp(540px, 68svh, 700px);
+}
+
+.bunker-hero-cta {
+  width: fit-content;
+  min-width: 148px;
+  min-height: 46px;
+  margin-top: 27px;
+  padding: 12px 18px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.bunker-hero-cta svg {
+  width: 17px;
+  height: 17px;
+  transition: transform .18s ease;
+}
+
+.bunker-game-entry {
+  margin-top: clamp(12px, 2vw, 26px);
+  scroll-margin-top: 88px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bunker-hero-cta:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+@media (max-width: 600px) {
+  .bunker-hero {
+    min-height: clamp(500px, 64svh, 580px);
+  }
+
+  .bunker-hero-cta {
+    min-width: 136px;
+    min-height: 45px;
+    margin-top: 22px;
+  }
+
+  .bunker-game-entry {
+    margin-top: 10px;
+    scroll-margin-top: 76px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .bunker-hero-cta svg {
+    transition: none;
+  }
+}
