@@ -83,11 +83,11 @@ requireText(files.unifiedMigration, /create or replace function public\.api_get_
 requireText(files.unifiedMigration, /create trigger game_sessions_watchdog_deadline/i, 'Watchdog deadline trigger is missing.');
 requireText(files.unifiedMigration, /ignored_crisis_ids/i, 'Workaround must persist the selected crisis.');
 requireText(files.unifiedMigration, /vulnerabilities_disabled_round/i, 'Safe Boot round state is missing.');
-requireText(files.exploitMigration, /create or replace function public\\.api_use_exploit_skill_card/i, 'Exploit RPC is missing.');
+requireText(files.exploitMigration, /create or replace function public\.api_use_exploit_skill_card/i, 'Exploit RPC is missing.');
 requireText(files.exploitMigration, /effect_handler_id = 'exploit_draw_second_skill'/i, 'Exploit handler approval is missing.');
-requireText(files.exploitMigration, /cc\\.category = 'skills'/i, 'Exploit must draw from the Skills category.');
-requireText(files.exploitMigration, /ci\\.zone = 'category_deck'/i, 'Exploit must draw from the server-owned Skills deck.');
-requireText(files.exploitMigration, /set zone = 'hand',[\\s\\S]*?owner_member_id = v_actor_id/i, 'Exploit must assign the drawn Skill to its owner.');
+requireText(files.exploitMigration, /cc\.category = 'skills'/i, 'Exploit must draw from the Skills category.');
+requireText(files.exploitMigration, /ci\.zone = 'category_deck'/i, 'Exploit must draw from the server-owned Skills deck.');
+requireText(files.exploitMigration, /set zone = 'hand',[\s\S]*?owner_member_id = v_actor_id/i, 'Exploit must assign the drawn Skill to its owner.');
 requireText(files.exploitMigration, /instance_status = 'hidden'/i, 'The additional Skill must remain hidden after drawing.');
 
 for (const [id, handler] of Object.entries(supportedHandlers)) {
@@ -119,7 +119,7 @@ const approvedFromSql = [...new Set([
   ...[...files.generatorMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.hotfixMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.unifiedMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
-  ...[...files.exploitMigration.matchAll(/where card_id = '(action_\\d+)'/gi)].map((match) => match[1]),
+  ...[...files.exploitMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
 ])].sort();
 const expectedApproved = Object.keys(supportedHandlers).sort();
 if (approvedFromSql.join(',') !== expectedApproved.join(',')) {
@@ -133,13 +133,17 @@ requireText(files.gameView, /ActionCardControls/i, 'Online game view does not re
 requireText(files.gameView, /onUseActionEffect/i, 'Online game view does not pass the generic action callback.');
 requireText(files.actionControls, /AVAILABLE_EFFECTS/i, 'Action controls do not define supported action cards.');
 requireText(files.actionControls, /action_20/i, 'Memory Dump target selection is missing.');
-requireText(files.actionControls, /action_11: \\{ description: .*вторую карту Навыка/i, 'Exploit is missing from online action controls.');
+requireText(files.actionControls, /action_11: \{ description: .*вторую карту Навыка/i, 'Exploit is missing from online action controls.');
 requireText(files.actionControls, /privateEvents\.slice/i, 'Private action results are not rendered.');
 requireText(files.actionControls, /myMemberId/i, 'Target selection must exclude the acting player.');
 requireText(files.localApp, /vulnerabilityDiscarded: true/i, 'Local demo Hotfix effect is missing.');
-requireText(files.localApp, /actionCard\\.card_id === 'action_11'/i, 'Local demo Exploit effect is missing.');
+requireText(files.localApp, /actionCard\.card_id === 'action_11'/i, 'Local demo Exploit effect is missing.');
 requireText(files.handView, /player\.vulnerabilityDiscarded/i, 'Local hand must hide a discarded Vulnerability.');
 requireText(files.rosterView, /player\.vulnerabilityDiscarded/i, 'Local public roster must hide a discarded Vulnerability.');
+requireText(files.handView, /extraSkills/i, 'Local hand must display additional Skills.');
+requireText(files.rosterView, /extraSkills/i, 'Local roster must display additional Skills.');
+requireText(files.finalAudit, /extraSkills/i, 'The final audit must include additional Skills.');
+requireText(files.cardsData, /skillDeck: shuffledSkills\.slice\(playerNames\.length\)/i, 'The local demo must retain the undrawn Skills deck.');
 requireText(files.importer, /action_04: 'hotfix_discard_own_vulnerability'/i, 'Importer must preserve the Hotfix handler.');
 requireText(files.importer, /action_28: 'emergency_generator_capacity_plus_one'/i, 'Importer must preserve Emergency Generator handler.');
 requireText(files.seed, /'approved', 'hotfix_discard_own_vulnerability'/i, 'Seed must preserve Hotfix approval.');
