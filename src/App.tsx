@@ -1297,7 +1297,7 @@ export function App() {
                   <strong>{gameState.bunkerCapacity}</strong>
                 </div>
                 {gameState.isLocalDemo !== false && (
-                  <span className="bunker-demo-label">Локальный тест с ботами</span>
+                  <span className="bunker-demo-label">{gameState.isOnlineBotTest ? 'ТЕСТ С БОТАМИ · СОСТОЯНИЕ НА ЭТОМ УСТРОЙСТВЕ' : 'Локальный тест с ботами'}</span>
                 )}
               </div>
 
