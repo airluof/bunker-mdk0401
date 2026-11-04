@@ -308,6 +308,25 @@ export async function useOnlineActionEffect(
   };
 }
 
+export async function useOnlineExploitSkillCard(roomId: string, actionCardInstanceId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_use_exploit_skill_card', {
+    p_room_id: roomId,
+    p_card_instance_id: actionCardInstanceId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    action_id: 'action_11';
+    effect_id: 'exploit_draw_second_skill';
+    card_instance_id: string;
+    additional_skill_added: boolean;
+    state_version: number;
+  };
+}
+
 export async function useOnlineHotfixCard(
   roomId: string,
   actionCardInstanceId: string,
