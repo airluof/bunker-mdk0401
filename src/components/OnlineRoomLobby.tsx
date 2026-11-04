@@ -59,7 +59,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
     <main className="bunker-page bunker-room-page">
       <header className="bunker-room-heading">
         <div>
-          <p className="bunker-eyebrow">Онлайн-игра</p>
+          <p className="bunker-eyebrow">{snapshot.room.room_mode === 'test' ? 'ТЕСТОВАЯ КОМНАТА · ЛЮДИ И БОТЫ' : 'ОНЛАЙН-ПАРТИЯ · ТОЛЬКО ЛЮДИ'}</p>
           <h1>{snapshot.room.status === 'archived' ? 'Комната закрыта' : 'Комната ожидания'}</h1>
           <p className="bunker-page-description">
             {snapshot.room.status === 'archived'
@@ -84,10 +84,10 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                   ? 'Запустить полный тестовый игровой цикл с ботами'
                   : 'Раздать карты и начать партию'}
             >
-              {busy ? 'Запускаем…' : activePlayers.some((player) => player.is_bot) ? 'Запустить тестовую партию' : 'Начать игру'}
+              {busy ? 'Запускаем…' : snapshot.room.room_mode === 'test' ? 'Запустить тестовую партию' : 'Начать игру'}
             </button>
           )}
-          {isHost && snapshot.room.status === 'lobby' && activePlayers.length < snapshot.room.min_players && (
+          {isHost && snapshot.room.room_mode === 'test' && snapshot.room.status === 'lobby' && activePlayers.length < snapshot.room.min_players && (
             <button
               type="button"
               onClick={onAddTestBots}
@@ -237,9 +237,9 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
               : 'Минимум участников набран. Ожидаем запуска от ведущего.'}
         </p>
       )}
-      {isHost && snapshot.room.status === 'lobby' && (
+      {snapshot.room.room_mode === 'test' && snapshot.room.status === 'lobby' && (
         <p className="bunker-online-note">
-          В тестовой партии боты получают настоящие карты из каталога, автоматически раскрывают по одной карте за раунд и голосуют случайно. Это имитация для проверки игрового цикла, а не полноценный искусственный интеллект.
+          В этой комнате могут находиться реальные игроки и тестовые боты одновременно. Боты занимают недостающие места до минимума в 8 участников. После старта они получают карты, автоматически раскрывают по одной карте за раунд и голосуют случайно. Все реальные игроки управляют своими персонажами со своих устройств.
         </p>
       )}
     </main>
