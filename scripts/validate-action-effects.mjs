@@ -101,11 +101,11 @@ for (const id of unresolvedIds) {
   }
 }
 
-const approvedFromSql = [
+const approvedFromSql = [...new Set([
   ...[...files.generatorMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.hotfixMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.unifiedMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
-].sort();
+])].sort();
 const expectedApproved = Object.keys(supportedHandlers).sort();
 if (approvedFromSql.join(',') !== expectedApproved.join(',')) {
   failures.push('SQL migrations do not map exactly the 15 approved action cards.');
