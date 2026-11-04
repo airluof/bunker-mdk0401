@@ -9,6 +9,7 @@ interface OnlineRoomLobbyProps {
   busy: boolean;
   error: string | null;
   onRefresh: () => void;
+  onTakeover: () => void;
   onExit: () => void;
   onSaveSettings: (maxPlayers: number) => void;
   onStartGame: () => void;
@@ -22,6 +23,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   busy,
   error,
   onRefresh,
+  onTakeover,
   onExit,
   onSaveSettings,
   onStartGame,
@@ -72,6 +74,12 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             <RefreshCw aria-hidden="true" />
             Обновить
           </button>
+          {!isHost && snapshot.room.status === 'lobby' && (
+            <button type="button" onClick={onTakeover} disabled={busy} className="bunker-button bunker-button-secondary">
+              <Crown aria-hidden="true" />
+              Перехватить управление
+            </button>
+          )}
           {isHost && snapshot.room.status === 'lobby' && (
             <button
               type="button"
