@@ -5,11 +5,13 @@ const root = process.cwd();
 const migrationPath = resolve(root, 'supabase/migrations/202611040001_initial_multiplayer_schema.sql');
 const invite014Path = resolve(root, 'supabase/migrations/202611040014_short_room_invite_codes.sql');
 const invite015Path = resolve(root, 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql');
+const invite016Path = resolve(root, 'supabase/migrations/202611040016_alphanumeric_room_codes.sql');
 
-const [sql, invite014, invite015] = await Promise.all([
+const [sql, invite014, invite015, invite016] = await Promise.all([
   readFile(migrationPath, 'utf8'),
   readFile(invite014Path, 'utf8'),
   readFile(invite015Path, 'utf8'),
+  readFile(invite016Path, 'utf8'),
 ]);
 
 const expectedTables = [
@@ -98,6 +100,29 @@ if (!invite015.includes("upper(btrim(p_invite_code)) !~ '^([A-Z]{5}|[0-9A-F]{32}
 requireText(invite015, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 015 must hash normalized invite codes.');
 requireText(invite015, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 015 must revoke room creation from PUBLIC and anon.');
 requireText(invite015, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 015 must grant room creation to authenticated users.');
+requireText(invite016, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'/i, 'Migration 016 must use A-Z and 0-9.');
+requireText(invite016, /v_random_byte < 252/i, 'Migration 016 must use unbiased rejection sampling.');
+requireText(invite016, /v_random_byte % 36/i, 'Migration 016 must generate from 36 alphanumeric characters.');
+requireText(invite016, /\[A-Z0-9\]\{5\}/i, 'Migration 016 must accept any five-character alphanumeric code.');
+if (!invite016.includes("upper(btrim(p_invite_code)) !~ '^([A-Z0-9]{5}|[0-9A-F]{32})
+
+if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
+  failures.push('The base schema migration must not grant database access to anon.');
+}
+
+if (failures.length) {
+  console.error('Supabase migration validation failed:');
+  for (const failure of failures) console.error(' - ' + failure);
+  process.exit(1);
+}
+
+console.log('Supabase migration structure validated.');
+console.log(expectedTables.length + ' tables with RLS; ' + expectedFunctions.length + ' protected functions.');
+console.log('Five-character alphanumeric invite generation, legacy-code compatibility and versioned catalog constraints are present.');
+")) {
+  failures.push('Migration 016 must use a complete five-character alphanumeric validation pattern.');
+}
+
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
   failures.push('The base schema migration must not grant database access to anon.');
