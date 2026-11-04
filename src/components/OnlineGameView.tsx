@@ -105,7 +105,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   const isTestMode = snapshot.room.room_mode === 'test' || snapshot.public_state?.test_mode === true || botCount > 0;
   const phaseLabel = PHASE_LABELS[phase] || 'Игровой этап';
 
-  const revealedSnapshotCards = snapshot.revealed_cards as SnapshotCard[];
+  const revealedSnapshotCards = snapshot.revealed_cards as unknown as SnapshotCard[];
   const ownEmergencyGenerator =
     (snapshot.my_cards as SnapshotCard[]).find((card) => card.card_id === 'action_28') ||
     revealedSnapshotCards.find((card) =>
