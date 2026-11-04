@@ -420,6 +420,21 @@ begin
     from public.public_game_state p where p.room_id = p_room_id
   ), 'null'::jsonb), true);
   v_snapshot := jsonb_set(v_snapshot, '{events}', v_events, true);
+  v_snapshot := jsonb_set(v_snapshot, '{audit_plan}', coalesce((
+    select jsonb_build_object(
+      'plan_text', a.submission_payload->>'plan_text',
+      'status', a.status,
+      'submitted_by_member_id', a.submitted_by_member_id,
+      'submitted_by_name', m.display_name,
+      'updated_at', a.updated_at
+    )
+    from public.audit_submissions a
+    join public.room_members m on m.id = a.submitted_by_member_id
+    join public.game_sessions s on s.id = a.session_id
+    where a.room_id = p_room_id
+    order by a.updated_at desc
+    limit 1
+  ), '{}'::jsonb), true);
 
   return v_snapshot;
 end;
@@ -1068,5 +1083,207 @@ $$;
 
 revoke all on function public.api_advance_game_round(uuid, uuid) from public, anon;
 grant execute on function public.api_advance_game_round(uuid, uuid) to authenticated;
+
+
+-- The final recovery plan is a shared, server-stored submission rather than
+-- a browser-only draft. One current plan is maintained per game session.
+create unique index if not exists audit_submissions_one_per_session_idx
+  on public.audit_submissions(session_id);
+
+create or replace function public.api_submit_audit_plan(
+  p_room_id uuid,
+  p_plan_text text,
+  p_command_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_room public.rooms%rowtype;
+  v_session public.game_sessions%rowtype;
+  v_member_id uuid;
+  v_submission_id uuid;
+  v_existing jsonb;
+  v_existing_name text;
+  v_result jsonb;
+  v_new_version bigint;
+begin
+  if v_user_id is null then
+    raise exception using errcode = '28000', message = 'UNAUTHENTICATED';
+  end if;
+  if p_room_id is null or p_command_id is null
+     or p_plan_text is null or char_length(btrim(p_plan_text)) < 20
+     or char_length(p_plan_text) > 12000 then
+    raise exception using errcode = '22023', message = 'AUDIT_PLAN_INVALID';
+  end if;
+
+  select cr.response_json, cr.command_name into v_existing, v_existing_name
+  from public.command_receipts cr
+  where cr.user_id = v_user_id and cr.command_id = p_command_id;
+  if found then
+    if v_existing_name <> 'api_submit_audit_plan' then
+      raise exception using errcode = '22023', message = 'COMMAND_ID_REUSED';
+    end if;
+    return v_existing;
+  end if;
+
+  select * into v_room
+  from public.rooms r
+  where r.id = p_room_id and r.created_by_user_id = v_user_id
+  for update;
+  if v_room.id is null then
+    raise exception using errcode = '42501', message = 'FORBIDDEN_OR_ROOM_NOT_FOUND';
+  end if;
+
+  select * into v_session from public.game_sessions s
+  where s.room_id = p_room_id for update;
+  if v_session.phase <> 'audit' then
+    raise exception using errcode = 'P0001', message = 'AUDIT_NOT_OPEN';
+  end if;
+
+  select m.id into v_member_id
+  from public.room_members m
+  where m.room_id = p_room_id and m.user_id = v_user_id
+    and m.membership_status = 'active' and m.is_alive;
+  if v_member_id is null then
+    raise exception using errcode = 'P0001', message = 'NOT_ACTIVE_PLAYER';
+  end if;
+
+  select a.id into v_submission_id
+  from public.audit_submissions a
+  where a.session_id = v_session.id
+  for update;
+
+  if v_submission_id is null then
+    insert into public.audit_submissions (
+      session_id, room_id, submitted_by_member_id, submission_payload, status
+    )
+    values (
+      v_session.id, p_room_id, v_member_id,
+      jsonb_build_object('plan_text', btrim(p_plan_text)), 'submitted'
+    )
+    returning id into v_submission_id;
+  else
+    update public.audit_submissions
+    set submitted_by_member_id = v_member_id,
+        submission_payload = jsonb_build_object('plan_text', btrim(p_plan_text)),
+        status = 'submitted',
+        updated_at = now()
+    where id = v_submission_id;
+  end if;
+
+  update public.game_sessions
+  set state_version = state_version + 1, updated_at = now()
+  where id = v_session.id returning state_version into v_new_version;
+
+  update public.public_game_state
+  set payload = payload || jsonb_build_object('audit_plan_submitted', true),
+      state_version = v_new_version, updated_at = now()
+  where room_id = p_room_id;
+
+  insert into public.public_game_events (room_id, session_id, event_type, public_payload)
+  values (p_room_id, v_session.id, 'audit_plan_submitted',
+          jsonb_build_object('submitted_by_member_id', v_member_id));
+
+  v_result := jsonb_build_object('ok', true, 'submission_id', v_submission_id, 'status', 'submitted');
+  insert into public.command_receipts (user_id, command_id, command_name, response_json)
+  values (v_user_id, p_command_id, 'api_submit_audit_plan', v_result);
+
+  return v_result;
+end;
+$$;
+
+revoke all on function public.api_submit_audit_plan(uuid, text, uuid) from public, anon;
+grant execute on function public.api_submit_audit_plan(uuid, text, uuid) to authenticated;
+
+create or replace function public.api_finish_game(
+  p_room_id uuid,
+  p_command_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_room public.rooms%rowtype;
+  v_session public.game_sessions%rowtype;
+  v_has_plan boolean;
+  v_new_version bigint;
+  v_existing jsonb;
+  v_existing_name text;
+  v_result jsonb;
+begin
+  if v_user_id is null then
+    raise exception using errcode = '28000', message = 'UNAUTHENTICATED';
+  end if;
+  if p_room_id is null or p_command_id is null then
+    raise exception using errcode = '22023', message = 'VALIDATION_ERROR';
+  end if;
+
+  select cr.response_json, cr.command_name into v_existing, v_existing_name
+  from public.command_receipts cr
+  where cr.user_id = v_user_id and cr.command_id = p_command_id;
+  if found then
+    if v_existing_name <> 'api_finish_game' then
+      raise exception using errcode = '22023', message = 'COMMAND_ID_REUSED';
+    end if;
+    return v_existing;
+  end if;
+
+  select * into v_room
+  from public.rooms r
+  where r.id = p_room_id and r.created_by_user_id = v_user_id
+  for update;
+  if v_room.id is null then
+    raise exception using errcode = '42501', message = 'FORBIDDEN_OR_ROOM_NOT_FOUND';
+  end if;
+
+  select * into v_session from public.game_sessions s
+  where s.room_id = p_room_id for update;
+  if v_session.phase <> 'audit' then
+    raise exception using errcode = 'P0001', message = 'AUDIT_NOT_OPEN';
+  end if;
+
+  select exists (
+    select 1 from public.audit_submissions a
+    where a.session_id = v_session.id and a.status = 'submitted'
+  ) into v_has_plan;
+  if not v_has_plan then
+    raise exception using errcode = 'P0001', message = 'AUDIT_PLAN_REQUIRED';
+  end if;
+
+  update public.game_sessions
+  set status = 'finished', phase = 'gameover', deadline_at = null,
+      state_version = state_version + 1, updated_at = now()
+  where id = v_session.id returning state_version into v_new_version;
+
+  update public.rooms
+  set status = 'finished', updated_at = now()
+  where id = p_room_id;
+
+  update public.public_game_state
+  set payload = payload || jsonb_build_object('status', 'finished', 'phase', 'gameover'),
+      state_version = v_new_version, updated_at = now()
+  where room_id = p_room_id;
+
+  insert into public.public_game_events (room_id, session_id, event_type, public_payload)
+  values (p_room_id, v_session.id, 'game_finished', jsonb_build_object('status', 'finished'));
+
+  v_result := jsonb_build_object('ok', true, 'status', 'finished', 'phase', 'gameover');
+  insert into public.command_receipts (user_id, command_id, command_name, response_json)
+  values (v_user_id, p_command_id, 'api_finish_game', v_result);
+
+  return v_result;
+end;
+$$;
+
+revoke all on function public.api_finish_game(uuid, uuid) from public, anon;
+grant execute on function public.api_finish_game(uuid, uuid) to authenticated;
+
 
 commit;
