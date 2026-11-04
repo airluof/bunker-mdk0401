@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Users, Crown, LockKeyhole, Radio } from 'lucide-react';
+import { RefreshCw, Users, Crown, LockKeyhole, Radio, DoorOpen } from 'lucide-react';
 import type { Card, CardCategory } from '../types/game';
 import { CATEGORY_CONFIG } from '../data/cards';
 import { CardView } from './CardView';
@@ -10,6 +10,7 @@ interface OnlineGameViewProps {
   busy: boolean;
   error: string | null;
   onRefresh: () => void;
+  onExit: () => void;
 }
 
 interface SnapshotCard {
@@ -69,6 +70,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   busy,
   error,
   onRefresh,
+  onExit,
 }) => {
   const myCards = [...snapshot.my_cards]
     .sort((left, right) => HAND_ORDER.indexOf(left.category as CardCategory) - HAND_ORDER.indexOf(right.category as CardCategory))
@@ -90,15 +92,28 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             Раунд {snapshot.session.round_number} из {snapshot.session.max_rounds} · {phaseLabel}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={busy}
-          className="bunker-button bunker-button-secondary"
-        >
-          <RefreshCw aria-hidden="true" />
-          {busy ? 'Обновляем…' : 'Синхронизировать'}
-        </button>
+        <div className="bunker-room-actions">
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={busy}
+            className="bunker-button bunker-button-secondary"
+          >
+            <RefreshCw aria-hidden="true" />
+            {busy ? 'Обновляем…' : 'Синхронизировать'}
+          </button>
+          {isTestMode && (
+            <button
+              type="button"
+              onClick={onExit}
+              disabled={busy}
+              className="bunker-button bunker-button-danger"
+            >
+              <DoorOpen aria-hidden="true" />
+              {busy ? 'Выходим…' : 'Завершить тест и выйти'}
+            </button>
+          )}
+        </div>
       </header>
 
       {error && <div role="alert" className="bunker-error">{error}</div>}
