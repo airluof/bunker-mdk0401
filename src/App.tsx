@@ -39,6 +39,7 @@ import {
   addOnlineTestBots,
   exitOnlineTestRoom,
   revealOnlineCard,
+  useOnlineActionCard,
   transitionOnlineGamePhase,
   submitOnlineVote,
   resolveOnlineVote,
@@ -482,6 +483,12 @@ export function App() {
     () => revealOnlineCard(onlineRoom!.roomId, instanceId),
     'Карта раскрыта всем участникам.',
     'Не удалось раскрыть карту.',
+  );
+
+  const handleUseOnlineActionCard = (instanceId: string) => runOnlineGameAction(
+    () => useOnlineActionCard(onlineRoom!.roomId, instanceId),
+    'Аварийный генератор активирован. Вместимость Бункера увеличена на одно место.',
+    'Не удалось применить карту действия.',
   );
 
   const handleStartBriefing = () => runOnlineGameAction(
@@ -1059,6 +1066,7 @@ export function App() {
               onExit={handleExitCurrentRoom}
               onInspectCard={setInspectingCard}
               onRevealCard={handleRevealOnlineCard}
+              onUseActionCard={handleUseOnlineActionCard}
               onStartBriefing={handleStartBriefing}
               onOpenVoting={handleOpenVoting}
               onVote={handleSubmitOnlineVote}
