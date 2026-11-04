@@ -1237,7 +1237,7 @@ export function App() {
           <div className="bunker-home">
             <section className="bunker-hero">
               <div className="bunker-hero-copy">
-                <p className="bunker-eyebrow">МДК.04.01 · Браузерная игра</p>
+                <p className="bunker-eyebrow">МДК.04.01 · Онлайн-игра</p>
                 <h1>ЦОД уничтожен<span>.</span></h1>
                 <p className="bunker-hero-description">
                   Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
@@ -1261,7 +1261,7 @@ export function App() {
               </header>
 
               <div className="bunker-name-field">
-                <label htmlFor="engineer-call-sign">Твоё имя</label>
+                <label htmlFor="engineer-call-sign">Позывной</label>
                 <input
                   id="engineer-call-sign"
                   type="text"
@@ -1272,7 +1272,7 @@ export function App() {
                     saveLocalUser(updated);
                   }}
                   maxLength={24}
-                  placeholder="Как тебя показывать в игре?"
+                  placeholder="Как к тебе обращаться?"
                   className="bunker-input"
                 />
               </div>
@@ -1361,21 +1361,21 @@ export function App() {
 
               <div className="bunker-category-grid">
                 {[
-                  { name: 'Роли', description: 'Профессия и опыт участника', color: '#66816b' },
-                  { name: 'Навыки', description: 'Знания и технические умения', color: '#718b78' },
-                  { name: 'Багаж', description: 'Предметы и ресурсы', color: '#aa8258' },
-                  { name: 'Уязвимости', description: 'Слабые стороны и риски', color: '#ac6a60' },
-                  { name: 'Кризисы', description: 'Угрозы для бункера', color: '#8c789f' },
-                  { name: 'Действия', description: 'Особые игровые эффекты', color: '#a38a54' },
-                ].map((item) => (
+                  { name: 'Роли', description: 'Профессия и опыт участника' },
+                  { name: 'Навыки', description: 'Знания и технические умения' },
+                  { name: 'Багаж', description: 'Предметы и ресурсы' },
+                  { name: 'Уязвимости', description: 'Слабые стороны и риски' },
+                  { name: 'Кризисы', description: 'Угрозы для бункера' },
+                  { name: 'Действия', description: 'Особые игровые эффекты' },
+                ].map((item, index) => (
                   <button
                     key={item.name}
                     type="button"
                     onClick={() => setCurrentView('catalog')}
                     className="bunker-category-card"
-                    style={{ '--category-color': item.color } as React.CSSProperties}
                   >
-                    <span className="bunker-category-dot" />
+                    <span className="bunker-category-index">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="bunker-category-dot" aria-hidden="true" />
                     <span className="bunker-category-copy">
                       <strong>{item.name}</strong>
                       <small>{item.description}</small>
