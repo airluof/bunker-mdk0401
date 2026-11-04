@@ -12,7 +12,7 @@ interface OnlineRoomLobbyProps {
   onExit: () => void;
   onSaveSettings: (maxPlayers: number) => void;
   onStartGame: () => void;
-  onStartTestGame: () => void;
+  onAddTestBots: () => void;
 }
 
 export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
@@ -25,7 +25,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   onExit,
   onSaveSettings,
   onStartGame,
-  onStartTestGame,
+  onAddTestBots,
 }) => {
   const [copied, setCopied] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(snapshot.room.max_players);
@@ -85,15 +85,15 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
               {busy ? 'Запускаем…' : 'Начать игру'}
             </button>
           )}
-          {isHost && snapshot.room.status === 'lobby' && (
+          {isHost && snapshot.room.status === 'lobby' && activePlayers.length < snapshot.room.min_players && (
             <button
               type="button"
-              onClick={onStartTestGame}
-              disabled={busy || activePlayers.length === 0}
+              onClick={onAddTestBots}
+              disabled={busy || activePlayers.length >= snapshot.room.max_players}
               className="bunker-button bunker-button-secondary"
-              title="Тестовый запуск выдаёт карты текущим участникам и не требует 8 игроков"
+              title={`Добавить тестовых участников до минимальных ${snapshot.room.min_players} игроков`}
             >
-              {busy ? 'Запускаем тест…' : 'Тестовый запуск'}
+              {busy ? 'Добавляем…' : `Добавить ботов до ${snapshot.room.min_players}`}
             </button>
           )}
           <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
@@ -129,7 +129,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                 </span>
                 <span className="bunker-player-details">
                   <strong>{player.display_name}</strong>
-                  <small>{player.technical_role === 'host' ? 'Создатель комнаты' : 'Игрок'}</small>
+                  <small>{player.is_bot ? 'Тестовый бот · без управления' : player.technical_role === 'host' ? 'Создатель комнаты' : 'Игрок'}</small>
                 </span>
                 {player.technical_role === 'host' && (
                   <span className="bunker-host-label"><Crown aria-hidden="true" /> Ведущий</span>
@@ -237,9 +237,8 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
       )}
       {isHost && snapshot.room.status === 'lobby' && (
         <p className="bunker-online-note">
-          Тестовый запуск проверяет раздачу для текущих участников, даже если вы один.
-          Он переводит комнату в состояние игры; для обычной партии после проверки
-          потребуется создать новую комнату.
+          Тестовые боты занимают места в списке и учитываются при обычном запуске партии.
+          Они получат карточки как участники, но не будут самостоятельно раскрывать карты или голосовать.
         </p>
       )}
     </main>
