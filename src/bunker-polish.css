@@ -2280,3 +2280,43 @@ body {
     justify-content: center;
   }
 }
+
+.bunker-online-pending-actions {
+  margin-top: 0.8rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.13);
+}
+.bunker-online-pending-actions > .bunker-kicker {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: rgba(235, 231, 224, 0.48);
+}
+.bunker-online-pending-action {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0.45rem 0;
+  color: rgba(235, 231, 224, 0.52);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.bunker-online-pending-action strong {
+  color: rgba(235, 231, 224, 0.76);
+  font-weight: 600;
+}
+.bunker-online-pending-action span {
+  max-width: 42rem;
+  text-align: right;
+}
+@media (max-width: 720px) {
+  .bunker-online-pending-action {
+    display: block;
+  }
+  .bunker-online-pending-action span {
+    display: block;
+    margin-top: 0.12rem;
+    text-align: left;
+  }
+}
