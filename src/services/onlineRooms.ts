@@ -264,6 +264,31 @@ export async function useOnlineActionCard(roomId: string, cardInstanceId: string
   };
 }
 
+export async function useOnlineHotfixCard(
+  roomId: string,
+  actionCardInstanceId: string,
+  vulnerabilityCardInstanceId: string,
+) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_use_hotfix_card', {
+    p_room_id: roomId,
+    p_action_card_instance_id: actionCardInstanceId,
+    p_vulnerability_card_instance_id: vulnerabilityCardInstanceId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    action_id: 'action_04';
+    effect_id: 'hotfix_discard_own_vulnerability';
+    card_instance_id: string;
+    discarded_vulnerability_card_id: string;
+    vulnerability_was_revealed: boolean;
+    state_version: number;
+  };
+}
+
 export async function transitionOnlineGamePhase(roomId: string, nextPhase: 'briefing' | 'voting') {
   const client = getClient();
   await ensureAnonymousSession();
