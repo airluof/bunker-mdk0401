@@ -34,7 +34,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
         <div>
           <span className="bunker-kicker">Ваш набор</span>
           <h2 id="bunker-hand-title">Личные карты</h2>
-          <p>{player.name} · 5 карт в руке</p>
+          <p>{player.name} · {player.vulnerabilityDiscarded ? '4 из 5 карт в руке' : '5 карт в руке'}</p>
         </div>
 
         {['action_04', 'action_28'].includes(player.hand.actions.card_id) && !player.actionUsed && player.isAlive && !['audit', 'gameover', 'lobby'].includes(currentPhase) && (
@@ -46,7 +46,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
             )}
           </button>
         )}
-        {player.revealed.actions && !player.actionUsed && player.hand.actions.card_id !== 'action_28' && (
+        {player.revealed.actions && !player.actionUsed && !['action_04', 'action_28'].includes(player.hand.actions.card_id) && (
           <span className="bunker-help">Эффект этой карты пока не автоматизирован.</span>
         )}
       </header>
