@@ -33,7 +33,7 @@ interface ActionCardControlsProps {
   vulnerabilitiesDisabledRound: number | null;
   ignoredCrisisIds: string[];
   busy: boolean;
-  onUse: (cardInstanceId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
+  onUse: (cardInstanceId: string, actionId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
 }
 
 const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 'player' | 'expelled' | 'hot-swap' | 'crisis' }> = {
@@ -41,6 +41,7 @@ const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 
   action_06: { description: 'Поменять карты Ролей с выбранным участником.', target: 'player' },
   action_08: { description: 'Посмотреть следующую скрытую карту будущего Кризиса. Результат увидите только вы.', target: 'none' },
   action_10: { description: 'Немедленно раскрыть Багаж всех участников.', target: 'none' },
+  action_11: { description: 'Получить вторую карту Навыка из колоды. Она останется скрытой, пока вы не решите раскрыть её в одном из следующих раундов.', target: 'none' },
   action_12: { description: 'Списать Багаж выбранного участника. Эффект сработает, если у него ровно одна карта Багажа.', target: 'player' },
   action_15: { description: 'Сбросить выбранный активный Кризис и открыть следующий из колоды.', target: 'crisis' },
   action_16: { description: 'Забрать Багаж у выбранного изгнанного участника.', target: 'expelled' },
@@ -99,19 +100,19 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
     const selected = selections[card.instance_id] || (mode === 'hot-swap' ? 'deck' : '');
     if (mode === 'player' || mode === 'expelled') {
       if (!selected) return;
-      onUse(card.instance_id, selected);
+      onUse(card.instance_id, card.card_id, selected);
       return;
     }
     if (mode === 'hot-swap' && selected !== 'deck') {
-      onUse(card.instance_id, selected);
+      onUse(card.instance_id, card.card_id, selected);
       return;
     }
     if (mode === 'crisis') {
       if (!selected) return;
-      onUse(card.instance_id, undefined, selected);
+      onUse(card.instance_id, card.card_id, undefined, selected);
       return;
     }
-    onUse(card.instance_id);
+    onUse(card.instance_id, card.card_id);
   };
 
   if (cards.length === 0 && privateEvents.length === 0) return null;
