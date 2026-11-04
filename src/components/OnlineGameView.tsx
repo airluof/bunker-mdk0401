@@ -338,7 +338,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
           {isTestMode && (
             <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
               <DoorOpen aria-hidden="true" />
-              Завершить тест и выйти
+              {isHost ? 'Завершить тест и выйти' : 'Покинуть тестовую партию'}
             </button>
           )}
         </div>
