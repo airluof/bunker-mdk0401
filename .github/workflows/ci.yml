@@ -35,6 +35,9 @@ jobs:
       - name: Validate Supabase migration structure
         run: npm run db:validate-migration
 
+      - name: Validate action-card effects
+        run: npm run db:validate-actions
+
       - name: Check for exposed service-role credentials
         shell: bash
         run: |
