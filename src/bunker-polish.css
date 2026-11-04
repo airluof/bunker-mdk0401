@@ -2131,7 +2131,9 @@ body {
   }
 }
 
-/* Hint is only relevant when the hand becomes a horizontal strip. */
-.bunker-hand-scroll-hint {
-  display: none;
+
+@media (min-width: 601px) {
+  .bunker-hand-scroll-hint {
+    display: none;
+  }
 }
