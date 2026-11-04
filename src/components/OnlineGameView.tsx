@@ -6,6 +6,7 @@ import {
 import type { Card, CardCategory } from '../types/game';
 import { CATEGORY_CONFIG } from '../data/cards';
 import { CardView } from './CardView';
+import { ActionCardControls } from './ActionCardControls';
 import type { RoomSnapshot } from '../services/onlineRooms';
 
 interface OnlineGameViewProps {
@@ -20,6 +21,7 @@ interface OnlineGameViewProps {
   onRevealCard: (instanceId: string) => void;
   onUseActionCard: (instanceId: string) => void;
   onUseHotfixCard: (actionInstanceId: string, vulnerabilityInstanceId: string) => void;
+  onUseActionEffect: (cardInstanceId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
@@ -85,6 +87,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onRevealCard,
   onUseActionCard,
   onUseHotfixCard,
+  onUseActionEffect,
   onStartBriefing,
   onOpenVoting,
   onVote,
@@ -125,6 +128,31 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     );
   const usedActionCardIds = Array.isArray(snapshot.public_state?.used_action_cards)
     ? snapshot.public_state.used_action_cards.filter((value): value is string => typeof value === 'string')
+    : [];
+  const ownActionCards = [
+    ...(snapshot.my_cards as SnapshotCard[])
+      .filter((card) => card.category === 'actions')
+      .map((card) => ({
+        instance_id: card.instance_id || card.card_instance_id || '',
+        card_id: card.card_id,
+        title: card.title,
+      })),
+    ...revealedSnapshotCards
+      .filter((card) => card.category === 'actions' && card.owner_member_id === myMemberId)
+      .map((card) => ({
+        instance_id: card.instance_id || card.card_instance_id || '',
+        card_id: card.card_id,
+        title: card.title,
+      })),
+  ].filter((card) => card.instance_id);
+  const watchdogRound = typeof snapshot.public_state?.watchdog_round === 'number'
+    ? snapshot.public_state.watchdog_round
+    : null;
+  const vulnerabilitiesDisabledRound = typeof snapshot.public_state?.vulnerabilities_disabled_round === 'number'
+    ? snapshot.public_state.vulnerabilities_disabled_round
+    : null;
+  const ignoredCrisisIds = Array.isArray(snapshot.public_state?.ignored_crisis_ids)
+    ? snapshot.public_state.ignored_crisis_ids.filter((value): value is string => typeof value === 'string')
     : [];
   const emergencyGeneratorInstanceId = ownEmergencyGenerator?.instance_id || ownEmergencyGenerator?.card_instance_id;
   const hotfixInstanceId = ownHotfixCard?.instance_id || ownHotfixCard?.card_instance_id;
@@ -508,6 +536,24 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               )}
               <span className="bunker-online-private-label"><LockKeyhole aria-hidden="true" /> Личная раздача</span>
             </header>
+            <ActionCardControls
+              myMemberId={myMemberId}
+              cards={ownActionCards}
+              players={players}
+              crises={(snapshot.active_crises as unknown as SnapshotCard[]).map((crisis) => ({
+                instance_id: crisis.instance_id || crisis.card_instance_id || '',
+                card_id: crisis.card_id,
+                title: crisis.title,
+              })).filter((crisis) => crisis.instance_id)}
+              usedCardInstanceIds={usedActionCardIds}
+              privateEvents={snapshot.my_private_action_events || []}
+              currentRound={snapshot.session.round_number}
+              watchdogRound={watchdogRound}
+              vulnerabilitiesDisabledRound={vulnerabilitiesDisabledRound}
+              ignoredCrisisIds={ignoredCrisisIds}
+              busy={busy}
+              onUse={onUseActionEffect}
+            />
             <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
             <div className="bunker-hand-grid bunker-online-hand-grid">
               {handCards.map(({ instanceId, card, revealed }) => (
