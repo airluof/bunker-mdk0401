@@ -96,7 +96,7 @@ const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
 
 function isValidOnlineInviteCode(value: string): boolean {
   const normalized = value.trim().toUpperCase();
-  return /^[A-Z]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
+  return /^[A-Z0-9]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
 }
 
 function formatOnlineError(error: unknown, fallback: string): string {
