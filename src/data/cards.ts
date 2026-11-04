@@ -132,6 +132,7 @@ export function dealNewGame(playerNames: string[]): {
   activeCrises: Card[];
   crisisDeck: Card[];
   bunkerCapacity: number;
+  skillDeck: Card[];
 } {
   const shuffledRoles = shuffleArray(CARDS_BY_CATEGORY.roles);
   const shuffledSkills = shuffleArray(CARDS_BY_CATEGORY.skills);
@@ -184,6 +185,7 @@ export function dealNewGame(playerNames: string[]): {
     activeCrises,
     crisisDeck,
     bunkerCapacity: capacity,
+    skillDeck: shuffledSkills.slice(playerNames.length),
   };
 }
 
