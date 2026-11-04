@@ -46,6 +46,7 @@
   /* Component tokens */
   --button-primary-bg: var(--color-accent);
   --button-primary-hover: var(--color-accent-hover);
+  --button-primary-pressed: var(--color-accent-pressed);
   --button-primary-text: #fff8f5;
   --control-bg: #101316;
   --control-border: var(--color-border-strong);
