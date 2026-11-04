@@ -6,6 +6,7 @@ const paths = {
   migration: 'supabase/migrations/202611040012_controller_failover_and_shared_audit.sql',
   shortInviteMigration: 'supabase/migrations/202611040014_short_room_invite_codes.sql',
   fullAlphabetMigration: 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql',
+  alphanumericMigration: 'supabase/migrations/202611040016_alphanumeric_room_codes.sql',
   service: 'src/services/onlineRooms.ts',
   app: 'src/App.tsx',
   gameView: 'src/components/OnlineGameView.tsx',
@@ -28,6 +29,7 @@ const requireText = (source, pattern, message) => {
 const sql = files.migration;
 const shortInviteSql = files.shortInviteMigration;
 const fullAlphabetSql = files.fullAlphabetMigration;
+const alphanumericSql = files.alphanumericMigration;
 
 const sqlFunctions = [
   'public.api_heartbeat_room',
@@ -57,8 +59,77 @@ if (!fullAlphabetSql.includes("extensions.digest(convert_to(upper(btrim(p_invite
 }
 requireText(files.app, /replace\(\/\[\^A-Z0-9\]\/g/i,
   'Invite input must accept all Latin letters and digits.');
-requireText(files.app, /return \/\^\[A-Z\]\{5\}\$\/\.test\(normalized\)/,
-  'Client-side validation must accept five-letter A-Z codes.');
+requireText(alphanumericSql, /v_alphabet constant text := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'/i,
+  'Migration 016 must generate five-character alphanumeric invite codes.');
+requireText(alphanumericSql, /v_random_byte < 252/i, 'Alphanumeric invite generation must use unbiased rejection sampling.');
+requireText(alphanumericSql, /v_random_byte % 36/i, 'Alphanumeric invite generation must select from all 36 characters.');
+if (!alphanumericSql.includes("upper(btrim(p_invite_code)) !~ '^([A-Z0-9]{5}|[0-9A-F]{32})
+
+requireText(sql, /create trigger room_controller_failover_after_elimination/i, 'Controller failover trigger is missing.');
+requireText(sql, /interval '90 seconds'/i, 'Controller takeover must use a server-side 90 second heartbeat grace period.');
+requireText(sql, /revoke all on function public\.api_heartbeat_room\(uuid\) from public, anon/i, 'Heartbeat RPC must not be callable by anon/PUBLIC.');
+requireText(sql, /grant execute on function public\.api_heartbeat_room\(uuid\) to authenticated/i, 'Authenticated heartbeat RPC grant is missing.');
+requireText(sql, /revoke all on function public\.api_takeover_room_control\(uuid, uuid\) from public, anon/i, 'Takeover RPC must not be callable by anon/PUBLIC.');
+requireText(sql, /grant execute on function public\.api_takeover_room_control\(uuid, uuid\) to authenticated/i, 'Authenticated takeover RPC grant is missing.');
+
+const auditFunction = sql.match(/create or replace function public\.api_submit_audit_plan[\s\S]*?\$\$;/i)?.[0] || '';
+const finishFunction = sql.match(/create or replace function public\.api_finish_game[\s\S]*?\$\$;/i)?.[0] || '';
+requireText(auditFunction, /m\.is_alive\s*=\s*true/i, 'Audit plan must be restricted to surviving participants.');
+requireText(finishFunction, /m\.is_alive\s*=\s*true/i, 'Only a surviving participant may finish the game.');
+if (/created_by_user_id\s*=\s*v_user_id/i.test(auditFunction)) failures.push('Audit plan must not require the original room creator.');
+if (/created_by_user_id\s*=\s*v_user_id/i.test(finishFunction)) failures.push('Finishing the game must not require the original room creator.');
+
+requireText(files.service, /export async function heartbeatOnlineRoom/i, 'Client heartbeat wrapper is missing.');
+requireText(files.service, /export async function takeoverOnlineRoomControl/i, 'Client takeover wrapper is missing.');
+requireText(files.service, /status === 'SUBSCRIBED'/i, 'Realtime resubscription must refresh the server snapshot.');
+requireText(files.app, /heartbeatOnlineRoom\(roomId\)/i, 'The app does not send room heartbeats.');
+requireText(files.app, /20_000/i, 'Client heartbeat interval is missing.');
+requireText(files.app, /takeoverOnlineRoomControl\(onlineRoom!/i, 'The app does not call the takeover RPC.');
+requireText(files.gameView, /onTakeover: \(\) => void/i, 'Game view takeover callback is missing.');
+requireText(files.gameView, /!isHost && isAlive/i, 'Living non-host participants cannot request controller takeover.');
+requireText(files.gameView, /\{isAlive \? \(/i, 'The final plan editor must be available to any surviving participant.');
+requireText(files.lobby, /onTakeover: \(\) => void/i, 'Lobby takeover callback is missing.');
+requireText(files.lobby, /!isHost && snapshot\.room\.status === 'lobby'/i, 'Lobby takeover action is missing.');
+
+requireText(files.main, /\.\/bunker-reference\.css/, 'The restored reference theme is no longer loaded.');
+requireText(files.main, /\.\/bunker-polish\.css/, 'The restored polish layer is no longer loaded.');
+requireText(files.polishCss, /\.bunker-brand-mark svg/, 'Logo icon alignment styles are missing.');
+requireText(files.polishCss, /\.bunker-nav-actions/, 'Navigation icon alignment styles are missing.');
+if (!files.referenceCss.length || !files.polishCss.length) failures.push('Restored design stylesheets must not be empty.');
+
+const manifest = JSON.parse(files.manifest.replace(/^\uFEFF/, ''));
+const cards = manifest.assets || [];
+if (cards.length !== 180) failures.push('Expected 180 source cards; found ' + cards.length + '.');
+for (const category of ['roles', 'skills', 'baggage', 'vulnerabilities', 'crises', 'actions']) {
+  const count = cards.filter((card) => card.category === category).length;
+  if (count !== 30) failures.push('Expected 30 cards in ' + category + '; found ' + count + '.');
+}
+
+const migrationFiles = (await readdir(resolve(root, 'supabase/migrations')))
+  .filter((name) => name.endsWith('.sql'))
+  .sort();
+for (let index = 1; index <= 16; index += 1) {
+  const prefix = '20261104' + String(index).padStart(4, '0');
+  if (!migrationFiles.some((name) => name.startsWith(prefix))) {
+    failures.push('Missing sequential migration ' + prefix + '.');
+  }
+}
+
+if (failures.length) {
+  console.error('Runtime contract validation failed:');
+  for (const failure of failures) console.error(' - ' + failure);
+  process.exit(1);
+}
+
+console.log('Runtime contracts validated.');
+console.log('Controller heartbeat/takeover, creator-elimination failover and shared survivor audit are present.');
+console.log('Restored design assets and all 180 source cards remain present.');
+console.log('All 16 sequential migrations are present, including alphanumeric room codes.');
+")) {
+  failures.push('Latest join RPC must accept five-character alphanumeric codes and legacy hexadecimal codes.');
+}
+requireText(files.app, /return \/\^\[A-Z0-9\]\{5\}\$\/\.test\(normalized\)/,
+  'Client-side validation must accept five-character alphanumeric codes.');
 
 requireText(sql, /create trigger room_controller_failover_after_elimination/i, 'Controller failover trigger is missing.');
 requireText(sql, /interval '90 seconds'/i, 'Controller takeover must use a server-side 90 second heartbeat grace period.');
