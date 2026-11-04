@@ -1193,3 +1193,69 @@ body {
     padding: 13px;
   }
 }
+
+
+/* Keep the five online hand cards at one fixed size before and after reveal. */
+.bunker-online-hand-grid .bunker-hand-slot {
+  height: 344px;
+  min-height: 344px;
+}
+
+.bunker-online-hand-grid .bunker-card {
+  width: 100%;
+  height: 344px;
+  min-height: 344px;
+  max-height: 344px;
+  flex: 0 0 344px;
+}
+
+.bunker-online-hand-grid .bunker-card-open .bunker-card-art {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.bunker-online-hand-grid .bunker-card-open .bunker-card-copy {
+  height: 126px;
+  min-height: 126px;
+  flex: 0 0 126px;
+}
+
+.bunker-online-hand-grid .bunker-card-open .bunker-card-copy p {
+  -webkit-line-clamp: 2;
+}
+
+/* Test exit is a quiet secondary action, not an alarm-red call to action. */
+.bunker-online-exit-test {
+  border-color: rgba(206,195,173,.2);
+  background: #292a25;
+  color: #d5cebf;
+}
+
+.bunker-online-exit-test svg {
+  color: #b3a58b;
+}
+
+.bunker-online-exit-test:hover:not(:disabled) {
+  border-color: rgba(206,195,173,.34);
+  background: #34352e;
+  color: #f0eadf;
+}
+
+@media (max-width: 600px) {
+  .bunker-online-hand-grid .bunker-hand-slot,
+  .bunker-online-hand-grid .bunker-card {
+    height: 330px;
+    min-height: 330px;
+    max-height: 330px;
+  }
+
+  .bunker-online-hand-grid .bunker-card {
+    flex-basis: 330px;
+  }
+
+  .bunker-online-hand-grid .bunker-card-open .bunker-card-copy {
+    height: 122px;
+    min-height: 122px;
+    flex-basis: 122px;
+  }
+}
