@@ -99,7 +99,7 @@ export const PlayerRoster: React.FC<PlayerRosterProps> = ({
               )}
 
               <div className="bunker-player-card-slots" aria-label="Карты игрока">
-                {categories.map((category) => {
+                {categories.filter((category) => !(category === 'vulnerabilities' && player.vulnerabilityDiscarded)).map((category) => {
                   const card = player.hand[category];
                   const isRevealed = player.revealed[category];
                   const config = CATEGORY_CONFIG[category];
