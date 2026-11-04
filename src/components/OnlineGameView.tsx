@@ -452,7 +452,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   };
 
   return (
-    <main className="bunker-page bunker-online-game">
+    <section className="bunker-page bunker-online-game">
       <header className="bunker-online-game-heading">
         <div>
           <p className="bunker-eyebrow">
