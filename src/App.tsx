@@ -784,7 +784,7 @@ export function App() {
       timestamp: new Date().toLocaleTimeString('ru-RU'),
       round: gameState.round,
       type: 'action',
-      message: `Применено действие [${actionCard.original_title}]: ${actionCard.source_description}`,
+      message: `Карта действия выбрана для проверки [${actionCard.original_title}]. Автоматический эффект в текущей тестовой сборке не применяется. Исходное описание: ${actionCard.source_description}`,
       actorName: myPlayer.name,
       cardId: actionCard.card_id,
     };
@@ -794,7 +794,7 @@ export function App() {
       players: updatedPlayers,
       log: [...gameState.log, newLog],
     });
-    showToast(`Действие «${actionCard.original_title}» активировано`);
+    showToast(`Карта «${actionCard.original_title}» отмечена. Её специальный эффект пока не автоматизирован.`);
   };
 
   // Submit vote in voting phase
