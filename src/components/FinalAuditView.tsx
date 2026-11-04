@@ -66,7 +66,7 @@ export const FinalAuditView: React.FC<FinalAuditViewProps> = ({
       '',
       `1. СОСТАВ ОПЕРАТИВНОЙ ГРУППЫ БУНКЕРА (${survivingPlayers.length} чел.):`,
       ...survivingPlayers.map(p => 
-        ` - ${p.name}: [Роль: ${p.hand.roles.original_title}] | [Навык: ${p.hand.skills.original_title}] | [Багаж: ${p.hand.baggage.original_title}] | [Уязвимость: ${p.hand.vulnerabilities.original_title}]`
+        ` - ${p.name}: [Роль: ${p.hand.roles.original_title}] | [Навыки: ${[p.hand.skills, ...(p.hand.extraSkills || [])].map((skill) => skill.original_title).join(', ')}] | [Багаж: ${p.hand.baggage.original_title}] | [Уязвимость: ${p.hand.vulnerabilities.original_title}]`
       ),
       '',
       `2. КАТАЛОГ ПРЕОДОЛЕННЫХ КРИЗИСОВ И СБОЕВ (${activeCrises.length}):`,
@@ -164,7 +164,7 @@ export const FinalAuditView: React.FC<FinalAuditViewProps> = ({
                     <span className="text-slate-400">Роль:</span> {player.hand.roles.original_title}
                   </div>
                   <div className="text-emerald-300">
-                    <span className="text-slate-400">Навык:</span> {player.hand.skills.original_title}
+                    <span className="text-slate-400">Навыки:</span> {[player.hand.skills, ...(player.hand.extraSkills || [])].map((skill) => skill.original_title).join(' · ')}
                   </div>
                   <div className="text-orange-300">
                     <span className="text-slate-400">Багаж:</span> {player.hand.baggage.original_title}
