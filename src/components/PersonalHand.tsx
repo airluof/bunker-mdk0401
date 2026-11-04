@@ -10,6 +10,7 @@ interface PersonalHandProps {
   onRevealCard: (category: PlayerSlotCategory) => void;
   onUseAction: () => void;
   onInspectCard: (card: Card) => void;
+  hasRevealedThisRound?: boolean;
 }
 
 export const PersonalHand: React.FC<PersonalHandProps> = ({
@@ -18,6 +19,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
   onRevealCard,
   onUseAction,
   onInspectCard,
+  hasRevealedThisRound = false,
 }) => {
   const categories: PlayerSlotCategory[] = ['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'];
 
@@ -47,7 +49,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
         {categories.map((category) => {
           const card = player.hand[category];
           const isRevealed = player.revealed[category];
-          const canReveal = !isRevealed && (currentPhase === 'reveal' || currentPhase === 'briefing');
+          const canReveal = !isRevealed && !hasRevealedThisRound && (currentPhase === 'reveal' || currentPhase === 'briefing');
 
           return (
             <div key={category} className="bunker-hand-slot">
