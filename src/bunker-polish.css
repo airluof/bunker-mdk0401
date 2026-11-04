@@ -894,3 +894,143 @@ body {
     display: flex;
   }
 }
+
+
+/* Card catalogue and inspection details. */
+.bunker-search {
+  width: min(100%, 560px);
+  min-height: 49px;
+  gap: 12px;
+  border-radius: 8px;
+  padding: 0 15px;
+  background: rgba(16,16,16,.92);
+}
+
+.bunker-search input {
+  height: 47px;
+  font-size: 14px;
+}
+
+.bunker-search input::placeholder {
+  color: #aaa69f;
+}
+
+.bunker-category-filters {
+  gap: 8px;
+}
+
+.bunker-filter {
+  min-height: 39px;
+  gap: 8px;
+  border-radius: 20px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,.045);
+  font-size: 13px;
+}
+
+.bunker-filter svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bunker-filter.is-active {
+  border-color: rgba(231,93,63,.46);
+  border-radius: 20px;
+  background: rgba(231,93,63,.16);
+  color: #ff9a82;
+}
+
+.bunker-catalog-result {
+  padding: 15px 0;
+  color: #b4b0a8;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.bunker-catalog-grid {
+  gap: 18px;
+}
+
+.bunker-catalog-item {
+  min-height: 345px;
+}
+
+.bunker-catalog-note {
+  color: #aaa69f;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.bunker-modal-panel {
+  border-radius: 11px;
+}
+
+.bunker-modal-art {
+  background: #1a1a1a;
+}
+
+.bunker-modal-copy {
+  gap: 17px;
+  padding: clamp(24px, 4vw, 42px);
+}
+
+.bunker-modal-copy h2 {
+  color: #f1eee8;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -.03em;
+}
+
+.bunker-modal-copy p {
+  color: #c0bcb4;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.bunker-category-label {
+  color: #f08b73;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.bunker-modal-close {
+  border-radius: 50%;
+}
+
+@media (max-width: 600px) {
+  .bunker-search {
+    width: 100%;
+  }
+
+  .bunker-category-filters {
+    gap: 7px;
+  }
+
+  .bunker-filter {
+    min-height: 37px;
+    padding: 7px 12px;
+  }
+
+  .bunker-catalog-grid {
+    gap: 10px;
+  }
+
+  .bunker-catalog-item {
+    min-height: 310px;
+  }
+
+  .bunker-modal-panel {
+    border-radius: 9px;
+  }
+
+  .bunker-modal-copy {
+    padding: 20px;
+  }
+
+  .bunker-modal-copy p {
+    font-size: 14px;
+  }
+}
