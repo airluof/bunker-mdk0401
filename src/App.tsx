@@ -31,6 +31,8 @@ import {
   createOnlineTestRoom,
   joinOnlineRoom,
   getOnlineRoomSnapshot,
+  heartbeatOnlineRoom,
+  takeoverOnlineRoomControl,
   subscribeToOnlineRoom,
   leaveOnlineRoom,
   closeOnlineRoom,
@@ -131,6 +133,12 @@ function formatOnlineError(error: unknown, fallback: string): string {
   }
   if (normalized.includes('CARD_CATALOG_INCOMPLETE')) {
     return 'Каталог карточек ещё не загружен в Supabase. Обратитесь к создателю игры.';
+  }
+  if (normalized.includes('ROOM_CONTROLLER_STILL_ACTIVE')) {
+    return 'Ведущий ещё отвечает. Перехват управления станет доступен после 90 секунд без связи.';
+  }
+  if (normalized.includes('ROOM_CONTROLLER_NOT_FOUND') || normalized.includes('ROOM_NOT_AVAILABLE_FOR_TAKEOVER')) {
+    return 'Сейчас нельзя передать управление этой комнатой.';
   }
   if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
     return 'Создатель должен закрыть комнату, прежде чем выйти из неё.';
@@ -276,6 +284,34 @@ export function App() {
     return () => {
       cancelled = true;
       unsubscribe?.();
+    };
+  }, [onlineRoom?.roomId]);
+
+  // Keep an authenticated heartbeat while this participant is inside a room.
+  // Heartbeats are written to a private table and do not trigger room-wide Realtime refreshes.
+  useEffect(() => {
+    const roomId = onlineRoom?.roomId;
+    if (!roomId) return;
+
+    let cancelled = false;
+    const sendHeartbeat = async () => {
+      try {
+        await heartbeatOnlineRoom(roomId);
+      } catch (error: unknown) {
+        if (!cancelled) {
+          setOnlineError(formatOnlineError(error, 'Не удалось обновить подключение к комнате.'));
+        }
+      }
+    };
+
+    void sendHeartbeat();
+    const interval = window.setInterval(() => {
+      void sendHeartbeat();
+    }, 20_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
     };
   }, [onlineRoom?.roomId]);
 
@@ -484,6 +520,12 @@ export function App() {
       setOnlineBusy(false);
     }
   };
+
+  const handleTakeoverOnlineRoom = () => runOnlineGameAction(
+    () => takeoverOnlineRoomControl(onlineRoom!.roomId),
+    'Управление комнатой передано вам.',
+    'Не удалось перехватить управление комнатой.',
+  );
 
   const handleRevealOnlineCard = (instanceId: string) => runOnlineGameAction(
     () => revealOnlineCard(onlineRoom!.roomId, instanceId),
@@ -1202,6 +1244,7 @@ export function App() {
               busy={onlineBusy}
               error={onlineError}
               onRefresh={handleRefreshOnlineRoom}
+              onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
               onInspectCard={setInspectingCard}
               onRevealCard={handleRevealOnlineCard}
@@ -1224,6 +1267,7 @@ export function App() {
               busy={onlineBusy}
               error={onlineError}
               onRefresh={handleRefreshOnlineRoom}
+              onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
               onSaveSettings={handleSaveOnlineRoomSettings}
               onStartGame={handleStartOnlineGame}
