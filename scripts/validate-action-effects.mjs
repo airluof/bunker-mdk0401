@@ -68,7 +68,7 @@ requireText(files.generatorMigration, /revoke all on public\.game_action_uses fr
 requireText(files.generatorMigration, /create or replace function public\.api_use_action_card/i, 'Emergency Generator RPC is missing.');
 requireText(files.generatorMigration, /v_new_capacity := v_old_capacity \+ 1/i, 'Emergency Generator must add exactly one place.');
 requireText(files.hotfixMigration, /create or replace function public\.api_use_hotfix_card/i, 'Hotfix RPC is missing.');
-requireText(files.hotfixMigration, /set zone = 'discard',[\s\S]*?owner_member_id = null/i, 'Hotfix must discard the owner's Vulnerability.');
+requireText(files.hotfixMigration, /set zone = 'discard',[\s\S]*?owner_member_id = null/i, "Hotfix must discard the owner's Vulnerability.");
 requireText(files.hotfixMigration, /grant execute on function public\.api_use_hotfix_card\(uuid, uuid, uuid, uuid\) to authenticated/i, 'Hotfix RPC grant is missing.');
 
 requireText(files.unifiedMigration, /zone in \('hand', 'crisis_deck', 'active_crisis', 'category_deck', 'discard'\)/i, 'Category-deck zone is missing.');
