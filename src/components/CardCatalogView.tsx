@@ -37,7 +37,7 @@ export const CardCatalogView: React.FC<CardCatalogViewProps> = ({ onInspectCard 
   };
 
   return (
-    <main className="bunker-page bunker-catalog">
+    <section className="bunker-page bunker-catalog">
       <header className="bunker-page-heading">
         <div>
           <p className="bunker-eyebrow">Бункер · Колода</p>
