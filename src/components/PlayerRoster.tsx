@@ -79,7 +79,7 @@ export const PlayerRoster: React.FC<PlayerRosterProps> = ({
                   </span>
                 </div>
 
-                {currentPhase === 'voting' && player.votesReceived > 0 && (
+                {(currentPhase === 'voting' || currentPhase === 'elimination') && player.votesReceived > 0 && (
                   <span className="bunker-player-votes">
                     <Vote aria-hidden="true" /> {player.votesReceived}
                   </span>
