@@ -630,6 +630,7 @@ export function App() {
       players: deal.players,
       activeCrises: deal.activeCrises,
       crisisDeck: deal.crisisDeck,
+      skillDeck: deal.skillDeck,
       bunkerCapacity: deal.bunkerCapacity,
       timerSeconds: 60,
       timerActive: false,
@@ -765,10 +766,18 @@ export function App() {
 
     const newPlayers = [...gameState.players, newPlayer];
     const updatedCapacity = Math.max(2, Math.floor(newPlayers.length / 2));
+    const availableSkills = gameState.skillDeck ?? shuffleArray(CARDS_BY_CATEGORY.skills.filter((skill) =>
+      !gameState.players.some((player) =>
+        player.hand.skills.card_id === skill.card_id
+        || (player.hand.extraSkills || []).some((extraSkill) => extraSkill.card_id === skill.card_id)
+      )
+    ));
+    const nextSkillDeck = availableSkills.filter((skill) => skill.card_id !== newPlayer.hand.skills.card_id);
 
     setGameState({
       ...gameState,
       players: newPlayers,
+      skillDeck: nextSkillDeck,
       bunkerCapacity: updatedCapacity,
       log: [
         ...gameState.log,
@@ -785,7 +794,7 @@ export function App() {
   };
 
   // Reveal player card
-  const handleRevealCard = (category: PlayerSlotCategory) => {
+  const handleRevealCard = (category: PlayerSlotCategory, extraSkillCardId?: string) => {
     if (!gameState) return;
     const myPlayer = gameState.players[0];
     if (!myPlayer) return;
@@ -795,10 +804,24 @@ export function App() {
       return;
     }
 
-    const card = myPlayer.hand[category];
+    const isExtraSkill = category === 'skills' && Boolean(extraSkillCardId);
+    const card = isExtraSkill
+      ? myPlayer.hand.extraSkills?.find((skill) => skill.card_id === extraSkillCardId)
+      : myPlayer.hand[category];
+    if (!card) return;
+
     const newlyRevealedBots: Array<{ memberId: string; category: PlayerSlotCategory }> = [];
     const updatedPlayers = gameState.players.map((player, index) => {
       if (index === 0) {
+        if (isExtraSkill && extraSkillCardId) {
+          return {
+            ...player,
+            hand: {
+              ...player.hand,
+              revealedExtraSkills: [...new Set([...(player.hand.revealedExtraSkills || []), extraSkillCardId])],
+            },
+          };
+        }
         return { ...player, revealed: { ...player.revealed, [category]: true } };
       }
       if (gameState.isLocalDemo && (gameState.phase === 'reveal' || gameState.phase === 'briefing') && player.isAlive && player.isBot && !revealedThisRound.includes(player.id)) {
@@ -877,6 +900,49 @@ export function App() {
       showToast('Hotfix применён. Ваша Уязвимость сброшена.');
       return;
     }
+    if (actionCard.card_id === 'action_11') {
+      const availableSkills = gameState.skillDeck ?? shuffleArray(CARDS_BY_CATEGORY.skills.filter((skill) =>
+        !gameState.players.some((player) =>
+          player.hand.skills.card_id === skill.card_id
+          || (player.hand.extraSkills || []).some((extraSkill) => extraSkill.card_id === skill.card_id)
+        )
+      ));
+      const additionalSkill = availableSkills[0];
+      if (!additionalSkill) {
+        showToast('Колода Навыков пуста. Эксплойт не был потрачен.');
+        return;
+      }
+
+      const updatedPlayers = gameState.players.map((player, index) => index === 0
+        ? {
+            ...player,
+            actionUsed: true,
+            revealed: { ...player.revealed, actions: true },
+            hand: {
+              ...player.hand,
+              extraSkills: [...(player.hand.extraSkills || []), additionalSkill],
+            },
+          }
+        : player);
+      const exploitLog: GameLogEntry = {
+        id: `log_${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'action',
+        message: 'Эксплойт применён: в личный набор добавлена вторая карта Навыка.',
+        actorName: myPlayer.name,
+        cardId: actionCard.card_id,
+      };
+      setGameState({
+        ...gameState,
+        players: updatedPlayers,
+        skillDeck: availableSkills.slice(1),
+        log: [...gameState.log, exploitLog],
+      });
+      showToast('Эксплойт применён. Второй Навык добавлен в личную руку.');
+      return;
+    }
+
     if (actionCard.card_id !== 'action_28') {
       showToast('Эффект этой карты пока не автоматизирован. Карта не потрачена.');
       return;
