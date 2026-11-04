@@ -1165,8 +1165,6 @@ export function App() {
 
   return (
     <div className="bunker-app min-h-screen flex flex-col">
-      <a className="bunker-skip-link" href="#main-content">Перейти к содержимому</a>
-
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
@@ -1263,7 +1261,7 @@ export function App() {
               </header>
 
               <div className="bunker-name-field">
-                <label htmlFor="engineer-call-sign">Позывной</label>
+                <label htmlFor="engineer-call-sign">Твоё имя</label>
                 <input
                   id="engineer-call-sign"
                   type="text"
@@ -1274,7 +1272,7 @@ export function App() {
                     saveLocalUser(updated);
                   }}
                   maxLength={24}
-                  placeholder="Как к тебе обращаться?"
+                  placeholder="Как тебя показывать в игре?"
                   className="bunker-input"
                 />
               </div>
@@ -1363,21 +1361,21 @@ export function App() {
 
               <div className="bunker-category-grid">
                 {[
-                  { name: 'Роли', description: 'Профессия и опыт участника' },
-                  { name: 'Навыки', description: 'Знания и технические умения' },
-                  { name: 'Багаж', description: 'Предметы и ресурсы' },
-                  { name: 'Уязвимости', description: 'Слабые стороны и риски' },
-                  { name: 'Кризисы', description: 'Угрозы для бункера' },
-                  { name: 'Действия', description: 'Особые игровые эффекты' },
-                ].map((item, index) => (
+                  { name: 'Роли', description: 'Профессия и опыт участника', color: '#66816b' },
+                  { name: 'Навыки', description: 'Знания и технические умения', color: '#718b78' },
+                  { name: 'Багаж', description: 'Предметы и ресурсы', color: '#aa8258' },
+                  { name: 'Уязвимости', description: 'Слабые стороны и риски', color: '#ac6a60' },
+                  { name: 'Кризисы', description: 'Угрозы для бункера', color: '#8c789f' },
+                  { name: 'Действия', description: 'Особые игровые эффекты', color: '#a38a54' },
+                ].map((item) => (
                   <button
                     key={item.name}
                     type="button"
                     onClick={() => setCurrentView('catalog')}
                     className="bunker-category-card"
+                    style={{ '--category-color': item.color } as React.CSSProperties}
                   >
-                    <span className="bunker-category-index">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="bunker-category-dot" aria-hidden="true" />
+                    <span className="bunker-category-dot" />
                     <span className="bunker-category-copy">
                       <strong>{item.name}</strong>
                       <small>{item.description}</small>
