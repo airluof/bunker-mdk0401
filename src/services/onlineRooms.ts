@@ -38,6 +38,7 @@ export interface RoomSnapshot {
     display_name: string;
     technical_role: 'host' | 'player';
     membership_status: 'active' | 'left';
+    is_bot: boolean;
     joined_at: string;
     last_seen_at: string | null;
   }>;
@@ -157,6 +158,30 @@ export async function startOnlineTestGame(roomId: string): Promise<RoomCommandRe
   throwIfError(error);
 
   return data as RoomCommandResult;
+}
+
+
+export async function addOnlineTestBots(roomId: string): Promise<{
+  ok: boolean;
+  added: number;
+  active_players: number;
+  test_bots: number;
+}> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_add_test_bots', {
+    p_room_id: roomId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as {
+    ok: boolean;
+    added: number;
+    active_players: number;
+    test_bots: number;
+  };
 }
 
 export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapshot> {
