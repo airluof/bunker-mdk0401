@@ -131,6 +131,6 @@ export const CardCatalogView: React.FC<CardCatalogViewProps> = ({ onInspectCard 
       <p className="bunker-catalog-note">
         Карточки в каталоге видны всем посетителям. Не используй его для хранения закрытой информации партии.
       </p>
-    </main>
+    </section>
   );
 };
