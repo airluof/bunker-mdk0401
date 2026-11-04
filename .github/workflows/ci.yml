@@ -38,6 +38,9 @@ jobs:
       - name: Validate action-card effects
         run: npm run db:validate-actions
 
+      - name: Validate online runtime contracts
+        run: npm run db:validate-runtime
+
       - name: Check for exposed service-role credentials
         shell: bash
         run: |
