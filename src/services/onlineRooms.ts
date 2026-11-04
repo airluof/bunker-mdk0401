@@ -243,6 +243,27 @@ export async function revealOnlineCard(roomId: string, cardInstanceId: string) {
   return data as { ok: boolean; card_instance_id: string; card_id: string; round: number };
 }
 
+
+export async function useOnlineActionCard(roomId: string, cardInstanceId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_use_action_card', {
+    p_room_id: roomId,
+    p_card_instance_id: cardInstanceId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as {
+    ok: boolean;
+    action_id: 'action_28';
+    effect_id: 'emergency_generator_capacity_plus_one';
+    card_instance_id: string;
+    capacity_before: number;
+    capacity_after: number;
+    state_version: number;
+  };
+}
+
 export async function transitionOnlineGamePhase(roomId: string, nextPhase: 'briefing' | 'voting') {
   const client = getClient();
   await ensureAnonymousSession();
