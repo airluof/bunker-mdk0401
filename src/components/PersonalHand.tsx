@@ -40,7 +40,7 @@ export const PersonalHand: React.FC<PersonalHandProps> = ({
         {player.revealed.actions && !player.actionUsed && (
           <button type="button" onClick={handleUseActionClick} className="bunker-action-card-button">
             <Zap aria-hidden="true" />
-            Применить действие
+            Проверить карту действия
           </button>
         )}
       </header>
