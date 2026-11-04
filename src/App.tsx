@@ -1072,15 +1072,29 @@ export function App() {
                     <h3>Создать комнату</h3>
                     <p>Ты станешь ведущим и получишь код приглашения.</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCreateOnlineRoom}
-                    disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
-                    className="bunker-button bunker-button-primary"
-                  >
-                    <Plus aria-hidden="true" />
-                    {onlineBusy ? 'Создаём комнату…' : 'Создать комнату'}
-                  </button>
+                  <div className="bunker-room-create-options">
+                    <button
+                      type="button"
+                      onClick={() => handleCreateOnlineRoom('players')}
+                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                      className="bunker-button bunker-button-primary"
+                    >
+                      <Plus aria-hidden="true" />
+                      {onlineBusy ? 'Создаём…' : 'Обычная игра · люди'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCreateOnlineRoom('test')}
+                      disabled={onlineBusy || !isSupabaseConfigured || currentUser.name.trim().length < 2}
+                      className="bunker-button bunker-button-secondary"
+                    >
+                      <Users aria-hidden="true" />
+                      {onlineBusy ? 'Создаём…' : 'Тест · люди + боты'}
+                    </button>
+                  </div>
+                  <p className="bunker-help">
+                    Обычная комната рассчитана на реальных участников. В тестовой можно добавить ботов, чтобы проверить полный игровой цикл вместе с друзьями.
+                  </p>
                   {!isSupabaseConfigured && (
                     <p className="bunker-help">
                       Онлайн-режим пока не настроен. Для запуска нужно подключить Supabase.
