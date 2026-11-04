@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </span>
           <span className="bunker-brand-copy">
             <span className="bunker-brand-name">Бункер</span>
-            <span className="bunker-brand-subtitle">МДК.04.01</span>
+            <span className="bunker-brand-subtitle">ПРОТОКОЛ ВЫЖИВАНИЯ</span>
           </span>
         </button>
 
