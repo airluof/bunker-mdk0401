@@ -1165,6 +1165,8 @@ export function App() {
 
   return (
     <div className="bunker-app min-h-screen flex flex-col">
+      <a className="bunker-skip-link" href="#main-content">Перейти к содержимому</a>
+
       {/* Top Navbar */}
       <Navbar
         currentView={currentView}
@@ -1190,7 +1192,7 @@ export function App() {
       )}
 
       {/* Main Container */}
-      <main className="bunker-main flex-1">
+      <main className="bunker-main flex-1" id="main-content">
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
         ) : onlineRoom ? (
