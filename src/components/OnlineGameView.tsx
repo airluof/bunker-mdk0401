@@ -21,7 +21,7 @@ interface OnlineGameViewProps {
   onRevealCard: (instanceId: string) => void;
   onUseActionCard: (instanceId: string) => void;
   onUseHotfixCard: (actionInstanceId: string, vulnerabilityInstanceId: string) => void;
-  onUseActionEffect: (cardInstanceId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
+  onUseActionEffect: (cardInstanceId: string, actionId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
@@ -519,7 +519,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 <span className="bunker-kicker">Личное досье</span>
                 <h2>Ваши карты</h2>
                 <p>
-                  {myPlayer?.display_name || 'Игрок'} · {handCards.length} из 5 карт
+                  {myPlayer?.display_name || 'Игрок'} · {handCards.length} карт
                   {snapshot.my_revealed_this_round ? ' · карта этого раунда уже раскрыта' : ''}
                 </p>
               </div>
