@@ -40,6 +40,7 @@ import {
   exitOnlineTestRoom,
   revealOnlineCard,
   useOnlineActionCard,
+  useOnlineHotfixCard,
   transitionOnlineGamePhase,
   submitOnlineVote,
   resolveOnlineVote,
@@ -491,6 +492,12 @@ export function App() {
     'Не удалось применить карту действия.',
   );
 
+  const handleUseOnlineHotfix = (actionInstanceId: string, vulnerabilityInstanceId: string) => runOnlineGameAction(
+    () => useOnlineHotfixCard(onlineRoom!.roomId, actionInstanceId, vulnerabilityInstanceId),
+    'Hotfix применён. Ваша карта Уязвимости отправлена в отбой.',
+    'Не удалось применить Hotfix.',
+  );
+
   const handleStartBriefing = () => runOnlineGameAction(
     () => transitionOnlineGamePhase(onlineRoom!.roomId, 'briefing'),
     'Брифинг начался. Таймер установлен сервером на 60 секунд.',
@@ -821,6 +828,30 @@ export function App() {
     if (['audit', 'gameover', 'lobby'].includes(gameState.phase)) return;
 
     const actionCard = myPlayer.hand.actions;
+    if (actionCard.card_id === 'action_04') {
+      const updatedPlayers = gameState.players.map((player, index) =>
+        index === 0
+          ? {
+              ...player,
+              actionUsed: true,
+              vulnerabilityDiscarded: true,
+              revealed: { ...player.revealed, actions: true },
+            }
+          : player
+      );
+      const hotfixLog: GameLogEntry = {
+        id: `log_${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'action',
+        message: 'Hotfix применён: собственная карта Уязвимости сброшена в отбой.',
+        actorName: myPlayer.name,
+        cardId: actionCard.card_id,
+      };
+      setGameState({ ...gameState, players: updatedPlayers, log: [...gameState.log, hotfixLog] });
+      showToast('Hotfix применён. Ваша Уязвимость сброшена.');
+      return;
+    }
     if (actionCard.card_id !== 'action_28') {
       showToast('Эффект этой карты пока не автоматизирован. Карта не потрачена.');
       return;
@@ -1077,6 +1108,7 @@ export function App() {
               onInspectCard={setInspectingCard}
               onRevealCard={handleRevealOnlineCard}
               onUseActionCard={handleUseOnlineActionCard}
+              onUseHotfixCard={handleUseOnlineHotfix}
               onStartBriefing={handleStartBriefing}
               onOpenVoting={handleOpenVoting}
               onVote={handleSubmitOnlineVote}
