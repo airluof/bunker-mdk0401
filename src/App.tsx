@@ -5,13 +5,15 @@ import {
   Card, 
   PlayerSlotCategory, 
   GameLogEntry, 
-  GamePhase 
+  GamePhase,
+  CardCategory,
 } from './types/game';
 import { 
   ALL_CARDS, 
   dealNewGame, 
   shuffleArray, 
-  CARDS_BY_CATEGORY 
+  CARDS_BY_CATEGORY,
+  CATEGORY_CONFIG,
 } from './data/cards';
 import { Navbar } from './components/Navbar';
 import { ActiveCrisesBanner } from './components/ActiveCrisesBanner';
@@ -36,6 +38,7 @@ import {
   updateOnlineRoomSettings,
   startOnlineGame,
   addOnlineTestBots,
+  getOnlineTestBotData,
   exitOnlineTestRoom,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
@@ -79,6 +82,77 @@ interface OnlineRoomSession {
 
 const ONLINE_ROOM_STORAGE_KEY = 'bunker_mdk0401_online_room_id';
 const ONLINE_INVITE_STORAGE_KEY = 'bunker_mdk0401_online_invite_code';
+
+const TEST_HAND_CATEGORIES: PlayerSlotCategory[] = ['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'];
+
+function mapServerCardToGameCard(source: { card_id: string; category?: string; title: string; description: string; image_path?: string | null }, fallbackCategory: CardCategory): Card {
+  const category: CardCategory = source.category === 'crises' ? 'crises' : TEST_HAND_CATEGORIES.includes(source.category as PlayerSlotCategory) ? source.category as PlayerSlotCategory : fallbackCategory;
+  return {
+    card_id: source.card_id,
+    category,
+    category_name_ru: CATEGORY_CONFIG[category].nameRu,
+    card_number: 0,
+    original_title: source.title,
+    source_description: source.description,
+    exported_title: source.title,
+    file_name: source.image_path?.split('/').pop() || '',
+    relative_path: source.image_path || '',
+  };
+}
+
+function createOnlineBotSimulation(snapshot: RoomSnapshot, botData: Awaited<ReturnType<typeof getOnlineTestBotData>>, roomCode: string): GameState {
+  const activePlayers = snapshot.players.filter((player) => player.membership_status === 'active');
+  const realPlayers = activePlayers.filter((player) => !player.is_bot);
+  if (realPlayers.length !== 1 || realPlayers[0].member_id !== snapshot.my_member_id) throw new Error('BOT_SIMULATION_REQUIRES_SINGLE_HOST');
+  const cardsByMember = new Map<string, Card[]>();
+  cardsByMember.set(snapshot.my_member_id, snapshot.my_cards.map((card) => mapServerCardToGameCard(card, 'roles')));
+  for (const botHand of botData.bot_hands) cardsByMember.set(botHand.member_id, botHand.cards.map((card) => mapServerCardToGameCard(card, 'roles')));
+  const baseDeal = dealNewGame(activePlayers.map((player) => player.display_name));
+  const players: Player[] = activePlayers.map((member, index) => {
+    const cards = cardsByMember.get(member.member_id) || [];
+    const cardFor = (category: PlayerSlotCategory) => cards.find((card) => card.category === category);
+    const roles = cardFor('roles');
+    const skills = cardFor('skills');
+    const baggage = cardFor('baggage');
+    const vulnerabilities = cardFor('vulnerabilities');
+    const actions = cardFor('actions');
+    if (!roles || !skills || !baggage || !vulnerabilities || !actions) throw new Error(member.is_bot ? 'TEST_BOT_HAND_INCOMPLETE' : 'PLAYER_HAND_INCOMPLETE');
+    return {
+      ...baseDeal.players[index],
+      id: member.member_id,
+      name: member.display_name,
+      isHost: member.technical_role === 'host',
+      isReady: true,
+      isAlive: true,
+      hand: { roles, skills, baggage, vulnerabilities, actions },
+      revealed: { roles: false, skills: false, baggage: false, vulnerabilities: false, actions: false },
+      actionUsed: false,
+      votesReceived: 0,
+      votedForId: null,
+      isBot: member.is_bot,
+    } as Player;
+  });
+  const activeCrises = snapshot.active_crises.map((card) => mapServerCardToGameCard(card as { card_id: string; category?: string; title: string; description: string; image_path?: string | null }, 'crises'));
+  const crisisDeck = botData.crisis_deck.map((card) => mapServerCardToGameCard(card, 'crises'));
+  return {
+    isLocalDemo: true,
+    roomCode,
+    hostId: snapshot.my_member_id,
+    round: 1,
+    maxRounds: 5,
+    phase: 'reveal',
+    players,
+    activeCrises,
+    crisisDeck,
+    bunkerCapacity: baseDeal.bunkerCapacity,
+    timerSeconds: 60,
+    timerActive: false,
+    activeSpeakerId: snapshot.my_member_id,
+    lastEliminatedPlayerId: null,
+    recoveryPlan: [],
+    log: [{ id: 'bot_test_' + Date.now(), timestamp: new Date().toLocaleTimeString('ru-RU'), round: 1, type: 'system', message: 'Тестовая партия запущена: ' + players.length + ' участников, включая ' + players.filter((player) => (player as Player & { isBot?: boolean }).isBot).length + ' ботов.' }],
+  };
+}
 
 function formatOnlineError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error || '');
