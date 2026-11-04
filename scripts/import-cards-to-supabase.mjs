@@ -25,6 +25,24 @@ const sourceSheets = {
   actions: 'Действия (Золотые)',
 };
 
+const approvedActionHandlers = {
+  action_03: 'hot_swap_baggage',
+  action_04: 'hotfix_discard_own_vulnerability',
+  action_06: 'vmotion_swap_roles',
+  action_08: 'smart_peek_future_crisis',
+  action_10: 'cmdb_reveal_all_baggage',
+  action_12: 'write_off_target_baggage',
+  action_15: 'cr_replace_selected_crisis',
+  action_16: 'confiscate_expelled_baggage',
+  action_17: 'watchdog_30_second_briefing',
+  action_18: 'session_hijacking_swap_vulnerabilities',
+  action_20: 'memory_dump_private_peek',
+  action_21: 'workaround_ignore_crisis_in_audit',
+  action_24: 'kernel_driver_draw_second_baggage',
+  action_25: 'safe_boot_disable_vulnerabilities_round',
+  action_28: 'emergency_generator_capacity_plus_one',
+};
+
 const ids = new Set();
 const counts = Object.fromEntries(expectedCategories.map((category) => [category, 0]));
 
@@ -54,12 +72,10 @@ const rows = assets.map((card) => {
     image_path: card.relative_path ?? null,
     source_sheet: sourceSheets[card.category],
     catalog_version: CATALOG_VERSION,
-    effect_status: ['action_04', 'action_28'].includes(card.card_id) ? 'approved' : card.category === 'actions' ? 'draft' : 'not_applicable',
-    effect_handler_id: card.card_id === 'action_04'
-      ? 'hotfix_discard_own_vulnerability'
-      : card.card_id === 'action_28'
-        ? 'emergency_generator_capacity_plus_one'
-        : null,
+    effect_status: card.category === 'actions'
+      ? (approvedActionHandlers[card.card_id] ? 'approved' : 'draft')
+      : 'not_applicable',
+    effect_handler_id: approvedActionHandlers[card.card_id] ?? null,
   };
 });
 
