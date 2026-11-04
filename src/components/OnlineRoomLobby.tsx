@@ -80,9 +80,11 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
               className="bunker-button bunker-button-primary"
               title={activePlayers.length < snapshot.room.min_players
                 ? `Для старта нужно ещё ${remainingToStart} игроков`
-                : 'Раздать карты и начать партию'}
+                : activePlayers.some((player) => player.is_bot)
+                  ? 'Запустить полный тестовый игровой цикл с ботами'
+                  : 'Раздать карты и начать партию'}
             >
-              {busy ? 'Запускаем…' : 'Начать игру'}
+              {busy ? 'Запускаем…' : activePlayers.some((player) => player.is_bot) ? 'Запустить тестовую партию' : 'Начать игру'}
             </button>
           )}
           {isHost && snapshot.room.status === 'lobby' && activePlayers.length < snapshot.room.min_players && (
