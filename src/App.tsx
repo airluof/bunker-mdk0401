@@ -142,6 +142,7 @@ function createOnlineBotSimulation(snapshot: RoomSnapshot, botData: Awaited<Retu
     maxRounds: 5,
     phase: 'reveal',
     players,
+    revealedThisRoundPlayerIds: [],
     activeCrises,
     crisisDeck,
     bunkerCapacity: baseDeal.bunkerCapacity,
@@ -713,7 +714,7 @@ export function App() {
     }
 
     const card = myPlayer.hand[category];
-    const newlyRevealedBotIds: string[] = [];
+    const newlyRevealedBots: Array<{ memberId: string; category: PlayerSlotCategory }> = [];
     const updatedPlayers = gameState.players.map((player, index) => {
       if (index === 0) {
         return { ...player, revealed: { ...player.revealed, [category]: true } };
@@ -723,7 +724,7 @@ export function App() {
           .filter((candidate) => !player.revealed[candidate]);
         if (unrevealed.length > 0) {
           const chosenCategory = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-          newlyRevealedBotIds.push(player.id);
+          newlyRevealedBots.push({ memberId: player.id, category: chosenCategory });
           return { ...player, revealed: { ...player.revealed, [chosenCategory]: true } };
         }
       }
@@ -739,14 +740,11 @@ export function App() {
       actorName: myPlayer.name,
       cardId: card.card_id,
     };
-    const botLogs: GameLogEntry[] = newlyRevealedBotIds.map((botId) => {
-      const bot = updatedPlayers.find((player) => player.id === botId)!;
-      const previous = gameState.players.find((player) => player.id === botId)!;
-      const openedCategory = (['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'] as PlayerSlotCategory[])
-        .find((candidate) => !previous.revealed[candidate])!;
+    const botLogs: GameLogEntry[] = newlyRevealedBots.map(({ memberId, category: openedCategory }) => {
+      const bot = updatedPlayers.find((player) => player.id === memberId)!;
       const openedCard = bot.hand[openedCategory];
       return {
-        id: `bot_reveal_${Date.now()}_${botId}`,
+        id: `bot_reveal_${Date.now()}_${memberId}`,
         timestamp: new Date().toLocaleTimeString('ru-RU'),
         round: gameState.round,
         type: 'reveal',
@@ -759,7 +757,7 @@ export function App() {
     setGameState({
       ...gameState,
       players: updatedPlayers,
-      revealedThisRoundPlayerIds: [...revealedThisRound, myPlayer.id, ...newlyRevealedBotIds],
+      revealedThisRoundPlayerIds: [...revealedThisRound, myPlayer.id, ...newlyRevealedBots.map((bot) => bot.memberId)],
       log: [...gameState.log, newLog, ...botLogs],
     });
     showToast('Карта раскрыта. Тестовые боты также раскрыли по одной карте.');
