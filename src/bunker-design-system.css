@@ -143,6 +143,25 @@ svg {
   outline-offset: 3px;
 }
 
+.bunker-skip-link {
+  position: absolute;
+  z-index: 100;
+  top: 8px;
+  left: 8px;
+  transform: translateY(-160%);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  padding: 10px 14px;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.bunker-skip-link:focus {
+  transform: translateY(0);
+}
+
 .bunker-app {
   min-height: 100vh;
   min-height: 100dvh;
@@ -2532,6 +2551,20 @@ svg {
   .bunker-toast {
     right: 12px !important;
     bottom: 12px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .bunker-nav-inner {
+    flex-wrap: wrap;
+    row-gap: 4px;
+    padding-block: 7px;
+  }
+
+  .bunker-nav-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
   }
 }
 
