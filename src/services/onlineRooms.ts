@@ -22,6 +22,7 @@ export interface RoomSnapshot {
     ruleset_version: string;
     catalog_version: string;
     created_at: string;
+    room_mode: 'players' | 'test';
   };
   session: {
     id: string;
@@ -39,6 +40,10 @@ export interface RoomSnapshot {
     technical_role: 'host' | 'player';
     membership_status: 'active' | 'left';
     is_bot: boolean;
+    is_alive: boolean;
+    eliminated_in_round: number | null;
+    votes_received: number;
+    revealed_this_round: boolean;
     joined_at: string;
     last_seen_at: string | null;
   }>;
@@ -53,6 +58,27 @@ export interface RoomSnapshot {
   }>;
   revealed_cards: Array<Record<string, unknown>>;
   active_crises: Array<Record<string, unknown>>;
+  current_round_votes: Array<{
+    voter_member_id: string;
+    voter_name: string;
+    target_member_id: string;
+    target_name: string;
+    created_at: string;
+  }>;
+  my_revealed_this_round: boolean;
+  my_vote_target_member_id: string | null;
+  current_result: {
+    eliminated_member_id?: string | null;
+    eliminated_name?: string | null;
+    vote_count?: number | null;
+    tie_break_used?: boolean;
+  };
+  bunker_capacity: number | null;
+  events: Array<{
+    event_type: string;
+    public_payload: Record<string, unknown>;
+    created_at: string;
+  }>;
 }
 
 function getClient() {
@@ -92,6 +118,19 @@ export async function createOnlineRoom(displayName: string): Promise<RoomCommand
   await ensureAnonymousSession();
 
   const { data, error } = await client.rpc('api_create_room', {
+    p_display_name: displayName.trim(),
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as RoomCommandResult;
+}
+
+export async function createOnlineTestRoom(displayName: string): Promise<RoomCommandResult> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_create_test_room', {
     p_display_name: displayName.trim(),
     p_command_id: crypto.randomUUID(),
   });
@@ -172,39 +211,11 @@ export async function addOnlineTestBots(roomId: string): Promise<{
 }
 
 
-export interface OnlineTestBotCard {
-  card_id: string;
-  category: string;
-  title: string;
-  description: string;
-  image_path: string | null;
-}
-
-export interface OnlineTestBotData {
-  bot_hands: Array<{
-    member_id: string;
-    cards: OnlineTestBotCard[];
-  }>;
-  crisis_deck: OnlineTestBotCard[];
-}
-
-export async function getOnlineTestBotData(roomId: string): Promise<OnlineTestBotData> {
-  const client = getClient();
-  await ensureAnonymousSession();
-
-  const { data, error } = await client.rpc('api_get_test_bot_data', {
-    p_room_id: roomId,
-  });
-  throwIfError(error);
-
-  return data as OnlineTestBotData;
-}
-
 export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapshot> {
   const client = getClient();
   await ensureAnonymousSession();
 
-  const { data, error } = await client.rpc('api_get_room_snapshot', {
+  const { data, error } = await client.rpc('api_get_game_snapshot', {
     p_room_id: roomId,
   });
   throwIfError(error);
