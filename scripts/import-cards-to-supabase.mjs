@@ -54,7 +54,8 @@ const rows = assets.map((card) => {
     image_path: card.relative_path ?? null,
     source_sheet: sourceSheets[card.category],
     catalog_version: CATALOG_VERSION,
-    effect_status: card.category === 'actions' ? 'draft' : 'not_applicable',
+    effect_status: card.card_id === 'action_28' ? 'approved' : card.category === 'actions' ? 'draft' : 'not_applicable',
+    effect_handler_id: card.card_id === 'action_28' ? 'emergency_generator_capacity_plus_one' : null,
   };
 });
 
