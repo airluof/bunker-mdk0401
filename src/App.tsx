@@ -149,6 +149,18 @@ function formatOnlineError(error: unknown, fallback: string): string {
   if (normalized.includes('VOTE_TIE_NEEDS_RULE')) {
     return 'Получилась ничья. Для обычной партии способ её разрешения ещё не утверждён.';
   }
+  if (normalized.includes('AUDIT_PLAN_INVALID')) {
+    return 'План восстановления должен содержать от 20 до 12 000 символов.';
+  }
+  if (normalized.includes('AUDIT_NOT_OPEN')) {
+    return 'Финальный аудит ещё не открыт.';
+  }
+  if (normalized.includes('AUDIT_PLAN_REQUIRED')) {
+    return 'Сначала сохраните общий план восстановления, затем завершите партию.';
+  }
+  if (normalized.includes('ACTIVE_GAME_CANNOT_BE_LEFT')) {
+    return 'Нельзя покинуть обычную партию до её завершения.';
+  }
   if (normalized.includes('NOT_ACTIVE_PLAYER')) {
     return 'Вы не можете выполнять это действие: возможно, вы выбыли из партии.';
   }
