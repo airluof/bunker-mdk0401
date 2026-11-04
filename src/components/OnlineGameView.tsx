@@ -402,7 +402,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             {busy ? 'Синхронизируем…' : 'Синхронизировать'}
           </button>
           {isTestMode && (
-            <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
+            <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-online-exit-test">
               <DoorOpen aria-hidden="true" />
               {isHost ? 'Завершить тест и выйти' : 'Покинуть тестовую партию'}
             </button>
