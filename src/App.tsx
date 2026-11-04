@@ -25,6 +25,7 @@ import { CardInspectModal } from './components/CardInspectModal';
 import { GameRulesModal } from './components/GameRulesModal';
 import { IncidentLog } from './components/IncidentLog';
 import { OnlineRoomLobby } from './components/OnlineRoomLobby';
+import { OnlineGameView } from './components/OnlineGameView';
 import {
   createOnlineRoom,
   joinOnlineRoom,
@@ -33,6 +34,7 @@ import {
   leaveOnlineRoom,
   closeOnlineRoom,
   updateOnlineRoomSettings,
+  startOnlineGame,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
 import { isSupabaseConfigured } from './services/supabase';
@@ -348,6 +350,25 @@ export function App() {
       showToast(`Лимит комнаты изменён: до ${maxPlayers} участников.`);
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось сохранить настройки комнаты.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleStartOnlineGame = async () => {
+    if (!onlineRoom) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      await startOnlineGame(onlineRoom.roomId);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast('Партия запущена. Личные карты выданы участникам.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось запустить онлайн-партию.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -816,7 +837,11 @@ export function App() {
         isHost={onlineRoom
           ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
           : gameState?.players[0]?.isHost}
-        onExitGame={onlineRoom || gameState ? handleExitCurrentRoom : undefined}
+        onExitGame={onlineRoom
+          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived'
+            ? handleExitCurrentRoom
+            : undefined
+          : gameState ? handleExitCurrentRoom : undefined}
       />
 
       {/* Toast Notification */}
@@ -832,16 +857,26 @@ export function App() {
         {currentView === 'catalog' ? (
           <CardCatalogView onInspectCard={setInspectingCard} />
         ) : onlineRoom ? (
-          <OnlineRoomLobby
-            snapshot={onlineRoom.snapshot}
-            inviteCode={onlineRoom.snapshot.room.status === 'lobby' ? onlineRoom.inviteCode : undefined}
-            isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
-            busy={onlineBusy}
-            error={onlineError}
-            onRefresh={handleRefreshOnlineRoom}
-            onExit={handleExitCurrentRoom}
-            onSaveSettings={handleSaveOnlineRoomSettings}
-          />
+          onlineRoom.snapshot.room.status === 'in_progress' ? (
+            <OnlineGameView
+              snapshot={onlineRoom.snapshot}
+              busy={onlineBusy}
+              error={onlineError}
+              onRefresh={handleRefreshOnlineRoom}
+            />
+          ) : (
+            <OnlineRoomLobby
+              snapshot={onlineRoom.snapshot}
+              inviteCode={onlineRoom.snapshot.room.status === 'lobby' ? onlineRoom.inviteCode : undefined}
+              isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
+              busy={onlineBusy}
+              error={onlineError}
+              onRefresh={handleRefreshOnlineRoom}
+              onExit={handleExitCurrentRoom}
+              onSaveSettings={handleSaveOnlineRoomSettings}
+              onStartGame={handleStartOnlineGame}
+            />
+          )
         ) : !gameState ? (
           /* ==============================================================
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL

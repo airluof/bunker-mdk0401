@@ -11,6 +11,7 @@ interface OnlineRoomLobbyProps {
   onRefresh: () => void;
   onExit: () => void;
   onSaveSettings: (maxPlayers: number) => void;
+  onStartGame: () => void;
 }
 
 export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
@@ -22,6 +23,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   onRefresh,
   onExit,
   onSaveSettings,
+  onStartGame,
 }) => {
   const [copied, setCopied] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(snapshot.room.max_players);
@@ -68,6 +70,19 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             <RefreshCw aria-hidden="true" />
             Обновить
           </button>
+          {isHost && snapshot.room.status === 'lobby' && (
+            <button
+              type="button"
+              onClick={onStartGame}
+              disabled={busy || activePlayers.length < snapshot.room.min_players}
+              className="bunker-button bunker-button-primary"
+              title={activePlayers.length < snapshot.room.min_players
+                ? `Для старта нужно ещё ${remainingToStart} игроков`
+                : 'Раздать карты и начать партию'}
+            >
+              {busy ? 'Запускаем…' : 'Начать игру'}
+            </button>
+          )}
           <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
             {snapshot.room.status === 'archived' || !isHost
               ? <DoorOpen aria-hidden="true" />
@@ -200,7 +215,11 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
 
       {snapshot.room.status === 'lobby' && (
         <p className="bunker-online-note">
-          Комната готова принимать игроков. Начать партию пока нельзя.
+          {remainingToStart > 0
+            ? `Ожидание участников: для старта нужно ещё ${remainingToStart}.`
+            : isHost
+              ? 'Минимум участников набран. Ведущий может запустить партию.'
+              : 'Минимум участников набран. Ожидаем запуска от ведущего.'}
         </p>
       )}
     </main>
