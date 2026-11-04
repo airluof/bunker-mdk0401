@@ -704,36 +704,30 @@ export function App() {
   // Reveal player card
   const handleRevealCard = (category: PlayerSlotCategory) => {
     if (!gameState) return;
-    const myPlayer = gameState.players[0]; // Host or current player
+    const myPlayer = gameState.players[0];
     if (!myPlayer) return;
+    const revealedThisRound = gameState.revealedThisRoundPlayerIds || [];
+    if (revealedThisRound.includes(myPlayer.id)) {
+      showToast('В этом раунде вы уже раскрыли одну карту.');
+      return;
+    }
 
     const card = myPlayer.hand[category];
-
-    const updatedPlayers = gameState.players.map((p, idx) => {
-      if (idx === 0) {
-        return {
-          ...p,
-          revealed: {
-            ...p.revealed,
-            [category]: true,
-          },
-        };
+    const newlyRevealedBotIds: string[] = [];
+    const updatedPlayers = gameState.players.map((player, index) => {
+      if (index === 0) {
+        return { ...player, revealed: { ...player.revealed, [category]: true } };
       }
-      // Simulate bots revealing a card in the round too
-      if (gameState.phase === 'reveal' && !p.revealed[category]) {
-        // Pick an unrevealed category for bot
+      if (gameState.isLocalDemo && gameState.phase === 'reveal' && player.isAlive && player.isBot && !revealedThisRound.includes(player.id)) {
         const unrevealed = (['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'] as PlayerSlotCategory[])
-          .filter(c => !p.revealed[c]);
-        const pickCat = unrevealed[0] || category;
-        return {
-          ...p,
-          revealed: {
-            ...p.revealed,
-            [pickCat]: true,
-          },
-        };
+          .filter((candidate) => !player.revealed[candidate]);
+        if (unrevealed.length > 0) {
+          const chosenCategory = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+          newlyRevealedBotIds.push(player.id);
+          return { ...player, revealed: { ...player.revealed, [chosenCategory]: true } };
+        }
       }
-      return p;
+      return player;
     });
 
     const newLog: GameLogEntry = {
@@ -745,13 +739,30 @@ export function App() {
       actorName: myPlayer.name,
       cardId: card.card_id,
     };
+    const botLogs: GameLogEntry[] = newlyRevealedBotIds.map((botId) => {
+      const bot = updatedPlayers.find((player) => player.id === botId)!;
+      const previous = gameState.players.find((player) => player.id === botId)!;
+      const openedCategory = (['roles', 'skills', 'baggage', 'vulnerabilities', 'actions'] as PlayerSlotCategory[])
+        .find((candidate) => !previous.revealed[candidate])!;
+      const openedCard = bot.hand[openedCategory];
+      return {
+        id: `bot_reveal_${Date.now()}_${botId}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'reveal',
+        message: `Бот раскрыл карту [${openedCard.category_name_ru}: ${openedCard.original_title}]`,
+        actorName: bot.name,
+        cardId: openedCard.card_id,
+      };
+    });
 
     setGameState({
       ...gameState,
       players: updatedPlayers,
-      log: [...gameState.log, newLog],
+      revealedThisRoundPlayerIds: [...revealedThisRound, myPlayer.id, ...newlyRevealedBotIds],
+      log: [...gameState.log, newLog, ...botLogs],
     });
-    showToast(`Карта «${card.original_title}» раскрыта для всех инженеров`);
+    showToast('Карта раскрыта. Тестовые боты также раскрыли по одной карте.');
   };
 
   // Trigger special Action card
@@ -790,40 +801,50 @@ export function App() {
   // Submit vote in voting phase
   const handleCastVote = (targetPlayerId: string) => {
     if (!gameState) return;
-    const target = gameState.players.find(p => p.id === targetPlayerId);
+    const target = gameState.players.find((player) => player.id === targetPlayerId);
     if (!target) return;
 
-    // Distribute simulated votes among other players for realistic team dynamics
-    const alivePlayers = gameState.players.filter(p => p.isAlive);
-    const updatedPlayers = gameState.players.map((p) => {
-      let votes = 0;
-      if (p.id === targetPlayerId) {
-        votes += 1; // My vote
-      }
-      // Add a couple bot votes realistically
-      if (Math.random() > 0.4 && p.id !== gameState.players[0].id) {
-        votes += Math.floor(Math.random() * 2);
-      }
+    const alivePlayers = gameState.players.filter((player) => player.isAlive);
+    const hostPlayer = gameState.players[0];
+    const voteByPlayer = new Map<string, string>();
+    voteByPlayer.set(hostPlayer.id, targetPlayerId);
+
+    // Test bots cast one visible vote each; their choices are random test data, not official strategy.
+    if (gameState.isLocalDemo) {
+      alivePlayers.filter((player) => player.isBot).forEach((bot) => {
+        const candidates = alivePlayers.filter((player) => player.id !== bot.id);
+        if (candidates.length > 0) {
+          const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          voteByPlayer.set(bot.id, chosen.id);
+        }
+      });
+    }
+
+    const voteCounts = new Map<string, number>();
+    voteByPlayer.forEach((chosenId) => voteCounts.set(chosenId, (voteCounts.get(chosenId) || 0) + 1));
+    const updatedPlayers = gameState.players.map((player) => ({
+      ...player,
+      votesReceived: voteCounts.get(player.id) || 0,
+      votedForId: voteByPlayer.get(player.id) || null,
+    }));
+    const voteLogs: GameLogEntry[] = Array.from(voteByPlayer.entries()).map(([voterId, chosenId]) => {
+      const voter = gameState.players.find((player) => player.id === voterId)!;
+      const chosen = gameState.players.find((player) => player.id === chosenId)!;
       return {
-        ...p,
-        votesReceived: votes,
+        id: `vote_${Date.now()}_${voterId}`,
+        timestamp: new Date().toLocaleTimeString('ru-RU'),
+        round: gameState.round,
+        type: 'vote',
+        message: `Голос против [${chosen.name}]`,
+        actorName: voter.name,
       };
     });
-
-    const newLog: GameLogEntry = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString('ru-RU'),
-      round: gameState.round,
-      type: 'vote',
-      message: `Голос отдан против кандидата [${target.name}]`,
-      actorName: gameState.players[0].name,
-    };
 
     setGameState({
       ...gameState,
       phase: 'elimination',
       players: updatedPlayers,
-      log: [...gameState.log, newLog],
+      log: [...gameState.log, ...voteLogs],
     });
   };
 
@@ -908,6 +929,7 @@ export function App() {
       round: nextRound,
       phase: 'reveal',
       players: updatedPlayers,
+      revealedThisRoundPlayerIds: [],
       activeCrises: newCrises,
       crisisDeck: nextCrisisDeck,
       lastEliminatedPlayerId: mostVoted.id,
@@ -1347,6 +1369,7 @@ export function App() {
                 onRevealCard={handleRevealCard}
                 onUseAction={handleUseAction}
                 onInspectCard={setInspectingCard}
+                hasRevealedThisRound={(gameState.revealedThisRoundPlayerIds || []).includes(gameState.players[0].id)}
               />
             )}
           </div>
