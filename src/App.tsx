@@ -35,7 +35,7 @@ import {
   closeOnlineRoom,
   updateOnlineRoomSettings,
   startOnlineGame,
-  startOnlineTestGame,
+  addOnlineTestBots,
   exitOnlineTestRoom,
 } from './services/onlineRooms';
 import type { RoomSnapshot } from './services/onlineRooms';
@@ -376,20 +376,22 @@ export function App() {
     }
   };
 
-  const handleStartOnlineTestGame = async () => {
+  const handleAddOnlineTestBots = async () => {
     if (!onlineRoom) return;
 
     setOnlineBusy(true);
     setOnlineError(null);
     try {
-      await startOnlineTestGame(onlineRoom.roomId);
+      const result = await addOnlineTestBots(onlineRoom.roomId);
       const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
       setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
         ? { ...current, snapshot }
         : current);
-      showToast('Тестовый запуск выполнен. Карты выданы текущим участникам.');
+      showToast(result.added > 0
+        ? `Добавлено ботов: ${result.added}. В лобби теперь ${result.active_players} игроков.`
+        : 'Минимум игроков уже набран.');
     } catch (error: unknown) {
-      setOnlineError(formatOnlineError(error, 'Не удалось выполнить тестовый запуск.'));
+      setOnlineError(formatOnlineError(error, 'Не удалось добавить тестовых ботов.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -403,7 +405,8 @@ export function App() {
       const ownMember = onlineRoom.snapshot.players.find(
         (player) => player.member_id === onlineRoom.memberId
       );
-      const isTestMode = onlineRoom.snapshot.public_state?.test_mode === true;
+      const isTestMode = onlineRoom.snapshot.public_state?.test_mode === true
+        || onlineRoom.snapshot.players.some((player) => player.is_bot);
 
       if (isTestMode && onlineRoom.snapshot.room.status === 'in_progress') {
         const result = await exitOnlineTestRoom(onlineRoom.roomId);
@@ -907,7 +910,7 @@ export function App() {
               onExit={handleExitCurrentRoom}
               onSaveSettings={handleSaveOnlineRoomSettings}
               onStartGame={handleStartOnlineGame}
-              onStartTestGame={handleStartOnlineTestGame}
+              onAddTestBots={handleAddOnlineTestBots}
             />
           )
         ) : !gameState ? (
