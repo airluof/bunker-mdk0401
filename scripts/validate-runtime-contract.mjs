@@ -129,11 +129,14 @@ for (const category of ['roles', 'skills', 'baggage', 'vulnerabilities', 'crises
 const migrationFiles = (await readdir(resolve(root, 'supabase/migrations')))
   .filter((name) => name.endsWith('.sql'))
   .sort();
-for (let index = 1; index <= 18; index += 1) {
+for (let index = 1; index <= 17; index += 1) {
   const prefix = '20261104' + String(index).padStart(4, '0');
   if (!migrationFiles.some((name) => name.startsWith(prefix))) {
     failures.push('Missing sequential migration ' + prefix + '.');
   }
+}
+if (!migrationFiles.some((name) => name.startsWith('202611050018'))) {
+  failures.push('Missing migration 202611050018 for the Role-first reveal rule.');
 }
 
 if (failures.length) {
