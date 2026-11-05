@@ -7,6 +7,8 @@ const paths = {
   shortInviteMigration: 'supabase/migrations/202611040014_short_room_invite_codes.sql',
   fullAlphabetMigration: 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql',
   alphanumericMigration: 'supabase/migrations/202611040016_alphanumeric_room_codes.sql',
+  actionReviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
+  cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
   app: 'src/App.tsx',
   gameView: 'src/components/OnlineGameView.tsx',
@@ -67,6 +69,11 @@ if (!alphanumericSql.includes("extensions.digest(convert_to(upper(btrim(p_invite
 
 requireText(files.app, /replace\(\/\[\^A-Z0-9\]\/g/i,
   'Invite input must accept all Latin letters and digits.');
+requireText(files.cardGuidance, /export function getCardGuidance/, 'Card inspection guidance is missing.');
+requireText(files.cardGuidance, /validateCardGuidanceCoverage/, 'Card guidance coverage validation is missing.');
+requireText(files.actionReviewMigration, /card_id = 'action_21'[\s\S]*?effect_status = 'draft'/i, 'Workaround must remain disabled until final-audit rules are enforced.');
+requireText(files.actionReviewMigration, /card_id = 'action_25'[\s\S]*?effect_status = 'draft'/i, 'Safe Boot must remain disabled until Vulnerability effects are implemented.');
+
 requireText(files.app, /return \/\^\[A-Z0-9\]\{5\}\$\/\.test\(normalized\)/,
   'Client-side validation must accept five-character alphanumeric codes.');
 
@@ -113,7 +120,7 @@ for (const category of ['roles', 'skills', 'baggage', 'vulnerabilities', 'crises
 const migrationFiles = (await readdir(resolve(root, 'supabase/migrations')))
   .filter((name) => name.endsWith('.sql'))
   .sort();
-for (let index = 1; index <= 16; index += 1) {
+for (let index = 1; index <= 17; index += 1) {
   const prefix = '20261104' + String(index).padStart(4, '0');
   if (!migrationFiles.some((name) => name.startsWith(prefix))) {
     failures.push('Missing sequential migration ' + prefix + '.');
@@ -129,4 +136,4 @@ if (failures.length) {
 console.log('Runtime contracts validated.');
 console.log('Controller heartbeat/takeover, creator-elimination failover and shared survivor audit are present.');
 console.log('Restored design assets and all 180 source cards remain present.');
-console.log('All 16 sequential migrations are present, including alphanumeric invite codes.');
+console.log('All 17 sequential migrations are present, including the card-effect review.');
