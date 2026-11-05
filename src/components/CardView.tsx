@@ -18,6 +18,7 @@ interface CardViewProps {
   card: Card;
   isRevealed?: boolean;
   canReveal?: boolean;
+  lockedLabel?: string;
   onReveal?: () => void;
   onInspect?: () => void;
   size?: 'sm' | 'md' | 'lg';
@@ -29,6 +30,7 @@ export const CardView: React.FC<CardViewProps> = ({
   card,
   isRevealed = true,
   canReveal = false,
+  lockedLabel = 'Доступна только вам',
   onReveal,
   onInspect,
   size = 'md',
@@ -95,7 +97,7 @@ export const CardView: React.FC<CardViewProps> = ({
           ) : (
             <span className="bunker-card-access">
               <Lock aria-hidden="true" />
-              Доступна только вам
+              {lockedLabel}
             </span>
           )}
         </div>
