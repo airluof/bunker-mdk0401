@@ -35,7 +35,7 @@ jobs:
       - name: Validate Supabase migration structure
         run: npm run db:validate-migration
 
-      - name: Validate action-card effects
+      - name: Validate action-card effects and card relationships
         run: npm run db:validate-actions
 
       - name: Validate online runtime contracts
