@@ -71,8 +71,10 @@ requireText(files.app, /replace\(\/\[\^A-Z0-9\]\/g/i,
   'Invite input must accept all Latin letters and digits.');
 requireText(files.cardGuidance, /export function getCardGuidance/, 'Card inspection guidance is missing.');
 requireText(files.cardGuidance, /validateCardGuidanceCoverage/, 'Card guidance coverage validation is missing.');
-requireText(files.actionReviewMigration, /card_id = 'action_21'[\s\S]*?effect_status = 'draft'/i, 'Workaround must remain disabled until final-audit rules are enforced.');
-requireText(files.actionReviewMigration, /card_id = 'action_25'[\s\S]*?effect_status = 'draft'/i, 'Safe Boot must remain disabled until Vulnerability effects are implemented.');
+requireText(files.actionReviewMigration, /effect_status = 'draft'/i, 'Incomplete action effects must be demoted to draft.');
+if (!files.actionReviewMigration.includes("card_id = 'action_21'") || !files.actionReviewMigration.includes("card_id = 'action_25'")) {
+  failures.push('Migration 017 must demote both Workaround and Safe Boot.');
+}
 
 requireText(files.app, /return \/\^\[A-Z0-9\]\{5\}\$\/\.test\(normalized\)/,
   'Client-side validation must accept five-character alphanumeric codes.');
