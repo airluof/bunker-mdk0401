@@ -211,7 +211,9 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   );
   const myVote = snapshot.my_vote_target_member_id;
   const canResolveVote = isHost && allHumanVotesReceived && snapshot.current_round_votes.length > 0;
-  const revealedHumanCount = humanPlayers.filter((player) => player.revealed_this_round).length;
+  const revealedHumanCount = humanPlayers.filter((player) =>
+    player.revealed_this_round || player.has_hidden_cards === false
+  ).length;
 
   useEffect(() => {
     if (!snapshot.session.deadline_at || phase !== 'briefing') {
@@ -253,9 +255,18 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <div className="bunker-online-action-panel">
           <div>
             <span className="bunker-kicker">Первый этап</span>
-            <h2>Раскройте по одной характеристике</h2>
-            <p>Каждый живой игрок выбирает одну карту из своей руки. В тестовом режиме боты раскроют карты автоматически, когда ведущий переведёт игру к брифингу.</p>
-            <p className="bunker-online-progress">{revealedHumanCount} из {humanPlayers.length} реальных игроков раскрыли карту в этом раунде.</p>
+            <h2>{snapshot.session.round_number === 1 ? 'Начните с раскрытия Роли' : 'Раскройте одну оставшуюся карту'}</h2>
+            <p>
+              {snapshot.session.round_number === 1
+                ? 'В первом раунде каждый живой игрок открывает только Роль.'
+                : 'В раундах 2–5 каждый живой игрок выбирает любую оставшуюся закрытую карту.'}
+              {' '}Выбор самостоятельный, без очереди; после нажатия карта сразу становится видна всем.
+            </p>
+            <p>Если у участника не осталось закрытых карт, он пропускает вскрытие и не задерживает партию.</p>
+            <p className="bunker-online-progress">Готовы к брифингу: {revealedHumanCount} из {humanPlayers.length} живых игроков.</p>
+            {isAlive && myPlayer?.has_hidden_cards === false && (
+              <p className="bunker-online-voted">У вас не осталось закрытых карт — в этом раунде вскрытие пропускается.</p>
+            )}
           </div>
           {isHost && (
             <button
@@ -585,7 +596,20 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                   <CardView
                     card={card}
                     isRevealed={revealed}
-                    canReveal={!revealed && isAlive && phase === 'reveal' && !snapshot.my_revealed_this_round}
+                    canReveal={
+                      !revealed &&
+                      isAlive &&
+                      phase === 'reveal' &&
+                      !snapshot.my_revealed_this_round &&
+                      (snapshot.session.round_number !== 1 || card.category === 'roles')
+                    }
+                    lockedLabel={
+                      phase === 'reveal' && isAlive && snapshot.my_revealed_this_round
+                        ? 'Вы уже выбрали карту в этом раунде'
+                        : phase === 'reveal' && isAlive && snapshot.session.round_number === 1 && card.category !== 'roles'
+                          ? 'Сначала откройте Роль'
+                          : 'Доступна только вам'
+                    }
                     onReveal={() => onRevealCard(instanceId)}
                     onInspect={() => onInspectCard(card)}
                     size="md"
