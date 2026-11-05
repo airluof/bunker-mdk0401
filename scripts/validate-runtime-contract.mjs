@@ -8,6 +8,7 @@ const paths = {
   fullAlphabetMigration: 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql',
   alphanumericMigration: 'supabase/migrations/202611040016_alphanumeric_room_codes.sql',
   actionReviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
+  revealRuleMigration: 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql',
   cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
   app: 'src/App.tsx',
@@ -32,6 +33,7 @@ const sql = files.migration;
 const shortInviteSql = files.shortInviteMigration;
 const fullAlphabetSql = files.fullAlphabetMigration;
 const alphanumericSql = files.alphanumericMigration;
+const revealRuleSql = files.revealRuleMigration;
 
 const sqlFunctions = [
   'public.api_heartbeat_room',
@@ -72,6 +74,11 @@ requireText(files.app, /replace\(\/\[\^A-Z0-9\]\/g/i,
 requireText(files.cardGuidance, /export function getCardGuidance/, 'Card inspection guidance is missing.');
 requireText(files.cardGuidance, /validateCardGuidanceCoverage/, 'Card guidance coverage validation is missing.');
 requireText(files.actionReviewMigration, /effect_status = 'draft'/i, 'Incomplete action effects must be demoted to draft.');
+requireText(revealRuleSql, /FIRST_ROUND_REQUIRES_ROLE/i, 'The first round must enforce Role reveal.');
+requireText(revealRuleSql, /has_hidden_cards/i, 'Snapshot must report whether a player still has hidden cards.');
+requireText(revealRuleSql, /cc\.category = 'roles'/i, 'Test bots must reveal Roles in the first round.');
+requireText(revealRuleSql, /PLAYERS_MUST_REVEAL_FIRST/i, 'The reveal phase must wait for players who still have hidden cards.');
+requireText(files.gameView, /snapshot\.session\.round_number !== 1 \|\| card\.category === 'roles'/i, 'The client must limit first-round reveal choices to Roles.');
 if (!files.actionReviewMigration.includes("card_id = 'action_21'") || !files.actionReviewMigration.includes("card_id = 'action_25'")) {
   failures.push('Migration 017 must demote both Workaround and Safe Boot.');
 }
@@ -122,7 +129,7 @@ for (const category of ['roles', 'skills', 'baggage', 'vulnerabilities', 'crises
 const migrationFiles = (await readdir(resolve(root, 'supabase/migrations')))
   .filter((name) => name.endsWith('.sql'))
   .sort();
-for (let index = 1; index <= 17; index += 1) {
+for (let index = 1; index <= 18; index += 1) {
   const prefix = '20261104' + String(index).padStart(4, '0');
   if (!migrationFiles.some((name) => name.startsWith(prefix))) {
     failures.push('Missing sequential migration ' + prefix + '.');
@@ -138,4 +145,4 @@ if (failures.length) {
 console.log('Runtime contracts validated.');
 console.log('Controller heartbeat/takeover, creator-elimination failover and shared survivor audit are present.');
 console.log('Restored design assets and all 180 source cards remain present.');
-console.log('All 17 sequential migrations are present, including the card-effect review.');
+console.log('All 18 sequential migrations are present, including the card-effect review and Role-first reveal rule.');
