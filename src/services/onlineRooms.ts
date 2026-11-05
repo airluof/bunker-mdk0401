@@ -50,6 +50,7 @@ export interface RoomSnapshot {
     eliminated_in_round: number | null;
     votes_received: number;
     revealed_this_round: boolean;
+    has_hidden_cards: boolean;
     joined_at: string;
     last_seen_at: string | null;
   }>;
