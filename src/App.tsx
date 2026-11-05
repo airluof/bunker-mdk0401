@@ -154,7 +154,13 @@ function formatOnlineError(error: unknown, fallback: string): string {
     return 'Боты разрешены только в тестовых комнатах. Создайте тестовую комнату, чтобы добавить их.';
   }
   if (normalized.includes('PLAYERS_MUST_REVEAL_FIRST')) {
-    return 'Сначала каждый живой участник должен раскрыть одну карту текущего раунда.';
+    return 'Сначала каждый живой участник, у которого остались закрытые карты, должен раскрыть одну карту текущего раунда.';
+  }
+  if (normalized.includes('FIRST_ROUND_REQUIRES_ROLE')) {
+    return 'В первом раунде можно раскрыть только карту «Роль».';
+  }
+  if (normalized.includes('ALREADY_REVEALED_THIS_ROUND')) {
+    return 'Вы уже раскрыли карту в этом раунде.';
   }
   if (normalized.includes('BRIEFING_TIMER_RUNNING')) {
     return 'Брифинг ещё идёт. Голосование откроется после завершения 60 секунд.';
