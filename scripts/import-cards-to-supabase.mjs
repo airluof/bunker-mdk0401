@@ -38,9 +38,7 @@ const approvedActionHandlers = {
   action_17: 'watchdog_30_second_briefing',
   action_18: 'session_hijacking_swap_vulnerabilities',
   action_20: 'memory_dump_private_peek',
-  action_21: 'workaround_ignore_crisis_in_audit',
   action_24: 'kernel_driver_draw_second_baggage',
-  action_25: 'safe_boot_disable_vulnerabilities_round',
   action_28: 'emergency_generator_capacity_plus_one',
 };
 
