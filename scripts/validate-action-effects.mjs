@@ -8,6 +8,7 @@ const paths = {
   hotfixMigration: 'supabase/migrations/202611040009_hotfix_action_effect.sql',
   unifiedMigration: 'supabase/migrations/202611040010_unified_action_engine.sql',
   exploitMigration: 'supabase/migrations/202611040011_exploit_second_skill.sql',
+  reviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
   service: 'src/services/onlineRooms.ts',
   gameView: 'src/components/OnlineGameView.tsx',
   actionControls: 'src/components/ActionCardControls.tsx',
@@ -40,12 +41,15 @@ const supportedHandlers = {
   action_17: 'watchdog_30_second_briefing',
   action_18: 'session_hijacking_swap_vulnerabilities',
   action_20: 'memory_dump_private_peek',
-  action_21: 'workaround_ignore_crisis_in_audit',
   action_24: 'kernel_driver_draw_second_baggage',
-  action_25: 'safe_boot_disable_vulnerabilities_round',
   action_28: 'emergency_generator_capacity_plus_one',
 };
-const unresolvedIds = expectedIds.filter((id) => !Object.hasOwn(supportedHandlers, id));
+const blockedHandlers = {
+  action_21: 'workaround_ignore_crisis_in_audit',
+  action_25: 'safe_boot_disable_vulnerabilities_round',
+};
+const blockedIds = Object.keys(blockedHandlers);
+const unresolvedIds = expectedIds.filter((id) => !Object.hasOwn(supportedHandlers, id) && !Object.hasOwn(blockedHandlers, id));
 const failures = [];
 const requireText = (source, pattern, message) => {
   if (!pattern.test(source)) failures.push(message);
@@ -121,10 +125,32 @@ const approvedFromSql = [...new Set([
   ...[...files.unifiedMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
   ...[...files.exploitMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
 ])].sort();
-const expectedApproved = Object.keys(supportedHandlers).sort();
-if (approvedFromSql.join(',') !== expectedApproved.join(',')) {
-  failures.push('SQL migrations do not map exactly the 16 approved action cards.');
+const expectedRegistered = [...Object.keys(supportedHandlers), ...blockedIds].sort();
+if (approvedFromSql.join(',') !== expectedRegistered.join(',')) {
+  failures.push('SQL migrations must register exactly 16 action handlers (14 ready, 2 blocked pending completion).');
 }
+
+const reviewMigration = files.reviewMigration;
+requireText(reviewMigration, /update public\.card_catalog/i, 'Action review migration must update the catalog statuses.');
+for (const [id, handler] of Object.entries(blockedHandlers)) {
+  const seedRow = files.seed.split('\n').find((line) => line.trimStart().startsWith(`('${id}'`));
+  if (!seedRow || !seedRow.includes("'draft', null")) {
+    failures.push(`Blocked card ${id} must be draft in the seed.`);
+  }
+  if (files.importer.includes(`${id}: '${handler}'`)) {
+    failures.push(`Importer must not re-enable blocked action ${id}.`);
+  }
+  if (!reviewMigration.includes(`card_id = '${id}'`) || !reviewMigration.includes(`effect_handler_id = '${handler}'`)) {
+    failures.push(`Migration 017 must demote ${id} from approved until its effect is complete.`);
+  }
+}
+const availableEffects = files.actionControls.match(/const AVAILABLE_EFFECTS:[\s\S]*?\n};/)?.[0] || '';
+const pendingEffects = files.actionControls.match(/const PENDING_RULES:[\s\S]*?\n};/)?.[0] || '';
+for (const id of blockedIds) {
+  if (availableEffects.includes(id)) failures.push(`Blocked action ${id} must not be playable in the UI.`);
+  if (!pendingEffects.includes(id)) failures.push(`Blocked action ${id} must explain why it is disabled.`);
+}
+
 
 requireText(files.service, /export async function useOnlineActionEffect/i, 'Generic action RPC client is missing.');
 requireText(files.service, /export async function useOnlineExploitSkillCard/i, 'Exploit RPC client is missing.');
@@ -156,5 +182,5 @@ if (failures.length) {
 }
 
 console.log('Action-effect validation passed.');
-console.log('30 source action cards verified; 16 have server-side handlers registered.');
-console.log('14 additional cards remain draft until their rule wording and edge cases are approved.');
+console.log('30 source action cards verified; 14 effects are fully enabled.');
+console.log('2 incomplete effects are disabled; 14 more remain draft pending rule clarification.');
