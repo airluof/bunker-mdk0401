@@ -8,6 +8,8 @@ import { CATEGORY_CONFIG } from '../data/cards';
 import { CardView } from './CardView';
 import { ActionCardControls } from './ActionCardControls';
 import type { RoomSnapshot } from '../services/onlineRooms';
+import { OnlineConnectionStatusView } from './OnlineConnectionStatus';
+import type { OnlineConnectionStatus } from './OnlineConnectionStatus';
 
 interface OnlineGameViewProps {
   snapshot: RoomSnapshot;
@@ -15,6 +17,7 @@ interface OnlineGameViewProps {
   isHost: boolean;
   busy: boolean;
   error: string | null;
+  connectionStatus: OnlineConnectionStatus;
   onRefresh: () => void;
   onTakeover: () => void;
   onExit: () => void;
@@ -82,6 +85,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   isHost,
   busy,
   error,
+  connectionStatus,
   onRefresh,
   onTakeover,
   onExit,
@@ -466,6 +470,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             Раунд {snapshot.session.round_number} из {snapshot.session.max_rounds} · {phaseLabel}
             {snapshot.bunker_capacity ? ` · мест в Бункере: ${snapshot.bunker_capacity}` : ''}
           </p>
+          <OnlineConnectionStatusView status={connectionStatus} />
         </div>
         <div className="bunker-room-actions">
           <button type="button" onClick={onRefresh} disabled={busy} className="bunker-button bunker-button-secondary">
