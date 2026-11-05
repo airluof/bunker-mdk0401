@@ -469,11 +469,15 @@ export async function finishOnlineGame(roomId: string) {
   return data as { ok: boolean; status: 'finished'; phase: 'gameover' };
 }
 
+export type OnlineConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
+
 export async function subscribeToOnlineRoom(
   roomId: string,
   onChange: (payload: unknown) => void,
+  onStatus?: (status: OnlineConnectionStatus) => void,
 ): Promise<() => void> {
   const client = getClient();
+  onStatus?.('connecting');
   await ensureAnonymousSession();
 
   const channel = client
@@ -504,7 +508,12 @@ export async function subscribeToOnlineRoom(
     }, (payload) => onChange(payload))
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
+        onStatus?.('connected');
         onChange({ type: 'reconnected' });
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        onStatus?.('reconnecting');
+      } else if (status === 'CLOSED') {
+        onStatus?.('disconnected');
       }
     });
 
