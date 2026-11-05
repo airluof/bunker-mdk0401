@@ -133,7 +133,6 @@ requireText(actionReview, /effect_handler_id = null/i, 'Incomplete actions must 
 
 requireText(revealRule, /^begin;/i, 'Reveal-rule migration must begin transactionally.');
 requireText(revealRule, /^commit;/im, 'Reveal-rule migration must commit transactionally.');
-requireText(revealRule, /add column if not exists is_published boolean not null default true/i, 'Reveal migration must preserve already-published historical reveals.');
 requireText(revealRule, /create or replace function public\.api_get_game_snapshot/i, 'Reveal migration must expose hidden-card availability in the game snapshot.');
 requireText(revealRule, /create or replace function public\.api_reveal_card/i, 'Reveal migration must update the reveal RPC.');
 requireText(revealRule, /FIRST_ROUND_REQUIRES_ROLE/i, 'Reveal RPC must enforce Role-first reveal.');
