@@ -3505,3 +3505,48 @@ html {
     font-size: 12px;
   }
 }
+
+
+/* A truthful connection indicator for online rooms. */
+.bunker-connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 12px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: #c6c1b7;
+  background: rgba(255,255,255,.035);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.bunker-connection-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #a58b60;
+}
+
+.bunker-connection-status.is-connected .bunker-connection-dot {
+  background: #75a581;
+}
+
+.bunker-connection-status.is-reconnecting .bunker-connection-dot {
+  background: #d0a45e;
+}
+
+.bunker-connection-status.is-disconnected .bunker-connection-dot {
+  background: #bb756a;
+}
+
+@media (max-width: 640px) {
+  .bunker-connection-status {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+}
