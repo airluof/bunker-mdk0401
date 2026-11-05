@@ -698,9 +698,9 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
 
           <section className="bunker-panel bunker-online-status">
             <Radio aria-hidden="true" />
-            <h2>Состояние синхронизировано</h2>
+            <h2>Состояние комнаты</h2>
             <p>
-              Карты, фазы и голоса хранятся на сервере. Подключённые устройства получают обновления из одной игровой сессии.
+              Карты, фазы и голоса хранятся на сервере. При активном соединении изменения поступают на устройства участников автоматически.
             </p>
             {isTestMode && <p className="bunker-help"><Bot aria-hidden="true" /> Боты выполняют простые тестовые действия и не используют игровой ИИ.</p>}
           </section>
