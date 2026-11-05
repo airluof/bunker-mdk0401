@@ -316,6 +316,7 @@ export function App() {
       try {
         const snapshot = await getOnlineRoomSnapshot(roomId);
         if (cancelled) return;
+        setOnlineError(null);
         setOnlineRoom((current) => current?.roomId === roomId
           ? { ...current, snapshot }
           : current);
