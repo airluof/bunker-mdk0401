@@ -7,13 +7,15 @@ const invite014Path = resolve(root, 'supabase/migrations/202611040014_short_room
 const invite015Path = resolve(root, 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql');
 const invite016Path = resolve(root, 'supabase/migrations/202611040016_alphanumeric_room_codes.sql');
 const actionReviewPath = resolve(root, 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql');
+const revealRulePath = resolve(root, 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql');
 
-const [sql, invite014, invite015, invite016, actionReview] = await Promise.all([
+const [sql, invite014, invite015, invite016, actionReview, revealRule] = await Promise.all([
   readFile(migrationPath, 'utf8'),
   readFile(invite014Path, 'utf8'),
   readFile(invite015Path, 'utf8'),
   readFile(invite016Path, 'utf8'),
   readFile(actionReviewPath, 'utf8'),
+  readFile(revealRulePath, 'utf8'),
 ]);
 
 const expectedTables = [
@@ -128,6 +130,18 @@ for (const id of ['action_21', 'action_25']) {
 }
 requireText(actionReview, /effect_status = 'draft'/i, 'Incomplete actions must be demoted to draft.');
 requireText(actionReview, /effect_handler_id = null/i, 'Incomplete actions must no longer expose an enabled handler.');
+
+requireText(revealRule, /^begin;/i, 'Reveal-rule migration must begin transactionally.');
+requireText(revealRule, /^commit;/im, 'Reveal-rule migration must commit transactionally.');
+requireText(revealRule, /add column if not exists is_published boolean not null default true/i, 'Reveal migration must preserve already-published historical reveals.');
+requireText(revealRule, /create or replace function public\.api_get_game_snapshot/i, 'Reveal migration must expose hidden-card availability in the game snapshot.');
+requireText(revealRule, /create or replace function public\.api_reveal_card/i, 'Reveal migration must update the reveal RPC.');
+requireText(revealRule, /FIRST_ROUND_REQUIRES_ROLE/i, 'Reveal RPC must enforce Role-first reveal.');
+requireText(revealRule, /create or replace function public\.api_transition_game_phase/i, 'Reveal migration must update the phase transition RPC.');
+requireText(revealRule, /cc\.category = 'roles'/i, 'Test bots must also reveal Roles in round one.');
+requireText(revealRule, /has_hidden_cards/i, 'The game snapshot must expose only the boolean availability of hidden cards.');
+requireText(revealRule, /revoke all on function public\.api_reveal_card\(uuid, uuid, uuid\) from public, anon;/i, 'Reveal RPC execution must be revoked from PUBLIC and anon.');
+requireText(revealRule, /grant execute on function public\.api_reveal_card\(uuid, uuid, uuid\) to authenticated;/i, 'Reveal RPC must be granted to authenticated users.');
 
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
