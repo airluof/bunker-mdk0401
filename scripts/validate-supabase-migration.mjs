@@ -6,12 +6,14 @@ const migrationPath = resolve(root, 'supabase/migrations/202611040001_initial_mu
 const invite014Path = resolve(root, 'supabase/migrations/202611040014_short_room_invite_codes.sql');
 const invite015Path = resolve(root, 'supabase/migrations/202611040015_full_alphabet_invite_codes.sql');
 const invite016Path = resolve(root, 'supabase/migrations/202611040016_alphanumeric_room_codes.sql');
+const actionReviewPath = resolve(root, 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql');
 
-const [sql, invite014, invite015, invite016] = await Promise.all([
+const [sql, invite014, invite015, invite016, actionReview] = await Promise.all([
   readFile(migrationPath, 'utf8'),
   readFile(invite014Path, 'utf8'),
   readFile(invite015Path, 'utf8'),
   readFile(invite016Path, 'utf8'),
+  readFile(actionReviewPath, 'utf8'),
 ]);
 
 const expectedTables = [
@@ -120,6 +122,13 @@ if (!invite016.includes("upper(btrim(p_invite_code)) !~ '^([A-Z0-9]{5}|[0-9A-F]{
 requireText(invite016, /extensions\.digest\(convert_to\(upper\(btrim\(p_invite_code\)\), 'UTF8'\), 'sha256'\)/i, 'Migration 016 must hash normalized invite codes.');
 requireText(invite016, /revoke all on function public\.api_create_room\(text, uuid\) from public, anon;/i, 'Migration 016 must revoke room creation from PUBLIC and anon.');
 requireText(invite016, /grant execute on function public\.api_create_room\(text, uuid\) to authenticated;/i, 'Migration 016 must grant room creation to authenticated users.');
+requireText(actionReview, /update public\.card_catalog/i, 'Migration 017 must update incomplete action card status.');
+for (const id of ['action_21', 'action_25']) {
+  if (!actionReview.includes(`card_id = '${id}'`)) failures.push('Migration 017 must disable ' + id + '.');
+}
+requireText(actionReview, /effect_status = 'draft'/i, 'Incomplete actions must be demoted to draft.');
+requireText(actionReview, /effect_handler_id = null/i, 'Incomplete actions must no longer expose an enabled handler.');
+
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
   failures.push('The base schema migration must not grant database access to anon.');
