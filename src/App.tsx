@@ -26,6 +26,8 @@ import { GameRulesModal } from './components/GameRulesModal';
 import { IncidentLog } from './components/IncidentLog';
 import { OnlineRoomLobby } from './components/OnlineRoomLobby';
 import { OnlineGameView } from './components/OnlineGameView';
+import { OnlineConnectionStatusView } from './components/OnlineConnectionStatus';
+import type { OnlineConnectionStatus } from './components/OnlineConnectionStatus';
 import {
   createOnlineRoom,
   createOnlineTestRoom,
@@ -222,6 +224,7 @@ export function App() {
   const [onlineRoom, setOnlineRoom] = useState<OnlineRoomSession | null>(null);
   const [onlineBusy, setOnlineBusy] = useState(false);
   const [onlineError, setOnlineError] = useState<string | null>(null);
+  const [onlineConnectionStatus, setOnlineConnectionStatus] = useState<OnlineConnectionStatus>('disconnected');
 
 
   // Restore the last online room after a page refresh, using the persisted Supabase Auth session.
@@ -258,30 +261,40 @@ export function App() {
 
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
+    setOnlineConnectionStatus('connecting');
 
-    void subscribeToOnlineRoom(onlineRoom.roomId, () => {
-      void getOnlineRoomSnapshot(onlineRoom.roomId)
-        .then((snapshot) => {
-          if (cancelled) return;
-          if (snapshot.room.status === 'archived') {
-            showToast('Комната закрыта создателем. Нажмите «Вернуться на главную».');
-          }
-          setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
-            ? { ...current, snapshot }
-            : current);
-        })
-        .catch((error: unknown) => {
-          if (!cancelled) {
-            setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
-          }
-        });
-    })
+    void subscribeToOnlineRoom(
+      onlineRoom.roomId,
+      () => {
+        void getOnlineRoomSnapshot(onlineRoom.roomId)
+          .then((snapshot) => {
+            if (cancelled) return;
+            setOnlineError(null);
+            if (snapshot.room.status === 'archived') {
+              showToast('Комната закрыта создателем. Нажмите «Вернуться на главную».');
+            }
+            setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+              ? { ...current, snapshot }
+              : current);
+          })
+          .catch((error: unknown) => {
+            if (!cancelled) {
+              setOnlineConnectionStatus('reconnecting');
+              setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
+            }
+          });
+      },
+      (status) => {
+        if (!cancelled) setOnlineConnectionStatus(status);
+      },
+    )
       .then((stop) => {
         if (cancelled) stop();
         else unsubscribe = stop;
       })
       .catch((error: unknown) => {
         if (!cancelled) {
+          setOnlineConnectionStatus('disconnected');
           setOnlineError(formatOnlineError(error, 'Не удалось подключить обновления комнаты.'));
         }
       });
@@ -291,6 +304,36 @@ export function App() {
       unsubscribe?.();
     };
   }, [onlineRoom?.roomId]);
+
+  // When Realtime is unavailable, keep the visible game state fresh through a
+  // low-frequency snapshot fallback. This does not pretend the live channel is healthy.
+  useEffect(() => {
+    const roomId = onlineRoom?.roomId;
+    if (!roomId || onlineConnectionStatus === 'connected' || onlineConnectionStatus === 'connecting') return;
+
+    let cancelled = false;
+    const refreshFallbackSnapshot = async () => {
+      try {
+        const snapshot = await getOnlineRoomSnapshot(roomId);
+        if (cancelled) return;
+        setOnlineRoom((current) => current?.roomId === roomId
+          ? { ...current, snapshot }
+          : current);
+      } catch {
+        if (!cancelled) setOnlineConnectionStatus('disconnected');
+      }
+    };
+
+    void refreshFallbackSnapshot();
+    const interval = window.setInterval(() => {
+      void refreshFallbackSnapshot();
+    }, 10_000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [onlineRoom?.roomId, onlineConnectionStatus]);
 
   // Keep an authenticated heartbeat while this participant is inside a room.
   // Heartbeats are written to a private table and do not trigger room-wide Realtime refreshes.
@@ -1248,6 +1291,7 @@ export function App() {
               isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
               busy={onlineBusy}
               error={onlineError}
+              connectionStatus={onlineConnectionStatus}
               onRefresh={handleRefreshOnlineRoom}
               onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
@@ -1271,6 +1315,7 @@ export function App() {
               isHost={onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')}
               busy={onlineBusy}
               error={onlineError}
+              connectionStatus={onlineConnectionStatus}
               onRefresh={handleRefreshOnlineRoom}
               onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
