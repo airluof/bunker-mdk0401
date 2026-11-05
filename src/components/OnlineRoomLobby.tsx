@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Copy, RefreshCw, Users, Crown, DoorOpen, XCircle, Settings2 } from 'lucide-react';
 import type { RoomSnapshot } from '../services/onlineRooms';
+import { OnlineConnectionStatusView } from './OnlineConnectionStatus';
+import type { OnlineConnectionStatus } from './OnlineConnectionStatus';
 
 interface OnlineRoomLobbyProps {
   snapshot: RoomSnapshot;
@@ -8,6 +10,7 @@ interface OnlineRoomLobbyProps {
   isHost: boolean;
   busy: boolean;
   error: string | null;
+  connectionStatus: OnlineConnectionStatus;
   onRefresh: () => void;
   onTakeover: () => void;
   onExit: () => void;
@@ -22,6 +25,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   isHost,
   busy,
   error,
+  connectionStatus,
   onRefresh,
   onTakeover,
   onExit,
@@ -68,6 +72,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
               ? 'Создатель закрыл комнату. Вы можете вернуться на главную.'
               : 'Отправь друзьям код приглашения и дождись, пока они подключатся.'}
           </p>
+          <OnlineConnectionStatusView status={connectionStatus} />
         </div>
         <div className="bunker-room-actions">
           <button type="button" onClick={onRefresh} disabled={busy} className="bunker-button bunker-button-secondary">
