@@ -55,12 +55,6 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
     }
   };
 
-  const remainingLabel = remainingToStart === 1
-    ? 'игрок'
-    : remainingToStart < 5
-      ? 'игрока'
-      : 'игроков';
-
   return (
     <section className="bunker-page bunker-room-page">
       <header className="bunker-room-heading">
@@ -169,13 +163,6 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
             )}
           </div>
 
-          {snapshot.room.status === 'lobby' && (
-            <p className="bunker-player-progress">
-              {remainingToStart > 0
-                ? 'Для начала игры нужно ещё ' + remainingToStart + ' ' + remainingLabel + '.'
-                : 'Минимальное количество игроков набрано.'}
-            </p>
-          )}
         </section>
 
         <aside className="bunker-room-sidebar">
