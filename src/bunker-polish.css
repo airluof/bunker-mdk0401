@@ -3374,3 +3374,134 @@ html {
     grid-template-columns: 1fr;
   }
 }
+
+/* Card guidance: related roles, skills, equipment and rule status. */
+.bunker-modal-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.bunker-modal-copy {
+  align-content: start;
+}
+
+.bunker-card-guidance {
+  display: grid;
+  gap: 11px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.11);
+}
+
+.bunker-card-guidance-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bunker-card-guidance-heading h3 {
+  margin: 0;
+  color: #eee9df;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.bunker-card-guidance-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 5px;
+  color: #c9c4ba;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.bunker-card-guidance-status.is-ready {
+  border-color: rgba(104,166,125,.35);
+  color: #a9d0b4;
+}
+
+.bunker-card-guidance-status.is-needs-rule,
+.bunker-card-guidance-status.is-blocked {
+  border-color: rgba(212,157,91,.35);
+  color: #e5bd8c;
+}
+
+.bunker-card-guidance > p {
+  margin: 0;
+  color: #aaa59d;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.bunker-card-guidance-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bunker-card-guidance-tags span {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.045);
+  color: #bdb8af;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.bunker-card-guidance-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bunker-card-guidance-list li {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 5px;
+  background: rgba(255,255,255,.025);
+}
+
+.bunker-card-guidance-list li > span {
+  color: #a99f91;
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: .035em;
+}
+
+.bunker-card-guidance-list li > strong {
+  color: #dfdbd3;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-card-guidance-list li.is-more {
+  grid-column: 1 / -1;
+  display: block;
+  color: #a99f91;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .bunker-card-guidance-list {
+    grid-template-columns: 1fr;
+  }
+
+  .bunker-card-guidance-list li > strong {
+    font-size: 12px;
+  }
+}
