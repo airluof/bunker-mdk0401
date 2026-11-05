@@ -48,9 +48,7 @@ const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 
   action_17: { description: 'Сократить текущий брифинг или задать 30 секунд для предстоящего брифинга этого раунда.', target: 'none' },
   action_18: { description: 'Поменять картами Уязвимостей с выбранным участником.', target: 'player' },
   action_20: { description: 'Посмотреть все скрытые карты выбранного участника. Результат увидите только вы.', target: 'player' },
-  action_21: { description: 'Выбрать один активный Кризис, который будет отмечен для игнорирования при финальном аудите.', target: 'crisis' },
   action_24: { description: 'Взять дополнительную карту Багажа из колоды.', target: 'none' },
-  action_25: { description: 'Активировать Safe Boot и записать состояние Уязвимостей на этот раунд.', target: 'none' },
 };
 
 const PENDING_RULES: Record<string, string> = {
@@ -62,6 +60,8 @@ const PENDING_RULES: Record<string, string> = {
   action_13: 'Нужны критерий победы в дуэли, судья и длительность иммунитета.',
   action_14: 'Нужно определить соседа справа/слева и что именно копируется.',
   action_19: 'Не определено, кто считается похожим игроком и как округляется половина голосов.',
+  action_21: 'Сервер сохраняет отметку о выбранном Кризисе, но финальный аудит пока не исключает его из проверки. Карта отключена до появления структурированного аудита.',
+  action_25: 'В игре нет формализованных автоматических эффектов Уязвимостей, которые Safe Boot мог бы отключить. Карта отключена до реализации этой системы.',
   action_22: 'В базовых правилах нет процедуры ввода паролей и подсчёта ошибок.',
   action_23: 'Нужно определить влияние пары на вместимость, голосование и изгнание.',
   action_26: 'Нужен порядок отправки запроса преподавателю и получения подсказки.',
@@ -153,7 +153,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
               return (
                 <div className="bunker-online-action-tool" key={card.instance_id}>
                   <div className="bunker-online-action-tool-copy">
-                    <strong>{card.title}</strong>
+                    <strong>{card.card_id === 'action_17' ? 'Сторожевой таймер (Watchdog)' : card.title}</strong>
                     <span>{config.description}</span>
                   </div>
                   <div className="bunker-online-action-tool-controls">
@@ -193,7 +193,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
 
       {pendingCards.length > 0 && (
         <div className="bunker-online-pending-actions">
-          <span className="bunker-kicker">Ожидают уточнения правил</span>
+          <span className="bunker-kicker">Нужны доработка или уточнение правил</span>
           {pendingCards.map((card) => (
             <div className="bunker-online-pending-action" key={card.instance_id}>
               <strong>{card.title}</strong>
@@ -207,10 +207,10 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
         <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Watchdog активирован: брифинг этого раунда рассчитан на 30 секунд.</p>
       )}
       {vulnerabilitiesDisabledRound === currentRound && (
-        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Safe Boot: сервер записал флаг действия на этот раунд. Автоматическое подавление эффектов Уязвимостей ещё не подключено.</p>
+        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> В состоянии партии есть отметка Safe Boot, но автоматические эффекты Уязвимостей не формализованы и не подавляются.</p>
       )}
       {ignoredCrisisIds.length > 0 && (
-        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Есть Кризис, отмеченный картой Workaround для финального аудита.</p>
+        <p className="bunker-online-action-state"><ShieldAlert aria-hidden="true" /> Есть отметка Workaround, но финальный аудит пока не исключает отмеченный Кризис из проверки.</p>
       )}
 
       {privateEvents.length > 0 && (
