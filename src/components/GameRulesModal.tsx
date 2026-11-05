@@ -111,7 +111,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 <ul className="list-disc pl-5 space-y-1 text-slate-300">
                   <li>Каждому инженеру выдается 5 карт: <strong>1 Роль</strong>, <strong>1 Навык</strong>, <strong>1 Багаж</strong>, <strong>1 Уязвимость</strong>, <strong>1 Действие</strong>.</li>
                   <li>На стол выкладывается 1 Кризис (во 2-м и 4-м раундах добавляется еще по одному кризису).</li>
-                  <li>Игра длится 5 раундов. В каждом раунде команда выбирает одного участника для отстранения.</li>
+                  <li>Игра рассчитана на 5 раундов; во время голосования определяется участник, покидающий Бункер.</li>
                 </ul>
               </div>
 
@@ -122,7 +122,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 <div className="space-y-2 mt-2">
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-sky-400">ФАЗА 1:</span>
-                    <span><strong>Вскрытие характеристик.</strong> Игрок раскрывает 1 закрытую карту из своего досье.</span>
+                    <span><strong>Вскрытие характеристик.</strong> В первом раунде каждый открывает Роль; в раундах 2–5 — одну оставшуюся закрытую карту на выбор. Очерёдности нет: карта становится видна всем сразу после выбора.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-amber-400">ФАЗА 2:</span>
@@ -175,14 +175,14 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
               <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-900/60 text-amber-200 text-xs flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  В соответствии с документом 02_Game_System.md, открытые вопросы Q-01..Q-26 остаются на усмотрение ведущего партии (преподавателя) и не навязываются жестким алгоритмом.
+                  Исходные материалы не описывают все процедуры подробно. В цифровой версии утверждён порядок вскрытия карт; остальные неоднозначные механики не должны автоматически додумываться системой.
                 </span>
               </div>
 
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
-                  <div className="font-mono-tech text-sky-400 font-bold">Q-01: Порядок вскрытия карт</div>
-                  <p className="text-slate-300 text-[11px] mt-0.5">Разрешено свободное вскрытие любой из 5 карт игрока в каждом раунде.</p>
+                  <div className="font-mono-tech text-emerald-400 font-bold">Вскрытие карт · принято для цифровой версии</div>
+                  <p className="text-slate-300 text-[11px] mt-0.5">Раунд 1 — Роль. Раунды 2–5 — любая оставшаяся закрытая карта. Каждый выбирает самостоятельно; выбранная карта сразу открывается всем.</p>
                 </div>
 
                 <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
@@ -191,8 +191,8 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 </div>
 
                 <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
-                  <div className="font-mono-tech text-sky-400 font-bold">Q-07: Разрешение ничьей при голосовании</div>
-                  <p className="text-slate-300 text-[11px] mt-0.5">В случае равенства голосов проводится 30-секундный дебат между кандидатами или решает голос ведущего.</p>
+                  <div className="font-mono-tech text-sky-400 font-bold">Ничья при голосовании · требует решения</div>
+                  <p className="text-slate-300 text-[11px] mt-0.5">В обычной партии система не выбирает выбывшего случайно. Способ разрешения ничьей ещё предстоит утвердить.</p>
                 </div>
               </div>
             </div>
