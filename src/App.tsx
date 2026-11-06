@@ -584,8 +584,8 @@ export function App() {
 
   const handleRevealOnlineCard = (instanceId: string) => runOnlineGameAction(
     () => revealOnlineCard(onlineRoom!.roomId, instanceId),
-    'Карта раскрыта всем участникам.',
-    'Не удалось раскрыть карту.',
+    'Выбор сохранён. Карта откроется вместе с остальными.',
+    'Не удалось сохранить выбор карты.',
   );
 
   const handleUseOnlineActionCard = (instanceId: string) => runOnlineGameAction(
