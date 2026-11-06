@@ -1849,3 +1849,124 @@ textarea:focus-visible {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Match the legacy/local game flow to the same visual system. */
+:root {
+  --incident-bg: #0e0e0e;
+  --incident-panel: #191919;
+  --incident-paper: #f5f5f7;
+  --incident-muted: #a7a9ac;
+  --incident-line: rgba(255,255,255,.11);
+  --incident-signal: #7084ff;
+  --incident-signal-soft: rgba(64,91,255,.14);
+}
+
+.incident-page {
+  color: #f5f5f7;
+}
+
+.incident-topline,
+.incident-section,
+.incident-room-header {
+  border-color: rgba(255,255,255,.11);
+}
+
+.incident-kicker,
+.incident-alert-code,
+.incident-section-index,
+.incident-category-label {
+  color: #aab5ff;
+}
+
+.incident-button {
+  min-height: 44px;
+  border-radius: 999px;
+  border-color: rgba(255,255,255,.15);
+  background: rgba(255,255,255,.045);
+  color: #e7e8ec;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.incident-button:hover:not(:disabled) {
+  border-color: rgba(112,132,255,.48);
+  background: rgba(64,91,255,.1);
+  color: #fff;
+}
+
+.incident-button-primary {
+  border-color: #405bff;
+  background: #405bff;
+  color: #fff;
+}
+
+.incident-button-primary:hover:not(:disabled) {
+  border-color: #7084ff;
+  background: #5069ff;
+  color: #fff;
+}
+
+.incident-button-danger {
+  border-color: rgba(220,119,119,.32);
+  color: #e4a0a0;
+}
+
+.incident-access-panel,
+.incident-room-aside {
+  border-color: rgba(255,255,255,.11);
+  border-radius: 22px;
+  background: rgba(25,25,25,.86);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.incident-room-player {
+  border-color: rgba(255,255,255,.09);
+}
+
+.incident-room-host-icon,
+.incident-room-player-status {
+  color: #aab5ff;
+}
+
+.incident-room-invite-code,
+.incident-room-select {
+  border-color: rgba(112,132,255,.25);
+  border-radius: 12px;
+  background: rgba(64,91,255,.075);
+}
+
+@media (max-width: 380px) {
+  .bunker-nav-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    border-radius: 20px;
+    padding: 9px 10px;
+  }
+
+  .bunker-brand {
+    justify-self: start;
+  }
+
+  .bunker-nav-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    margin: 0;
+  }
+
+  .bunker-nav-link,
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    width: 100%;
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 10px;
+  }
+}
