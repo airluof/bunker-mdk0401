@@ -1,8 +1,8 @@
 # Этап 4. Транзакционный smoke-тест и границы тестового режима
 
-**Дата:** 2026-11-06  
-**Ветка:** `work/neurotech-redesign-and-game-audit`  
-**Supabase:** целевой проект `airluof's Project`  
+**Дата:** 2026-11-06
+**Ветка:** `work/neurotech-redesign-and-game-audit`
+**Supabase:** целевой проект `airluof's Project`
 **Миграция:** `20261106124439_test_runtime_mode_guards`
 
 ## Результат
@@ -28,7 +28,7 @@
 
 ### Защита от обхода тестового режима
 
-До миграции прямой вызов тестового RPC мог использоваться вне intended test room: `api_start_test_game` не проверял `rooms.room_mode`, а `api_exit_test_room` принимал как признак тестовой партии payload-флаг или наличие ботов.
+До миграции прямой вызов тестового RPC мог использоваться вне тестовой комнаты: `api_start_test_game` не проверял `rooms.room_mode`, а `api_exit_test_room` принимал как признак тестовой партии payload-флаг или наличие ботов.
 
 Исправлено миграцией:
 
