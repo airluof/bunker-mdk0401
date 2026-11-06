@@ -10,6 +10,7 @@ const paths = {
   actionReviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
   revealRuleMigration: 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql',
   simultaneousRevealMigration: 'supabase/migrations/202611060019_simultaneous_free_card_reveal.sql',
+  testModeGuardsMigration: 'supabase/migrations/20261106124439_test_runtime_mode_guards.sql',
   rulesModal: 'src/components/GameRulesModal.tsx',
   cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
@@ -37,6 +38,7 @@ const fullAlphabetSql = files.fullAlphabetMigration;
 const alphanumericSql = files.alphanumericMigration;
 const revealRuleSql = files.revealRuleMigration;
 const simultaneousRevealSql = files.simultaneousRevealMigration;
+const testModeGuardsSql = files.testModeGuardsMigration;
 
 const sqlFunctions = [
   'public.api_heartbeat_room',
@@ -171,4 +173,4 @@ if (failures.length) {
 console.log('Runtime contracts validated.');
 console.log('Controller heartbeat/takeover, creator-elimination failover and shared survivor audit are present.');
 console.log('Restored design assets and all 180 source cards remain present.');
-console.log('All 19 sequential migrations are present, including card-effect review and simultaneous free card reveal.');
+console.log('All 20 migrations are present, including simultaneous free reveal and test-room RPC mode guards.');
