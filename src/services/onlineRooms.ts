@@ -293,7 +293,7 @@ export async function revealOnlineCard(roomId: string, cardInstanceId: string) {
     p_command_id: crypto.randomUUID(),
   });
   throwIfError(error);
-  return data as { ok: boolean; card_instance_id: string; card_id: string; round: number };
+  return data as { ok: boolean; selected: boolean; round: number };
 }
 
 
