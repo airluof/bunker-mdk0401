@@ -557,3 +557,151 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* Local round header and roster cards use the same safe wrapping rules. */
+.bunker-round-header,
+.bunker-round-summary,
+.bunker-round-number,
+.bunker-phase-detail,
+.bunker-capacity-detail,
+.bunker-round-actions,
+.bunker-player-card,
+.bunker-player-card-head,
+.bunker-player-card-slots,
+.bunker-player-card-slot,
+.bunker-player-identity,
+.bunker-player-votes,
+.bunker-crisis-copy,
+.bunker-briefing-timer,
+.bunker-event-log {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.bunker-round-summary {
+  flex-wrap: wrap;
+}
+
+.bunker-phase-detail strong,
+.bunker-demo-label,
+.bunker-player-card-slot > span,
+.bunker-player-card-slot > strong,
+.bunker-player-identity h3 {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.bunker-round-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.bunker-round-actions .bunker-game-action {
+  min-width: min(100%, 180px);
+  max-width: 100%;
+}
+
+.bunker-player-card-head {
+  flex-wrap: wrap;
+}
+
+.bunker-player-name-line h3 {
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-card-slot {
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-card-slot > strong {
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-action-state {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-action-state svg {
+  flex: 0 0 auto;
+}
+
+.bunker-online-private-action-results {
+  min-width: 0;
+  max-width: 100%;
+  border-left-color: var(--wope-violet);
+  border-radius: 0 var(--ui-radius-tile) var(--ui-radius-tile) 0;
+  background: rgba(113, 61, 255, .08);
+}
+
+.bunker-online-action-tools {
+  border-top-color: rgba(183, 164, 251, .22);
+}
+
+.bunker-online-crisis-ignore {
+  max-width: 100%;
+  color: var(--wope-beam);
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.bunker-online-candidate > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-candidate > svg {
+  flex: 0 0 auto;
+}
+
+.bunker-online-private-action-result li > span,
+.bunker-online-private-action-result li > strong {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 721px) {
+  .bunker-online-action-tool-controls {
+    flex: 1 1 320px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .bunker-action-target-select {
+    width: auto;
+    flex: 1 1 200px;
+  }
+
+  .bunker-online-action-tool-controls .bunker-button {
+    width: auto;
+    min-width: 120px;
+    flex: 0 1 auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .bunker-online-action-tool {
+    flex-direction: column;
+  }
+
+  .bunker-online-action-tool-controls {
+    width: 100%;
+    flex: 0 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bunker-action-target-select,
+  .bunker-online-action-tool-controls .bunker-button {
+    width: 100%;
+    flex: 0 1 auto;
+  }
+}
