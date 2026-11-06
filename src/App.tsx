@@ -1340,25 +1340,6 @@ export function App() {
              SCREEN 1: LANDING & INCIDENT RESPONSE PORTAL
              ============================================================== */
           <div className="bunker-home">
-            <section className="bunker-hero">
-              <div className="bunker-hero-copy">
-                <p className="bunker-eyebrow">МДК.04.01 · Онлайн-игра</p>
-                <h1>ЦОД уничтожен<span>.</span></h1>
-                <p className="bunker-hero-description">
-                  Вирус «Zero-Day: Oblivion» вывел из строя основной кластер «НейроТех».
-                  Остался резервный контур — DRP-Site. Мест в Бункере вдвое меньше, чем участников.
-                </p>
-                <a href="#game-entry" className="bunker-button bunker-button-primary bunker-hero-cta">
-                  Играть <ArrowRight aria-hidden="true" />
-                </a>
-              </div>
-              <aside className="bunker-game-facts" aria-label="Параметры игры">
-                <div><strong>8–16</strong><span>игроков</span></div>
-                <div><strong>5</strong><span>раундов</span></div>
-                <div><strong>180</strong><span>карточек</span></div>
-              </aside>
-            </section>
-
             <section className="bunker-hero bunker-hero-frame">
               {navbarElement}
               <div className="bunker-hero-copy">
