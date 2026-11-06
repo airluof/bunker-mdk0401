@@ -11,7 +11,6 @@ const paths = {
   revealRuleMigration: 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql',
   simultaneousRevealMigration: 'supabase/migrations/202611060019_simultaneous_free_card_reveal.sql',
   testModeGuardsMigration: 'supabase/migrations/20261106124439_test_runtime_mode_guards.sql',
-  testModeGuardsMigration: 'supabase/migrations/20261106124439_test_runtime_mode_guards.sql',
   rulesModal: 'src/components/GameRulesModal.tsx',
   cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
@@ -39,7 +38,6 @@ const fullAlphabetSql = files.fullAlphabetMigration;
 const alphanumericSql = files.alphanumericMigration;
 const revealRuleSql = files.revealRuleMigration;
 const simultaneousRevealSql = files.simultaneousRevealMigration;
-const testModeGuardsSql = files.testModeGuardsMigration;
 const testModeGuardsSql = files.testModeGuardsMigration;
 
 const sqlFunctions = [
