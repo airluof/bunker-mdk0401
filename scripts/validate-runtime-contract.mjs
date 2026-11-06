@@ -11,6 +11,7 @@ const paths = {
   revealRuleMigration: 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql',
   simultaneousRevealMigration: 'supabase/migrations/202611060019_simultaneous_free_card_reveal.sql',
   testModeGuardsMigration: 'supabase/migrations/20261106124439_test_runtime_mode_guards.sql',
+  testModeGuardsMigration: 'supabase/migrations/20261106124439_test_runtime_mode_guards.sql',
   rulesModal: 'src/components/GameRulesModal.tsx',
   cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
@@ -38,6 +39,7 @@ const fullAlphabetSql = files.fullAlphabetMigration;
 const alphanumericSql = files.alphanumericMigration;
 const revealRuleSql = files.revealRuleMigration;
 const simultaneousRevealSql = files.simultaneousRevealMigration;
+const testModeGuardsSql = files.testModeGuardsMigration;
 const testModeGuardsSql = files.testModeGuardsMigration;
 
 const sqlFunctions = [
@@ -101,6 +103,23 @@ const stagedRevealFunction = simultaneousRevealSql.match(/create or replace func
 if (/insert into public\.public_game_events/i.test(stagedRevealFunction)) {
   failures.push('A selected card must not enter public events before simultaneous publication.');
 }
+
+const testStartFunction = testModeGuardsSql.match(/create or replace function public\.api_start_test_game[\s\S]*?\$\$;/i)?.[0] || '';
+const testExitFunction = testModeGuardsSql.match(/create or replace function public\.api_exit_test_room[\s\S]*?\$\$;/i)?.[0] || '';
+requireText(testStartFunction, /r\.created_by_user_id = v_user_id/i, 'Test-game start must verify the room creator.');
+requireText(testStartFunction, /r\.room_mode = 'test'/i, 'Test-game start must require a test room.');
+requireText(testStartFunction, /FORBIDDEN_OR_NOT_TEST_ROOM/i, 'Test-game start must reject regular rooms.');
+requireText(testExitFunction, /v_room\.room_mode is distinct from 'test'/i, 'Test-game exit must trust the authoritative room mode.');
+requireText(testExitFunction, /NOT_A_TEST_GAME/i, 'Test-game exit must reject regular rooms.');
+if (/\bv_test_mode\b|\bv_has_test_bots\b/i.test(testExitFunction)) {
+  failures.push('Test-game exit must not trust payload flags or bot presence as proof of room mode.');
+}
+requireText(testModeGuardsSql, /revoke all on function public\.api_start_test_game\(uuid, uuid\) from public, anon/i, 'Test-start RPC must not be callable by anon/PUBLIC.');
+requireText(testModeGuardsSql, /grant execute on function public\.api_start_test_game\(uuid, uuid\) to authenticated/i, 'Authenticated test-start RPC grant is missing.');
+requireText(testModeGuardsSql, /revoke all on function public\.api_exit_test_room\(uuid, uuid\) from public, anon/i, 'Test-exit RPC must not be callable by anon/PUBLIC.');
+requireText(testModeGuardsSql, /grant execute on function public\.api_exit_test_room\(uuid, uuid\) to authenticated/i, 'Authenticated test-exit RPC grant is missing.');
+requireText(testModeGuardsSql, /security definer[\s\S]*?set search_path = ''/i, 'Test-mode guard functions must pin an empty search_path.');
+
 if (!files.actionReviewMigration.includes("card_id = 'action_21'") || !files.actionReviewMigration.includes("card_id = 'action_25'")) {
   failures.push('Migration 017 must demote both Workaround and Safe Boot.');
 }
@@ -162,6 +181,12 @@ if (!migrationFiles.some((name) => name.startsWith('202611050018'))) {
 }
 if (!migrationFiles.some((name) => name.startsWith('202611060019'))) {
   failures.push('Missing migration 202611060019 for simultaneous free card reveal.');
+}
+if (!migrationFiles.some((name) => name.startsWith('20261106124439'))) {
+  failures.push('Missing migration 20261106124439 for test-room RPC mode guards.');
+}
+if (migrationFiles.length < 20) {
+  failures.push('Expected at least 20 SQL migrations; found ' + migrationFiles.length + '.');
 }
 
 if (failures.length) {
