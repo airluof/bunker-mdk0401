@@ -1,5 +1,6 @@
-/* Wope-inspired "violet horizon" theme for Bunker.
-   Presentation layer only. Game components, state, and fixed hand-card geometry stay intact. */
+/* Wope violet horizon — palette and surface treatment only.
+   Geometry, spacing, typography scale, control heights and card dimensions
+   are intentionally inherited from bunker-reference.css + bunker-polish.css. */
 
 :root {
   color-scheme: dark;
@@ -13,16 +14,13 @@
   --wope-violet: #713dff;
   --wope-beam: #b7a4fb;
   --wope-horizon: #8562ff;
-  --wope-glass-04: rgba(255,255,255,.04);
-  --wope-glass-10: rgba(255,255,255,.10);
-  --wope-glass-14: rgba(255,255,255,.14);
   --bunker-bg: var(--wope-night);
   --bunker-panel: #10081d;
   --bunker-panel-raised: #160d26;
   --bunker-panel-dark: #0c0616;
-  --bunker-paper: #fff;
+  --bunker-paper: #ffffff;
   --bunker-paper-muted: #d2d0dd;
-  --bunker-ink: #fff;
+  --bunker-ink: #ffffff;
   --bunker-muted: #9b96b0;
   --bunker-line: rgba(255,255,255,.10);
   --bunker-line-strong: rgba(255,255,255,.16);
@@ -31,51 +29,28 @@
   --bunker-accent-dark: #5427d5;
   --bunker-danger: #b98aab;
   --bunker-good: #b7a4fb;
-  --bunker-radius: 16px;
 }
 
 html,
 body {
-  min-height: 100%;
-  margin: 0;
   background: var(--wope-night) !important;
   color: var(--wope-white) !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  font-feature-settings: "calt" 0, "cv01", "cv06", "ss01", "ss03";
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 body {
-  position: relative;
-  overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse 760px 330px at 50% 650px, rgba(113,61,255,.17), transparent 72%),
-    radial-gradient(ellipse 680px 260px at 50% -120px, rgba(133,98,255,.09), transparent 74%),
-    linear-gradient(180deg, transparent 20%, rgba(22,9,42,.22) 100%),
-    linear-gradient(rgba(183,164,251,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(183,164,251,.018) 1px, transparent 1px) !important;
-  background-size: auto, auto, auto, 64px 64px, 64px 64px !important;
+    radial-gradient(ellipse 760px 360px at 50% 58%, rgba(113,61,255,.14), transparent 73%),
+    radial-gradient(ellipse 620px 300px at 52% -180px, rgba(133,98,255,.10), transparent 74%),
+    linear-gradient(180deg, transparent 20%, rgba(22,9,42,.22) 100%) !important;
   background-attachment: fixed !important;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--wope-beam) !important;
-  outline-offset: 3px;
+  outline-color: var(--wope-beam) !important;
 }
 
 ::selection {
@@ -83,22 +58,7 @@ textarea:focus-visible {
   color: #fff;
 }
 
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: #0c0616;
-}
-::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(183,164,251,.28);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(183,164,251,.48);
-}
-
-.font-tactical,
+/* Display type changes family only; original font sizes and line heights remain. */
 .bunker-brand-name,
 .bunker-hero h1,
 .bunker-section-heading h2,
@@ -115,10 +75,20 @@ textarea:focus-visible {
 .bunker-event-log h2,
 .bunker-briefing-timer h2,
 .bunker-modal-copy h2,
-.bunker-vote-heading h2 {
-  font-family: 'Sora', 'Inter', sans-serif !important;
-  font-weight: 700;
-  letter-spacing: -.045em;
+.bunker-vote-heading h2,
+.bunker-card-copy h3,
+.bunker-game-facts strong {
+  font-family: 'Sora', 'Inter', sans-serif;
+}
+
+.font-tactical,
+.bunker-button,
+.bunker-game-action,
+.bunker-nav-link,
+.bunker-nav-icon,
+.bunker-nav-exit,
+.incident-button {
+  font-family: 'Inter', sans-serif;
 }
 
 .font-mono-tech,
@@ -127,139 +97,59 @@ textarea:focus-visible {
 .bunker-code-input,
 .bunker-invite-code,
 .bunker-online-timer strong,
-.bunker-timer-display > strong {
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', Consolas, monospace !important;
-  letter-spacing: 0;
+.bunker-timer-display > strong,
+.bunker-event-meta {
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', Consolas, monospace;
 }
 
+/* Canvas, header and brand */
 .bunker-app {
-  min-height: 100vh;
   background: transparent !important;
   color: var(--wope-white);
 }
 
-.bunker-main {
-  width: min(100%, 1248px);
-  margin: 0 auto;
-  padding: 36px clamp(16px, 3vw, 36px) 88px;
-}
-
-.bunker-page {
-  width: 100%;
-}
-
-/* Header: full-width bar, pill actions only. */
 .bunker-nav {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  width: 100%;
-  margin: 0;
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.075);
-  background: rgba(10,1,24,.78) !important;
+  border-bottom-color: rgba(255,255,255,.075);
+  background: rgba(10,1,24,.84) !important;
   box-shadow: none;
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-
-.bunker-nav-inner {
-  display: flex;
-  width: min(100%, 1248px);
-  min-height: 78px;
-  align-items: center;
-  gap: 22px;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 36px);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 .bunker-brand {
-  display: inline-flex;
-  min-width: 150px;
-  align-items: center;
-  gap: 10px;
   color: #fff;
 }
 
 .bunker-brand-mark {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  place-items: center;
-  border: 1px solid rgba(183,164,251,.3);
-  border-radius: 12px;
+  border-color: rgba(183,164,251,.32);
   background: rgba(255,255,255,.035);
   color: #c6b6ff;
   box-shadow: none;
 }
 
-.bunker-brand-mark svg {
-  width: 19px;
-  height: 19px;
-  stroke-width: 1.8;
-}
-
 .bunker-brand-name {
   color: #fff;
-  font-size: 18px;
-  line-height: 1.05;
 }
 
 .bunker-brand-subtitle {
   color: var(--wope-dim);
-  font-size: 9px;
-  letter-spacing: .11em;
 }
 
 .bunker-nav-room {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-right: auto;
-  border-left: 1px solid rgba(183,164,251,.48);
-  padding: 6px 12px;
+  border-left-color: rgba(183,164,251,.48);
   color: var(--wope-lilac);
-  font-size: 12px;
 }
 
 .bunker-nav-room strong {
   color: #fff;
-  font-size: 11px;
-}
-
-.bunker-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: auto;
 }
 
 .bunker-nav-link,
 .bunker-nav-icon,
 .bunker-nav-exit {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 7px 15px;
+  border-color: transparent;
   background: transparent;
   color: var(--wope-lilac);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color .16s ease, background .16s ease, border-color .16s ease;
-}
-
-.bunker-nav-link svg,
-.bunker-nav-icon svg,
-.bunker-nav-exit svg {
-  width: 16px;
-  height: 16px;
 }
 
 .bunker-nav-link:hover,
@@ -275,16 +165,7 @@ textarea:focus-visible {
   color: #fff;
 }
 
-.bunker-nav-icon {
-  width: 40px;
-  padding: 7px;
-  color: var(--wope-dim);
-}
-
 .bunker-nav-exit {
-  width: 40px;
-  margin-left: 2px;
-  padding: 7px;
   color: #bd9bb9;
 }
 .bunker-nav-exit:hover {
@@ -293,46 +174,32 @@ textarea:focus-visible {
   color: #ead6e7;
 }
 
-/* Landing: one quiet frame, with light rising from beneath it. */
-.bunker-home {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(64px, 8vw, 108px);
-}
-
+/* Hero: preserve original grid, dimensions and text scale; only change lighting. */
 .bunker-hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, 250px);
-  align-items: center;
-  gap: clamp(24px, 4vw, 56px);
-  min-height: 410px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 16px;
-  padding: clamp(28px, 5vw, 56px);
+  border-color: rgba(255,255,255,.11);
   background:
-    linear-gradient(180deg, rgba(10,1,24,.02) 22%, rgba(22,9,42,.50) 100%),
-    radial-gradient(ellipse 680px 250px at 54% 115%, rgba(133,98,255,.30), transparent 76%),
+    linear-gradient(180deg, rgba(11,2,23,0) 22.69%, rgba(22,9,42,.5) 100%),
+    radial-gradient(ellipse 720px 300px at 54% 112%, rgba(133,98,255,.30), transparent 76%),
     #0c0616;
   box-shadow: none;
 }
 
 .bunker-hero::before {
+  display: block !important;
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(183,164,251,.025) 1px, transparent 1px),
-    linear-gradient(rgba(183,164,251,.025) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(183,164,251,.022) 1px, transparent 1px),
+    linear-gradient(rgba(183,164,251,.022) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: linear-gradient(135deg, rgba(0,0,0,.7), transparent 78%);
+  mask-image: linear-gradient(135deg, rgba(0,0,0,.62), transparent 78%);
   content: '';
   pointer-events: none;
 }
 
 .bunker-hero::after {
+  display: block !important;
   position: absolute;
-  z-index: 0;
   right: 15%;
   bottom: -150px;
   left: 15%;
@@ -350,227 +217,94 @@ textarea:focus-visible {
   z-index: 1;
 }
 
-.bunker-hero-copy {
-  max-width: 790px;
-  align-self: center;
-}
-
-.bunker-eyebrow,
-.bunker-kicker {
-  display: block;
-  margin: 0 0 13px;
-  color: #c2b2ff;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .10em;
-  line-height: 1.5;
-  text-transform: uppercase;
-}
-
-.bunker-hero h1 {
-  max-width: 820px;
-  margin: 0 0 20px;
+.bunker-hero h1,
+.bunker-section-heading h2,
+.bunker-page-heading h1,
+.bunker-room-heading h1,
+.bunker-online-game-heading h1 {
   color: #fff;
-  font-size: clamp(44px, 6.8vw, 76px);
-  line-height: 1.08;
-  letter-spacing: -.065em;
 }
 
 .bunker-hero h1 span {
-  color: #b7a4fb;
-  text-shadow: 0 0 34px rgba(133,98,255,.28);
+  color: var(--wope-beam);
+  text-shadow: 0 0 28px rgba(133,98,255,.28);
 }
 
-.bunker-hero-description {
-  max-width: 660px;
-  margin: 0;
+.bunker-hero-description,
+.bunker-section-heading > p,
+.bunker-page-description {
   color: var(--wope-lilac);
-  font-size: 16px;
-  line-height: 1.65;
-  letter-spacing: -.16px;
 }
 
-.bunker-hero-cta {
-  margin-top: 24px;
+.bunker-eyebrow,
+.bunker-kicker,
+.incident-kicker,
+.incident-alert-code,
+.incident-section-index {
+  color: #b7a4fb;
 }
 
 .bunker-game-facts {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 10px;
-  padding: 12px 20px;
+  border-color: rgba(255,255,255,.10);
   background: rgba(10,1,24,.20);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
 .bunker-game-facts div {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  padding: 14px 0;
-}
-.bunker-game-facts div:last-child {
-  border-bottom: 0;
+  border-bottom-color: rgba(255,255,255,.08);
 }
 .bunker-game-facts strong {
-  min-width: 82px;
   color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -.06em;
 }
 .bunker-game-facts span {
   color: var(--wope-lilac);
-  font-size: 13px;
 }
 
-/* Section rhythm and entry surfaces */
-.bunker-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.bunker-section-heading,
-.bunker-page-heading,
-.bunker-room-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.bunker-section-heading h2,
-.bunker-page-heading h1,
-.bunker-room-heading h1 {
-  margin: 0;
-  color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: clamp(26px, 3vw, 36px);
-  font-weight: 700;
-  line-height: 1.14;
-  letter-spacing: -.055em;
-}
-
-.bunker-section-heading > p,
-.bunker-page-description {
-  max-width: 490px;
-  margin: 0;
-  color: var(--wope-lilac);
-  font-size: 14px;
-  line-height: 1.65;
-  letter-spacing: -.28px;
-}
-
-.bunker-name-field {
-  display: flex;
-  max-width: 480px;
-  flex-direction: column;
-  gap: 8px;
-}
+/* Sections, inputs and actions */
 .bunker-name-field label,
 .bunker-field-label {
   color: var(--wope-steel);
-  font-size: 14px;
-  font-weight: 500;
 }
 
-/* Input controls use a calm underline, not a framed rectangle. */
 .bunker-input,
 .bunker-select {
-  width: 100%;
-  min-width: 0;
-  min-height: 48px;
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.22);
-  border-radius: 0;
-  padding: 13px 2px;
-  outline: none;
-  background: transparent;
+  border-color: rgba(255,255,255,.18);
+  background: rgba(10,1,24,.28);
   color: #fff;
-  font: 400 15px/1.4 'Inter', sans-serif;
-  transition: border-color .16s ease, box-shadow .16s ease;
-}
-.bunker-input::placeholder {
-  color: #85808c;
-}
-.bunker-input:focus,
-.bunker-select:focus {
-  border-bottom-color: #b7a4fb;
-  box-shadow: 0 1px 0 #b7a4fb;
-}
-.bunker-code-input {
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: .10em;
 }
 
-/* Cards sit nearly flush with the canvas. */
-.bunker-panel,
+.bunker-input::placeholder {
+  color: var(--wope-dim);
+}
+
+.bunker-input:focus,
+.bunker-select:focus {
+  border-color: var(--wope-beam);
+  background: rgba(22,9,42,.58);
+  box-shadow: 0 0 0 2px rgba(113,61,255,.12);
+}
+
 .bunker-access-panel,
-.bunker-online-crisis-panel,
-.bunker-online-roster,
-.bunker-online-status,
-.bunker-online-public-cards,
-.bunker-online-audit,
-.bunker-online-vote-ledger,
-.bunker-online-hand {
-  min-width: 0;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 16px;
-  padding: 26px;
-  background: rgba(12,6,22,.88);
+.bunker-panel {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(12,6,22,.90);
   box-shadow: none;
 }
 
-.bunker-access-panel {
-  display: flex;
-  min-height: 214px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 15px;
-}
-.bunker-access-panel > div:first-child {
-  margin-bottom: auto;
-}
 .bunker-access-panel h3,
-.bunker-panel h2 {
-  margin: 0;
+.bunker-panel h2,
+.bunker-panel-heading h2 {
   color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -.04em;
-}
-.bunker-access-panel p,
-.bunker-invite-panel > p,
-.bunker-panel-heading p {
-  margin: 5px 0 0;
-  color: var(--wope-lilac);
-  font-size: 13px;
-  line-height: 1.6;
-}
-.bunker-access-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-.bunker-room-create-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin-top: 12px;
-}
-.bunker-room-create-options .bunker-button {
-  flex: 1 1 180px;
 }
 
-/* Wope controls: pill shape, restrained translucent fill. */
+.bunker-access-panel p,
+.bunker-invite-panel > p,
+.bunker-panel-heading p,
+.bunker-help {
+  color: var(--wope-lilac);
+}
+
 .bunker-button,
 .bunker-game-action,
 .bunker-action-card-button,
@@ -579,379 +313,234 @@ textarea:focus-visible {
 .bunker-vote-cancel,
 .bunker-vote-confirm,
 .incident-button {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  padding: 8px 20px;
+  border-color: rgba(255,255,255,.10);
   background: rgba(255,255,255,.04);
   color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -.16px;
-  text-transform: none;
-  cursor: pointer;
   box-shadow: none;
-  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
 }
-.bunker-button svg,
-.bunker-text-button svg {
-  width: 16px;
-  height: 16px;
-}
-.bunker-button:disabled,
-.bunker-game-action:disabled,
-.incident-button:disabled {
-  cursor: not-allowed;
-  opacity: .42;
-}
+
 .bunker-button-primary,
+.bunker-game-action-primary,
+.bunker-card-reveal,
 .incident-button-primary,
 .bunker-vote-confirm {
   border-color: rgba(183,164,251,.30);
-  background: rgba(255,255,255,.07);
+  background: rgba(255,255,255,.075);
   color: #fff;
 }
+
 .bunker-button-primary:hover:not(:disabled),
+.bunker-game-action-primary:hover:not(:disabled),
+.bunker-card-reveal:hover,
 .incident-button-primary:hover:not(:disabled),
 .bunker-vote-confirm:hover:not(:disabled) {
-  border-color: rgba(183,164,251,.58);
-  background: rgba(113,61,255,.22);
+  border-color: rgba(183,164,251,.56);
+  background: rgba(113,61,255,.20);
   color: #fff;
+  box-shadow: none;
 }
+
 .bunker-button-secondary,
+.bunker-game-action-secondary,
 .incident-button-soft,
 .bunker-vote-cancel {
   border-color: rgba(255,255,255,.10);
-  background: transparent;
+  background: rgba(255,255,255,.025);
   color: var(--wope-steel);
 }
+
 .bunker-button-secondary:hover:not(:disabled),
+.bunker-game-action-secondary:hover:not(:disabled),
 .incident-button-soft:hover:not(:disabled),
 .bunker-vote-cancel:hover:not(:disabled) {
   border-color: rgba(183,164,251,.34);
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.05);
   color: #fff;
 }
+
 .bunker-button-danger,
+.bunker-game-action-danger,
 .incident-button-danger {
   border-color: rgba(185,138,171,.28);
   background: rgba(185,138,171,.055);
   color: #d8b8ce;
 }
 .bunker-button-danger:hover:not(:disabled),
+.bunker-game-action-danger:hover:not(:disabled),
 .incident-button-danger:hover:not(:disabled) {
-  border-color: rgba(185,138,171,.48);
+  border-color: rgba(185,138,171,.46);
   background: rgba(185,138,171,.10);
+  color: #f0dce9;
 }
+
 .bunker-text-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  padding: 7px 0;
-  background: transparent;
-  color: #b7a4fb;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
+  color: var(--wope-beam);
 }
 .bunker-text-button:hover {
   color: #fff;
 }
-.bunker-help {
-  margin: 0;
-  color: var(--wope-dim);
-  font-size: 12px;
-  line-height: 1.6;
-}
+
 .bunker-error {
-  border: 1px solid rgba(185,138,171,.28);
-  border-radius: 10px;
-  padding: 12px 15px;
+  border-color: rgba(185,138,171,.32);
   background: rgba(185,138,171,.07);
   color: #e3c5d9;
-  font-size: 13px;
-  line-height: 1.55;
 }
 .bunker-toast {
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  padding: 13px 16px;
-  background: rgba(10,1,24,.86);
+  border-color: rgba(255,255,255,.12);
+  border-left-color: var(--wope-beam);
+  background: rgba(10,1,24,.90);
   color: #fff;
-  font-size: 13px;
   box-shadow: none;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 .bunker-toast svg {
-  color: #b7a4fb;
+  color: var(--wope-beam);
 }
 
-/* Category rails: one consistent panel language, no extra decorative tiles. */
-.bunker-category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
+/* Category list and catalogue */
 .bunker-category-card {
-  display: flex;
-  min-width: 0;
-  min-height: 76px;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid rgba(255,255,255,.085);
-  border-radius: 16px;
-  padding: 15px 17px;
+  border-color: rgba(255,255,255,.09);
   background: rgba(255,255,255,.02);
   color: #fff;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color .16s ease, background .16s ease;
 }
 .bunker-category-card:hover {
-  border-color: rgba(183,164,251,.28);
+  border-color: rgba(183,164,251,.30);
   background: rgba(113,61,255,.07);
 }
 .bunker-category-dot {
-  width: 5px;
-  height: 25px;
-  flex: 0 0 5px;
-  border-radius: 99px;
-  background: #8562ff;
-}
-.bunker-category-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 3px;
+  background: var(--wope-horizon);
 }
 .bunker-category-copy strong {
   color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
 }
-.bunker-category-copy small {
+.bunker-category-copy small,
+.bunker-category-count,
+.bunker-catalog-result,
+.bunker-catalog-note {
   color: var(--wope-lilac);
-  font-size: 12px;
-  line-height: 1.4;
 }
-.bunker-category-count {
-  color: #b7a4fb;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+.bunker-catalog-total strong {
+  color: var(--wope-beam);
+}
+.bunker-catalog-toolbar {
+  border-bottom-color: rgba(255,255,255,.09);
+}
+.bunker-search {
+  border-color: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.02);
+  color: var(--wope-lilac);
+}
+.bunker-search:focus-within {
+  border-color: rgba(183,164,251,.48);
+  box-shadow: 0 1px 0 rgba(183,164,251,.48);
+}
+.bunker-search input {
+  background: transparent;
+  color: #fff;
+}
+.bunker-search input::placeholder {
+  color: var(--wope-dim);
+}
+.bunker-filter {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.025);
+  color: var(--wope-lilac);
+}
+.bunker-filter:hover {
+  border-color: rgba(183,164,251,.32);
+  color: #fff;
+}
+.bunker-filter.is-active {
+  border-color: rgba(183,164,251,.30);
+  background: rgba(113,61,255,.14);
+  color: #fff;
+}
+.bunker-empty {
+  border-color: rgba(255,255,255,.14);
+  color: var(--wope-lilac);
+}
+.bunker-empty > svg {
+  color: var(--wope-beam);
+}
+.bunker-empty h2 {
+  color: #fff;
 }
 
-/* Shared panel headers and player rows. */
-.bunker-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 17px;
+/* Online lobby */
+.bunker-room-heading h1 {
+  color: #fff;
 }
 .bunker-player-count {
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
   color: var(--wope-lilac);
-  font-size: 12px;
 }
-.bunker-player-count svg {
-  width: 16px;
-  height: 16px;
-  align-self: center;
-  color: #b7a4fb;
-}
+.bunker-player-count svg,
 .bunker-player-count strong {
-  color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-}
-.bunker-player-list {
-  gap: 0 18px;
+  color: var(--wope-beam);
 }
 .bunker-player-row,
-.bunker-player-seat {
-  min-height: 60px;
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  border-radius: 0;
-  padding: 9px 3px;
-  background: transparent;
+.bunker-player-seat,
+.bunker-online-roster-list .bunker-player-row {
+  border-bottom-color: rgba(255,255,255,.075);
+}
+.bunker-player-row:hover,
+.bunker-player-seat:hover {
+  background: rgba(255,255,255,.025);
 }
 .bunker-player-avatar {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
-  border: 1px solid rgba(183,164,251,.22);
-  border-radius: 50%;
+  border-color: rgba(183,164,251,.22);
   background: rgba(113,61,255,.11);
   color: #ded4ff;
-  font-size: 11px;
-  font-weight: 600;
 }
 .bunker-player-avatar.is-empty {
-  border: 1px dashed rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.18);
   background: transparent;
   color: var(--wope-dim);
 }
 .bunker-player-details strong {
   color: #fff;
-  font-size: 13px;
-  font-weight: 500;
 }
 .bunker-player-details small {
   color: var(--wope-lilac);
-  font-size: 11px;
 }
-.bunker-host-label {
-  color: #b7a4fb;
-  font-size: 11px;
-}
+.bunker-host-label,
 .bunker-host-label svg {
-  width: 13px;
-  height: 13px;
+  color: var(--wope-beam);
 }
-.bunker-empty-copy {
-  color: var(--wope-lilac);
-  font-size: 13px;
-  line-height: 1.6;
-}
+.bunker-empty-copy,
 .bunker-player-progress,
 .bunker-online-note {
-  border-top: 1px solid rgba(255,255,255,.09);
   color: var(--wope-lilac);
-  font-size: 12px;
-  line-height: 1.6;
 }
-
-/* Online waiting room */
-.bunker-room-page {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-.bunker-room-heading {
-  align-items: end;
-  margin-bottom: 5px;
-}
-.bunker-room-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.bunker-room-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(270px, .75fr);
-  align-items: start;
-  gap: 16px;
-}
-.bunker-players-panel {
-  padding: 26px;
-}
-.bunker-room-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.bunker-room-sidebar .bunker-panel {
-  padding: 22px;
+.bunker-online-note {
+  border-color: rgba(183,164,251,.12);
+  background: rgba(113,61,255,.045);
 }
 .bunker-invite-code {
-  overflow-wrap: anywhere;
-  margin: 15px 0 12px;
-  border: 1px solid rgba(183,164,251,.18);
-  border-radius: 10px;
-  padding: 14px;
+  border-color: rgba(183,164,251,.18);
+  border-left-color: var(--wope-beam);
   background: rgba(113,61,255,.07);
   color: #eee8ff;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  letter-spacing: .08em;
 }
-.bunker-copy-button,
-.bunker-save-settings {
-  width: 100%;
+.bunker-settings-panel .bunker-panel-heading > svg {
+  color: var(--wope-beam);
 }
 .bunker-setting-value {
-  margin-top: 11px;
   color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: 30px;
-  font-weight: 700;
 }
 .bunker-setting-value span {
   color: var(--wope-lilac);
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-}
-.bunker-save-settings {
-  margin-top: 11px;
-}
-.bunker-online-note {
-  border: 1px solid rgba(183,164,251,.12);
-  border-radius: 10px;
-  padding: 13px 15px;
-  background: rgba(113,61,255,.045);
 }
 
-/* Live game layout and phase actions */
-.bunker-online-game {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+/* Online game surface and phase controls */
 .bunker-online-game-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 18px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-  padding-bottom: 19px;
+  border-bottom-color: rgba(255,255,255,.10);
 }
 .bunker-online-game-heading h1 {
-  margin: 3px 0 0;
   color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: clamp(30px, 3.5vw, 42px);
-  font-weight: 700;
-  line-height: 1.14;
-  letter-spacing: -.055em;
 }
 .bunker-online-game-heading .bunker-page-description {
-  margin-top: 7px;
   color: var(--wope-lilac);
-  font-size: 13px;
-}
-.bunker-online-game-heading .bunker-room-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.bunker-online-game-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 292px;
-  align-items: start;
-  gap: 16px;
-}
-.bunker-online-game-main,
-.bunker-online-game-sidebar {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 16px;
 }
 .bunker-online-crisis-panel,
 .bunker-online-roster,
@@ -960,52 +549,110 @@ textarea:focus-visible {
 .bunker-online-audit,
 .bunker-online-vote-ledger,
 .bunker-online-hand {
-  padding: 22px;
+  border-color: rgba(255,255,255,.10);
+  background: rgba(12,6,22,.90);
+  box-shadow: none;
 }
 .bunker-online-crisis-panel {
-  position: relative;
-  overflow: hidden;
-  border-color: rgba(183,164,251,.14);
+  border-top-color: rgba(183,164,251,.30);
   background:
     radial-gradient(ellipse 420px 170px at 50% 112%, rgba(113,61,255,.12), transparent 76%),
     rgba(12,6,22,.92);
 }
-.bunker-online-crisis-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
-  justify-items: start;
-  gap: 13px;
-  padding-top: 12px;
+.bunker-online-action-panel {
+  border-color: rgba(183,164,251,.18);
+  background:
+    radial-gradient(ellipse 470px 160px at 68% 122%, rgba(133,98,255,.20), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,.018), rgba(22,9,42,.42)),
+    #0c0616;
+  box-shadow: none;
 }
-.bunker-online-crisis-cards .bunker-card {
-  width: 100%;
-  max-width: 270px;
+.bunker-online-action-panel h2,
+.bunker-online-audit h2 {
+  color: #fff;
 }
-.bunker-online-private-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #c6b6ff;
-  font-size: 12px;
+.bunker-online-action-panel p,
+.bunker-online-audit p,
+.bunker-online-status p,
+.bunker-online-game-footnote {
+  color: var(--wope-lilac);
 }
-.bunker-online-hand-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+.bunker-online-progress,
+.bunker-online-private-label,
+.bunker-online-timer {
+  color: #c3b4ff;
 }
-.bunker-online-hand-grid .bunker-card,
-.bunker-online-hand-grid .bunker-hand-slot {
-  min-width: 0;
-  width: 100%;
+.bunker-online-voted {
+  color: #d0c7ed;
+}
+.bunker-online-timer strong {
+  color: #fff;
+}
+.bunker-online-timer span {
+  color: var(--wope-lilac);
+}
+.bunker-online-candidate {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.025);
+  color: #e9e5f2;
+}
+.bunker-online-candidate:hover:not(:disabled),
+.bunker-online-candidate.is-selected {
+  border-color: rgba(183,164,251,.44);
+  background: rgba(113,61,255,.14);
+}
+.bunker-online-public-player {
+  border-top-color: rgba(255,255,255,.09);
+  background: transparent;
+}
+.bunker-online-public-player > header strong,
+.bunker-online-public-card-list strong,
+.bunker-online-vote-ledger .bunker-online-vote-row strong {
+  color: #fff;
+}
+.bunker-online-public-player > header small,
+.bunker-online-public-player > p,
+.bunker-online-vote-ledger .bunker-online-vote-row {
+  color: var(--wope-lilac);
+}
+.bunker-online-public-card-list button {
+  border-color: rgba(255,255,255,.075);
+  background: rgba(255,255,255,.025);
+  color: #e8e3f2;
+}
+.bunker-online-public-card-list button:hover {
+  border-color: rgba(183,164,251,.30);
+  background: rgba(113,61,255,.08);
+}
+.bunker-online-public-card-list span {
+  color: var(--wope-beam);
+}
+.bunker-online-status h2 {
+  color: #fff;
+}
+.bunker-online-status > svg {
+  color: var(--wope-beam);
 }
 
-/* The cards are still the visual centrepiece; fixed hand dimensions stay as defined upstream. */
-.bunker-card {
-  border-radius: 16px;
+/* Connection state */
+.bunker-connection-status {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.025);
+  color: var(--wope-lilac);
 }
+.bunker-connection-dot {
+  background: var(--wope-beam);
+  box-shadow: 0 0 10px rgba(183,164,251,.45);
+}
+.bunker-connection-status.is-reconnecting .bunker-connection-dot,
+.bunker-connection-status.is-disconnected .bunker-connection-dot {
+  background: #b98aab;
+  box-shadow: none;
+}
+
+/* Card faces: original card sizes remain defined by the existing polish sheet. */
 .bunker-card-open {
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
+  border-color: rgba(255,255,255,.12);
   background: #10081d;
   color: #fff;
   box-shadow: none;
@@ -1015,23 +662,14 @@ textarea:focus-visible {
   box-shadow: none;
 }
 .bunker-card-open .bunker-card-topline {
-  min-height: 40px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  border-radius: 0;
+  border-bottom-color: rgba(255,255,255,.07);
   background: rgba(255,255,255,.02);
-  padding: 8px 12px;
 }
 .bunker-card-open .bunker-card-category {
   color: #c3b6ec;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
 }
 .bunker-card-open .bunker-card-inspect {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 50%;
+  border-color: rgba(255,255,255,.10);
   background: rgba(255,255,255,.025);
   color: #c8c1d7;
 }
@@ -1046,40 +684,27 @@ textarea:focus-visible {
     #0c0616;
 }
 .bunker-card-open .bunker-card-art img {
-  filter: saturate(.82);
+  filter: saturate(.88);
 }
 .bunker-card-open .bunker-card-copy {
-  min-height: 120px;
-  gap: 7px;
-  border-top: 1px solid rgba(183,164,251,.22);
+  border-top-color: rgba(183,164,251,.22);
   background: #10081d;
-  padding: 13px 14px 14px;
 }
 .bunker-card-open .bunker-card-copy h3 {
   color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.32;
-  letter-spacing: -.25px;
 }
 .bunker-card-open .bunker-card-copy p {
   color: #aaa3ba;
-  font-size: 11px;
-  line-height: 1.5;
 }
 .bunker-card-sealed {
-  border: 1px solid rgba(183,164,251,.22);
-  border-radius: 16px;
+  border-color: rgba(183,164,251,.22);
   background:
     radial-gradient(ellipse at 50% 72%, rgba(113,61,255,.18), transparent 68%),
     #0c0616;
   color: #fff;
 }
 .bunker-card-sealed::before {
-  inset: 9px;
-  border: 1px solid rgba(183,164,251,.13);
-  border-radius: 10px;
+  border-color: rgba(183,164,251,.13);
 }
 .bunker-card-sealed .bunker-card-topline {
   border-bottom-color: rgba(255,255,255,.07);
@@ -1089,327 +714,282 @@ textarea:focus-visible {
   color: #c3b6ec;
 }
 .bunker-card-lock {
-  width: 54px;
-  height: 54px;
-  border: 1px solid rgba(183,164,251,.32);
-  border-radius: 14px;
+  border-color: rgba(183,164,251,.32);
   background: rgba(113,61,255,.10);
   color: #c9baff;
   box-shadow: none;
 }
 .bunker-card-seal {
-  color: #d2d0dd;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--wope-steel);
 }
 .bunker-card-bottom {
-  border-top: 1px solid rgba(255,255,255,.07);
-}
-.bunker-card-reveal {
-  min-height: 38px;
-  border-color: rgba(183,164,251,.26);
-  background: rgba(255,255,255,.07);
-  color: #fff;
-  font-size: 12px;
-}
-.bunker-card-reveal:hover {
-  border-color: rgba(183,164,251,.52);
-  background: rgba(113,61,255,.18);
+  border-top-color: rgba(255,255,255,.07);
 }
 .bunker-card-access {
-  color: #9b96b0;
-  font-size: 11px;
+  color: var(--wope-lilac);
 }
 
-/* Phase panel: the violet horizon is a light field, not a left-side alert stripe. */
-.bunker-online-action-panel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(183,164,251,.18);
-  border-radius: 16px;
-  padding: 22px 25px;
-  background:
-    radial-gradient(ellipse 470px 160px at 68% 122%, rgba(133,98,255,.21), transparent 74%),
-    linear-gradient(180deg, rgba(255,255,255,.018), rgba(22,9,42,.42)),
-    #0c0616;
-  box-shadow: none;
+/* Local game — same purple horizon without changing its prior geometry. */
+.incident-page {
+  color: #fff;
 }
-.bunker-online-action-panel h2,
-.bunker-online-audit h2 {
-  margin: 4px 0 8px;
+.incident-topline,
+.incident-section,
+.incident-room-header {
+  border-color: rgba(255,255,255,.09);
+}
+.incident-hero {
+  border-color: rgba(255,255,255,.09);
+  background:
+    radial-gradient(ellipse 600px 210px at 50% 110%, rgba(113,61,255,.22), transparent 75%),
+    #0c0616;
+}
+.incident-title {
   color: #fff;
   font-family: 'Sora', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -.045em;
 }
-.bunker-online-action-panel p,
-.bunker-online-audit p {
-  max-width: 720px;
-  margin: 5px 0;
+.incident-title span {
+  color: var(--wope-beam);
+}
+.incident-lead,
+.incident-section-note,
+.incident-sidebar-copy,
+.incident-room-player-role,
+.incident-room-settings-note {
   color: var(--wope-lilac);
-  font-size: 13px;
-  line-height: 1.6;
 }
-.bunker-online-progress {
-  color: #c3b4ff !important;
-  font-weight: 500;
+.incident-sidebar {
+  border-color: rgba(255,255,255,.09);
 }
-.bunker-online-voted {
-  color: #d0c7ed !important;
+.incident-access-panel,
+.incident-room-aside {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(12,6,22,.90);
+  box-shadow: none;
 }
-.bunker-online-timer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 13px;
-  color: #c2b2ff;
+.incident-room-player {
+  border-color: rgba(255,255,255,.075);
 }
-.bunker-online-timer svg {
-  width: 18px;
-  height: 18px;
-}
-.bunker-online-timer strong {
-  color: #fff;
-  font-size: 30px;
-  font-variant-numeric: tabular-nums;
-}
-.bunker-online-timer span {
-  color: var(--wope-lilac);
-  font-size: 12px;
-}
-.bunker-online-candidates {
-  display: grid;
-  min-width: min(100%, 310px);
-  gap: 7px;
-}
-.bunker-online-candidate {
-  display: flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  padding: 8px 13px;
-  background: rgba(255,255,255,.025);
-  color: #e9e5f2;
-  font-size: 13px;
-  cursor: pointer;
-  transition: border-color .16s ease, background .16s ease;
-}
-.bunker-online-candidate:hover:not(:disabled),
-.bunker-online-candidate.is-selected {
-  border-color: rgba(183,164,251,.44);
-  background: rgba(113,61,255,.14);
-}
-.bunker-online-vote-ledger .bunker-online-vote-row {
-  gap: 9px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  padding: 10px 2px;
-  color: var(--wope-lilac);
-  font-size: 12px;
-}
-.bunker-online-vote-ledger .bunker-online-vote-row strong {
+.incident-room-player-name,
+.incident-room-range,
+.incident-room-count strong {
   color: #fff;
 }
-.bunker-online-public-grid {
-  gap: 12px 18px;
-  margin-top: 15px;
+.incident-room-host-icon,
+.incident-room-copy,
+.incident-room-player-status {
+  color: var(--wope-beam);
 }
-.bunker-online-public-player {
-  min-width: 0;
-  border: 0;
-  border-top: 1px solid rgba(255,255,255,.09);
-  border-radius: 0;
-  padding: 12px 3px 9px;
-  background: transparent;
-}
-.bunker-online-public-player > header {
-  padding-bottom: 8px;
-}
-.bunker-online-public-player > header strong {
+.incident-room-invite-code,
+.incident-room-select {
+  border-color: rgba(183,164,251,.18);
+  background: rgba(113,61,255,.07);
   color: #fff;
 }
-.bunker-online-public-player > header small,
-.bunker-online-public-player > p {
+.incident-local-room-page > div:first-child,
+.incident-final-audit-page > div:first-child,
+.incident-local-room-page > div:nth-child(2),
+.incident-final-audit-page .grid > div {
+  border-color: rgba(255,255,255,.10) !important;
+  background: rgba(12,6,22,.90) !important;
+  box-shadow: none !important;
+}
+.incident-final-audit-page h2,
+.incident-final-audit-page h3,
+.incident-final-audit-page h4 {
+  color: #fff !important;
+}
+.incident-final-audit-page p,
+.incident-final-audit-page span,
+.incident-local-room-page p,
+.incident-local-room-page span {
   color: var(--wope-lilac);
 }
-.bunker-online-public-card-list {
-  gap: 5px;
-  padding-top: 8px;
+
+/* Local game table surfaces */
+.bunker-round-header {
+  border-bottom-color: rgba(255,255,255,.10);
 }
-.bunker-online-public-card-list button {
-  border: 1px solid rgba(255,255,255,.075);
-  border-radius: 10px;
-  padding: 8px 10px;
-  background: rgba(255,255,255,.025);
-  color: #e8e3f2;
-  text-align: left;
+.bunker-round-number,
+.bunker-phase-detail {
+  color: var(--wope-lilac);
 }
-.bunker-online-public-card-list button:hover {
-  border-color: rgba(183,164,251,.3);
+.bunker-round-number strong,
+.bunker-phase-detail strong {
+  color: #fff;
+  font-family: 'Sora', sans-serif;
+}
+.bunker-round-stamp,
+.bunker-demo-label {
+  border-color: rgba(183,164,251,.22);
   background: rgba(113,61,255,.08);
+  color: #cbbdff;
 }
-.bunker-online-public-card-list span {
-  color: #b7a4fb;
-  font-size: 10px;
-}
-.bunker-online-public-card-list strong {
+.bunker-round-stamp strong {
   color: #fff;
-  font-size: 12px;
 }
-.bunker-online-status > svg {
-  color: #b7a4fb;
-}
-.bunker-online-status h2 {
-  margin-top: 8px;
-  font-size: 16px;
-}
-.bunker-online-status p,
-.bunker-online-game-footnote {
-  color: var(--wope-lilac);
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-/* Connection chip and audit form */
-.bunker-connection-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  padding: 7px 11px;
-  background: rgba(255,255,255,.025);
-  color: var(--wope-lilac);
-  font-size: 11px;
-}
-.bunker-connection-dot {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border-radius: 50%;
-  background: #b7a4fb;
-  box-shadow: 0 0 10px rgba(183,164,251,.45);
-}
-.bunker-connection-status.is-reconnecting .bunker-connection-dot,
-.bunker-connection-status.is-disconnected .bunker-connection-dot {
-  background: #b98aab;
+.bunker-crises,
+.bunker-roster,
+.bunker-hand,
+.bunker-briefing-timer,
+.bunker-event-log {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(12,6,22,.90);
   box-shadow: none;
 }
-.bunker-online-audit {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.bunker-crises h2,
+.bunker-roster h2,
+.bunker-hand h2,
+.bunker-event-log h2,
+.bunker-briefing-timer h2 {
+  color: #fff;
+  font-family: 'Sora', sans-serif;
 }
-.bunker-online-audit-label {
-  margin-top: 12px;
+.bunker-crisis-card {
+  border-color: rgba(255,255,255,.09);
+  background: rgba(255,255,255,.025);
+  color: #fff;
+}
+.bunker-crisis-card:hover {
+  border-color: rgba(183,164,251,.35);
+  background: rgba(113,61,255,.07);
+}
+.bunker-crisis-index,
+.bunker-crisis-open,
+.bunker-crisis-copy strong {
+  color: #c6b6ff;
+}
+.bunker-crisis-copy > span {
+  color: var(--wope-lilac);
+}
+.bunker-player-card {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.025);
+}
+.bunker-player-card.is-speaking,
+.bunker-player-card.is-you {
+  border-color: rgba(183,164,251,.35);
+  background: rgba(113,61,255,.08);
+  box-shadow: none;
+}
+.bunker-player-name-line h3,
+.bunker-vote-person strong {
+  color: #fff;
+}
+.bunker-player-crown,
+.bunker-player-you,
+.bunker-player-card-slot > svg {
+  color: var(--wope-beam);
+}
+.bunker-player-you {
+  border-color: rgba(183,164,251,.25);
+}
+.bunker-player-status {
+  color: var(--wope-lilac);
+}
+.bunker-player-votes {
+  border-color: rgba(183,164,251,.20);
+  background: rgba(113,61,255,.08);
+  color: #cbbdff;
+}
+.bunker-speaker-button,
+.bunker-timer-preset,
+.bunker-timer-sound,
+.bunker-timer-reset {
+  border-color: rgba(255,255,255,.10);
+  background: rgba(255,255,255,.025);
   color: var(--wope-steel);
-  font-size: 14px;
-  font-weight: 500;
 }
-.bunker-online-audit-textarea,
-.bunker-online-audit-submission {
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 10px;
-  padding: 14px 15px;
-  background: rgba(10,1,24,.42);
-  color: #fff;
-  font: 400 14px/1.65 'Inter', sans-serif;
-}
-.bunker-online-audit-textarea {
-  resize: vertical;
-}
-.bunker-online-audit-textarea:focus {
-  border-color: rgba(183,164,251,.52);
-  outline: 0;
-  box-shadow: 0 0 0 2px rgba(113,61,255,.15);
-}
-.bunker-online-audit-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 9px;
-  margin-top: 13px;
-}
-.bunker-online-audit-actions > span {
-  margin-right: auto;
-  color: var(--wope-lilac);
-  font-size: 12px;
-}
-
-/* Card catalogue and details */
-.bunker-catalog-toolbar {
-  border-bottom-color: rgba(255,255,255,.09);
-}
-.bunker-search {
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.18);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.bunker-search:focus-within {
-  border-bottom-color: #b7a4fb;
-  box-shadow: 0 1px 0 #b7a4fb;
-}
-.bunker-search input {
-  background: transparent;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
-}
-.bunker-search input::placeholder {
-  color: var(--wope-dim);
-}
-.bunker-filter {
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  background: rgba(255,255,255,.025);
-  color: var(--wope-lilac);
-}
-.bunker-filter:hover {
+.bunker-speaker-button:hover,
+.bunker-speaker-button.is-active,
+.bunker-timer-preset:hover,
+.bunker-timer-sound:hover {
   border-color: rgba(183,164,251,.35);
   color: #fff;
 }
-.bunker-filter.is-active {
-  border-color: rgba(183,164,251,.30);
-  border-radius: 999px;
-  background: rgba(113,61,255,.15);
+.bunker-player-card-slot {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.025);
+}
+.bunker-player-card-slot > span {
+  color: var(--wope-lilac);
+}
+.bunker-player-card-slot > strong {
+  color: #e5dfff;
+}
+.bunker-player-card-slot.is-hidden {
+  border-color: rgba(255,255,255,.09);
+  background: rgba(255,255,255,.012);
+}
+.bunker-hand {
+  border-top-color: rgba(183,164,251,.28);
+  background:
+    radial-gradient(ellipse 520px 160px at 50% 110%, rgba(113,61,255,.10), transparent 75%),
+    rgba(12,6,22,.92);
+}
+.bunker-hand-heading h2 {
   color: #fff;
 }
-.bunker-catalog-result {
-  color: var(--wope-lilac);
-  font-family: 'JetBrains Mono', monospace;
-}
-.bunker-catalog-total strong {
-  color: #c1b1ff;
-}
-.bunker-catalog-note {
+.bunker-hand-heading p,
+.bunker-hand-note,
+.bunker-timer-note {
   color: var(--wope-lilac);
 }
-.bunker-empty {
-  border-color: rgba(255,255,255,.15);
-  border-radius: 16px;
-  color: var(--wope-lilac);
+.bunker-action-card-button {
+  border-color: rgba(183,164,251,.24);
+  background: rgba(113,61,255,.10);
+  color: #d5caff;
 }
-.bunker-empty > svg {
-  color: #b7a4fb;
+.bunker-action-card-button:hover {
+  background: rgba(113,61,255,.18);
 }
-.bunker-empty h2 {
+.bunker-briefing-timer.is-urgent {
+  border-top-color: rgba(185,138,171,.5);
+}
+.bunker-timer-heading > svg,
+.bunker-timer-display > strong,
+.bunker-event-count,
+.bunker-event-icon,
+.bunker-event-meta strong {
+  color: var(--wope-beam);
+}
+.bunker-timer-track {
+  background: rgba(255,255,255,.07);
+}
+.bunker-timer-track span {
+  background: linear-gradient(90deg, #713dff, #b7a4fb);
+}
+.bunker-timer-start {
+  border-color: rgba(183,164,251,.28);
+  background: rgba(255,255,255,.07);
   color: #fff;
-  font-family: 'Sora', sans-serif;
+}
+.bunker-timer-start:hover {
+  background: rgba(113,61,255,.18);
+}
+.bunker-timer-start.is-running {
+  border-color: rgba(185,138,171,.28);
+  background: rgba(185,138,171,.08);
+  color: #d8b8ce;
+}
+.bunker-timer-reset {
+  color: var(--wope-steel);
+}
+.bunker-event-log-heading,
+.bunker-event-entry {
+  border-color: rgba(255,255,255,.08);
+}
+.bunker-event-meta,
+.bunker-event-copy p {
+  color: var(--wope-lilac);
+}
+.bunker-event-entry.is-elimination .bunker-event-icon,
+.bunker-event-entry.is-vote .bunker-event-icon,
+.bunker-event-entry.is-reveal .bunker-event-icon {
+  color: var(--wope-beam);
 }
 
-/* Dialogs and overlays */
+/* Voting, rules and other overlays */
 .bunker-modal,
 .bunker-vote-modal,
 .bunker-rules-modal {
@@ -1420,8 +1000,7 @@ textarea:focus-visible {
 .bunker-modal-panel,
 .bunker-vote-panel,
 .bunker-rules-panel {
-  border: 1px solid rgba(255,255,255,.12) !important;
-  border-radius: 16px !important;
+  border-color: rgba(255,255,255,.12) !important;
   background: #0c0616 !important;
   color: #fff !important;
   box-shadow: none !important;
@@ -1429,17 +1008,12 @@ textarea:focus-visible {
 .bunker-modal-art {
   background: #10081d;
 }
-.bunker-modal-copy {
-  gap: 16px;
-  padding: clamp(22px, 4vw, 40px);
-}
 .bunker-modal-copy h2,
 .bunker-vote-heading h2,
 .bunker-rules-panel h2,
 .bunker-rules-panel h4 {
   color: #fff !important;
   font-family: 'Sora', sans-serif !important;
-  letter-spacing: -.04em !important;
 }
 .bunker-modal-copy p,
 .bunker-vote-heading p,
@@ -1447,22 +1021,14 @@ textarea:focus-visible {
 .bunker-rules-panel li,
 .bunker-rules-panel span {
   color: var(--wope-lilac);
-  font-family: 'Inter', sans-serif;
-  line-height: 1.65;
-  letter-spacing: normal;
-  text-transform: none;
 }
 .bunker-category-label {
-  border-left: 0;
-  border-radius: 999px;
-  padding: 6px 12px;
+  border-left-color: var(--wope-beam);
   background: rgba(113,61,255,.14);
   color: #c9bcff;
-  font-family: 'Inter', sans-serif;
 }
 .bunker-modal-close {
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 50%;
+  border-color: rgba(255,255,255,.12);
   background: rgba(10,1,24,.76);
   color: #fff;
 }
@@ -1470,29 +1036,22 @@ textarea:focus-visible {
   border-color: rgba(183,164,251,.4);
   color: #cbbdff;
 }
-.bunker-vote-panel {
-  border-top: 1px solid rgba(255,255,255,.12) !important;
-  padding: 22px;
-}
 .bunker-vote-heading {
   border-bottom-color: rgba(255,255,255,.09);
 }
 .bunker-vote-mark,
 .bunker-vote-avatar {
-  border: 1px solid rgba(183,164,251,.18);
-  border-radius: 12px;
+  border-color: rgba(183,164,251,.18);
   background: rgba(113,61,255,.10);
   color: #cbbdff;
 }
 .bunker-vote-warning {
-  border-left: 2px solid #b7a4fb;
-  border-radius: 0 10px 10px 0;
+  border-left-color: var(--wope-beam);
   background: rgba(113,61,255,.08);
   color: #d1c5f2;
 }
 .bunker-vote-candidate {
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 12px;
+  border-color: rgba(255,255,255,.09);
   background: rgba(255,255,255,.025);
   color: #fff;
 }
@@ -1511,8 +1070,8 @@ textarea:focus-visible {
 .bunker-vote-actions {
   border-top-color: rgba(255,255,255,.09);
 }
-.bunker-vote-confirm {
-  border-radius: 999px;
+.bunker-vote-confirm:hover:not(:disabled) {
+  background: rgba(113,61,255,.20);
 }
 .bunker-rules-panel > div:first-child,
 .bunker-rules-panel > div:last-child {
@@ -1524,656 +1083,6 @@ textarea:focus-visible {
 }
 .bunker-rules-panel strong {
   color: #fff;
-}
-
-/* Legacy/local mode — bring it into the same quiet violet system. */
-.incident-page {
-  color: #fff;
-}
-.incident-topline,
-.incident-section,
-.incident-room-header {
-  border-color: rgba(255,255,255,.09);
-}
-.incident-kicker,
-.incident-alert-code,
-.incident-section-index {
-  color: #b7a4fb;
-}
-.incident-hero {
-  border-color: rgba(255,255,255,.09);
-  background:
-    radial-gradient(ellipse 600px 210px at 50% 110%, rgba(113,61,255,.22), transparent 75%),
-    #0c0616;
-}
-.incident-title {
-  color: #fff;
-  font-family: 'Sora', sans-serif;
-}
-.incident-title span {
-  color: #b7a4fb;
-}
-.incident-lead,
-.incident-section-note,
-.incident-sidebar-copy {
-  color: var(--wope-lilac);
-}
-.incident-sidebar {
-  border-color: rgba(255,255,255,.09);
-}
-.incident-panel,
-.incident-access-panel,
-.incident-room-aside {
-  border-color: rgba(255,255,255,.10);
-  border-radius: 16px;
-  background: rgba(12,6,22,.88);
-  box-shadow: none;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-}
-.incident-button {
-  min-height: 42px;
-  border-radius: 999px;
-  text-transform: none;
-  letter-spacing: -.16px;
-}
-.incident-button-primary {
-  border-color: rgba(183,164,251,.30);
-  background: rgba(255,255,255,.07);
-  color: #fff;
-}
-.incident-room-player {
-  border-color: rgba(255,255,255,.075);
-}
-.incident-room-player-name,
-.incident-room-range,
-.incident-room-count strong {
-  color: #fff;
-}
-.incident-room-player-role,
-.incident-room-settings-note,
-.incident-room-player-status {
-  color: var(--wope-lilac);
-}
-.incident-room-host-icon,
-.incident-room-copy {
-  color: #b7a4fb;
-}
-.incident-room-invite-code,
-.incident-room-select {
-  border: 1px solid rgba(183,164,251,.18);
-  border-radius: 10px;
-  background: rgba(113,61,255,.07);
-  color: #fff;
-}
-.incident-local-room-page > div:first-child,
-.incident-final-audit-page > div:first-child,
-.incident-local-room-page > div:nth-child(2),
-.incident-final-audit-page .grid > div {
-  border-color: rgba(255,255,255,.10) !important;
-  border-radius: 16px !important;
-  background: rgba(12,6,22,.88) !important;
-  box-shadow: none !important;
-}
-.incident-final-audit-page h2,
-.incident-final-audit-page h3,
-.incident-final-audit-page h4 {
-  color: #fff !important;
-}
-.incident-final-audit-page p,
-.incident-final-audit-page span,
-.incident-local-room-page p,
-.incident-local-room-page span {
-  color: var(--wope-lilac);
-  line-height: 1.55;
-}
-
-/* Local game board */
-.bunker-table-layout {
-  gap: 16px;
-}
-.bunker-round-header {
-  border-bottom: 1px solid rgba(255,255,255,.10);
-  padding-bottom: 18px;
-}
-.bunker-round-number,
-.bunker-phase-detail {
-  color: var(--wope-lilac);
-}
-.bunker-round-number strong,
-.bunker-phase-detail strong {
-  color: #fff;
-  font-family: 'Sora', sans-serif;
-}
-.bunker-round-stamp,
-.bunker-demo-label {
-  border: 1px solid rgba(183,164,251,.22);
-  border-radius: 999px;
-  padding: 7px 12px;
-  background: rgba(113,61,255,.08);
-  color: #cbbdff;
-}
-.bunker-round-stamp strong {
-  color: #fff;
-}
-.bunker-table-sidebar {
-  gap: 14px;
-}
-.bunker-crises,
-.bunker-roster,
-.bunker-hand,
-.bunker-briefing-timer,
-.bunker-event-log {
-  min-width: 0;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 16px;
-  padding: 20px;
-  background: rgba(12,6,22,.90);
-  box-shadow: none;
-}
-.bunker-crises h2,
-.bunker-roster h2,
-.bunker-hand h2,
-.bunker-event-log h2,
-.bunker-briefing-timer h2 {
-  color: #fff;
-  font-family: 'Sora', sans-serif;
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: -.04em;
-}
-.bunker-crisis-card {
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 12px;
-  background: rgba(255,255,255,.025);
-  color: #fff;
-}
-.bunker-crisis-card:hover {
-  border-color: rgba(183,164,251,.35);
-  background: rgba(113,61,255,.07);
-}
-.bunker-crisis-index,
-.bunker-crisis-open {
-  color: #b7a4fb;
-}
-.bunker-crisis-copy strong {
-  color: #fff;
-  font-weight: 600;
-}
-.bunker-crisis-copy > span {
-  color: var(--wope-lilac);
-}
-.bunker-player-card {
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 12px;
-  background: rgba(255,255,255,.025);
-}
-.bunker-player-card.is-speaking,
-.bunker-player-card.is-you {
-  border-color: rgba(183,164,251,.35);
-  background: rgba(113,61,255,.08);
-  box-shadow: none;
-}
-.bunker-player-name-line h3,
-.bunker-vote-person strong {
-  color: #fff;
-}
-.bunker-player-crown,
-.bunker-player-you,
-.bunker-player-card-slot > svg {
-  color: #b7a4fb;
-}
-.bunker-player-you {
-  border-color: rgba(183,164,251,.25);
-}
-.bunker-player-status {
-  color: var(--wope-lilac);
-}
-.bunker-player-votes {
-  border-color: rgba(183,164,251,.20);
-  border-radius: 999px;
-  background: rgba(113,61,255,.08);
-  color: #cbbdff;
-}
-.bunker-speaker-button,
-.bunker-timer-preset,
-.bunker-timer-sound,
-.bunker-timer-reset {
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 999px;
-  background: rgba(255,255,255,.025);
-  color: var(--wope-steel);
-}
-.bunker-speaker-button:hover,
-.bunker-speaker-button.is-active,
-.bunker-timer-preset:hover,
-.bunker-timer-sound:hover {
-  border-color: rgba(183,164,251,.35);
-  color: #fff;
-}
-.bunker-player-card-slot {
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px;
-  background: rgba(255,255,255,.025);
-}
-.bunker-player-card-slot > span,
-.bunker-player-status {
-  color: var(--wope-lilac);
-}
-.bunker-player-card-slot > strong {
-  color: #e5dfff;
-}
-.bunker-player-card-slot.is-hidden {
-  border-style: dashed;
-  background: rgba(255,255,255,.012);
-}
-.bunker-hand {
-  border-top: 1px solid rgba(183,164,251,.28);
-  background:
-    radial-gradient(ellipse 520px 160px at 50% 110%, rgba(113,61,255,.10), transparent 75%),
-    rgba(12,6,22,.92);
-}
-.bunker-hand-heading h2 {
-  color: #fff;
-}
-.bunker-hand-heading p,
-.bunker-hand-note {
-  color: var(--wope-lilac);
-}
-.bunker-action-card-button {
-  border-radius: 999px;
-  border-color: rgba(183,164,251,.24);
-  background: rgba(113,61,255,.10);
-  color: #d5caff;
-}
-.bunker-action-card-button:hover {
-  background: rgba(113,61,255,.18);
-}
-.bunker-briefing-timer.is-urgent {
-  border-top-color: rgba(185,138,171,.5);
-}
-.bunker-timer-heading > svg,
-.bunker-timer-note,
-.bunker-event-count,
-.bunker-event-icon,
-.bunker-event-meta strong {
-  color: #b7a4fb;
-}
-.bunker-timer-display > strong {
-  color: #fff;
-}
-.bunker-timer-track {
-  border-radius: 999px;
-  background: rgba(255,255,255,.07);
-}
-.bunker-timer-track span {
-  border-radius: 999px;
-  background: linear-gradient(90deg, #713dff, #b7a4fb);
-}
-.bunker-timer-start,
-.bunker-timer-reset {
-  border-radius: 999px;
-}
-.bunker-timer-start {
-  border-color: rgba(183,164,251,.28);
-  background: rgba(255,255,255,.07);
-  color: #fff;
-}
-.bunker-timer-start:hover {
-  background: rgba(113,61,255,.18);
-}
-.bunker-timer-start.is-running {
-  border-color: rgba(185,138,171,.28);
-  background: rgba(185,138,171,.08);
-  color: #d8b8ce;
-}
-.bunker-event-log-heading,
-.bunker-event-entry {
-  border-color: rgba(255,255,255,.08);
-}
-.bunker-event-icon {
-  border-radius: 8px;
-}
-.bunker-event-entry.is-elimination .bunker-event-icon,
-.bunker-event-entry.is-vote .bunker-event-icon {
-  color: #bd9bb9;
-}
-.bunker-event-entry.is-reveal .bunker-event-icon {
-  color: #b7a4fb;
-}
-.bunker-event-meta,
-.bunker-event-copy p {
-  color: var(--wope-lilac);
-}
-.bunker-vote-panel {
-  border-top: 1px solid rgba(255,255,255,.10) !important;
-}
-.bunker-vote-heading h2 {
-  color: #fff;
-}
-.bunker-vote-candidate.is-selected .bunker-vote-avatar,
-.bunker-vote-check {
-  border-color: rgba(183,164,251,.40);
-  color: #cbbdff;
-}
-.bunker-vote-confirm {
-  border-color: rgba(183,164,251,.30);
-  background: rgba(255,255,255,.07);
-  color: #fff;
-}
-.bunker-vote-confirm:hover:not(:disabled) {
-  background: rgba(113,61,255,.20);
-}
-
-/* Tablet */
-@media (max-width: 1050px) {
-  .bunker-online-game-grid,
-  .bunker-table-layout {
-    grid-template-columns: minmax(0, 1fr) 270px;
-  }
-  .bunker-online-hand-grid,
-  .bunker-hand-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* Mobile and narrow screens */
-@media (max-width: 820px) {
-  .bunker-main {
-    width: 100%;
-    padding: 28px 18px 58px;
-  }
-  .bunker-nav-inner {
-    min-height: 70px;
-    gap: 12px;
-  }
-  .bunker-brand {
-    min-width: 0;
-  }
-  .bunker-hero {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
-    min-height: auto;
-  }
-  .bunker-game-facts {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 10px;
-    padding: 10px 14px;
-  }
-  .bunker-game-facts div {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-    border: 0;
-    padding: 6px 0;
-  }
-  .bunker-game-facts strong {
-    min-width: 0;
-    font-size: 24px;
-  }
-  .bunker-room-layout,
-  .bunker-online-game-grid,
-  .bunker-table-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .bunker-online-game-sidebar,
-  .bunker-table-sidebar {
-    position: static;
-    display: flex;
-    flex-direction: column;
-  }
-  .bunker-online-game-heading,
-  .bunker-room-heading,
-  .bunker-round-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 13px;
-  }
-  .bunker-online-game-heading .bunker-room-actions,
-  .bunker-room-page .bunker-room-actions,
-  .bunker-round-actions {
-    width: 100%;
-  }
-  .bunker-online-action-panel {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .bunker-online-candidates {
-    width: 100%;
-    min-width: 0;
-  }
-  .bunker-online-crisis-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .bunker-category-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .bunker-catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .bunker-modal-panel {
-    width: 100%;
-    max-height: calc(100dvh - 24px);
-    overflow-y: auto;
-  }
-  .bunker-modal-art {
-    min-height: 220px;
-    max-height: 35dvh;
-  }
-}
-
-/* Phones */
-@media (max-width: 600px) {
-  .bunker-main {
-    padding: 22px 13px 44px;
-  }
-  .bunker-nav-inner {
-    min-height: 62px;
-    flex-wrap: nowrap;
-    gap: 7px;
-    padding: 0 12px;
-  }
-  .bunker-brand {
-    flex: 0 0 auto;
-    gap: 7px;
-  }
-  .bunker-brand-mark {
-    width: 33px;
-    height: 33px;
-    flex-basis: 33px;
-    border-radius: 10px;
-  }
-  .bunker-brand-name {
-    font-size: 16px;
-  }
-  .bunker-brand-subtitle,
-  .bunker-nav-room {
-    display: none;
-  }
-  .bunker-nav-actions {
-    flex: 0 0 auto;
-    gap: 1px;
-    margin-left: auto;
-  }
-  .bunker-nav-link,
-  .bunker-nav-icon,
-  .bunker-nav-exit {
-    min-height: 36px;
-    padding: 6px 9px;
-    font-size: 11px;
-  }
-  .bunker-nav-link svg,
-  .bunker-nav-icon svg,
-  .bunker-nav-exit svg {
-    width: 14px;
-    height: 14px;
-  }
-  .bunker-nav-icon,
-  .bunker-nav-exit {
-    width: 36px;
-  }
-  .bunker-home {
-    gap: 64px;
-  }
-  .bunker-hero {
-    border-radius: 16px;
-    padding: 26px 20px;
-  }
-  .bunker-hero h1 {
-    font-size: clamp(40px, 12vw, 58px);
-    line-height: 1.08;
-  }
-  .bunker-hero-description {
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .bunker-game-facts {
-    gap: 7px;
-    padding: 9px 11px;
-  }
-  .bunker-game-facts strong {
-    font-size: 21px;
-  }
-  .bunker-game-facts span {
-    font-size: 10px;
-  }
-  .bunker-section-heading,
-  .bunker-page-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 11px;
-  }
-  .bunker-section-heading h2,
-  .bunker-page-heading h1,
-  .bunker-room-heading h1 {
-    font-size: clamp(25px, 7.8vw, 32px);
-  }
-  .bunker-access-grid,
-  .bunker-category-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .bunker-panel,
-  .bunker-access-panel,
-  .bunker-players-panel,
-  .bunker-room-sidebar .bunker-panel,
-  .bunker-online-crisis-panel,
-  .bunker-online-roster,
-  .bunker-online-status,
-  .bunker-online-public-cards,
-  .bunker-online-audit,
-  .bunker-online-vote-ledger,
-  .bunker-online-hand,
-  .bunker-crises,
-  .bunker-roster,
-  .bunker-hand,
-  .bunker-briefing-timer,
-  .bunker-event-log {
-    border-radius: 14px;
-    padding: 17px;
-  }
-  .bunker-player-list,
-  .bunker-roster-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .bunker-room-actions .bunker-button,
-  .bunker-online-game-heading .bunker-room-actions .bunker-button {
-    flex: 1 1 auto;
-  }
-  .bunker-online-action-panel {
-    gap: 14px;
-    border-radius: 14px;
-    padding: 18px;
-  }
-  .bunker-online-action-panel h2,
-  .bunker-online-audit h2 {
-    font-size: 19px;
-  }
-  .bunker-online-action-panel p,
-  .bunker-online-audit p {
-    font-size: 12px;
-  }
-  .bunker-online-hand-grid,
-  .bunker-hand-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .bunker-online-hand-grid .bunker-card,
-  .bunker-online-hand-grid .bunker-hand-slot {
-    max-width: 100%;
-  }
-  .bunker-online-crisis-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .bunker-online-public-grid,
-  .bunker-online-survivors {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .bunker-catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 10px;
-    row-gap: 13px;
-  }
-  .bunker-catalog-item {
-    min-height: 300px;
-  }
-  .bunker-modal-panel {
-    grid-template-columns: minmax(0, 1fr);
-    border-radius: 14px;
-  }
-  .bunker-modal-art {
-    min-height: 180px;
-    max-height: 28dvh;
-  }
-  .bunker-modal-copy {
-    gap: 12px;
-    padding: 19px;
-  }
-  .bunker-modal-copy p {
-    font-size: 13px;
-  }
-  .bunker-online-audit-actions,
-  .bunker-vote-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .bunker-online-audit-actions > span {
-    margin-right: 0;
-  }
-  .bunker-connection-status {
-    max-width: 100%;
-    font-size: 10px;
-  }
-  .incident-sidebar {
-    padding: 16px 0 0;
-    border-left: 0;
-    border-top: 1px solid rgba(255,255,255,.09);
-  }
-}
-
-@media (max-width: 380px) {
-  .bunker-nav-inner {
-    min-height: 58px;
-    gap: 4px;
-    padding: 0 8px;
-  }
-  .bunker-brand-name {
-    font-size: 15px;
-  }
-  .bunker-nav-link,
-  .bunker-nav-icon,
-  .bunker-nav-exit {
-    min-height: 34px;
-    padding: 5px 7px;
-    font-size: 10px;
-  }
-  .bunker-nav-icon,
-  .bunker-nav-exit {
-    width: 33px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
