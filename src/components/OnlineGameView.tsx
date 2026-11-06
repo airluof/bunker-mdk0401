@@ -190,11 +190,12 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     instanceId: source.instance_id,
     card: toDisplayCard(source as SnapshotCard),
     revealed: false,
+    pendingReveal: source.status === 'pending_reveal',
   }));
 
   const handCards = [
     ...privateCards,
-    ...myPublicCards.map((card) => ({ instanceId: '', card, revealed: true })),
+    ...myPublicCards.map((card) => ({ instanceId: '', card, revealed: true, pendingReveal: false })),
   ].sort((left, right) => HAND_ORDER.indexOf(left.card.category) - HAND_ORDER.indexOf(right.card.category));
 
   const crisisInstances = snapshot.active_crises as unknown as SnapshotCard[];
@@ -255,15 +256,14 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <div className="bunker-online-action-panel">
           <div>
             <span className="bunker-kicker">Первый этап</span>
-            <h2>{snapshot.session.round_number === 1 ? 'Начните с раскрытия Роли' : 'Раскройте одну оставшуюся карту'}</h2>
+            <h2>Выберите карту для общего вскрытия</h2>
             <p>
-              {snapshot.session.round_number === 1
-                ? 'В первом раунде каждый живой игрок открывает только Роль.'
-                : 'В раундах 2–5 каждый живой игрок выбирает любую оставшуюся закрытую карту.'}
-              {' '}Выбор самостоятельный, без очереди; после нажатия карта сразу становится видна всем.
+              В каждом раунде можно выбрать любую ещё не раскрытую карту — Роль не имеет приоритета,
+              порядок категорий свободный. Выбор останется скрытым от остальных до общего вскрытия.
             </p>
+            <p>Когда все живые игроки сделают выбор, ведущий начнёт брифинг — выбранные карты откроются одновременно.</p>
             <p>Если у участника не осталось закрытых карт, он пропускает вскрытие и не задерживает партию.</p>
-            <p className="bunker-online-progress">Готовы к брифингу: {revealedHumanCount} из {humanPlayers.length} живых игроков.</p>
+            <p className="bunker-online-progress">Выборы сделаны: {revealedHumanCount} из {humanPlayers.length} живых игроков.</p>
             {isAlive && myPlayer?.has_hidden_cards === false && (
               <p className="bunker-online-voted">У вас не осталось закрытых карт — в этом раунде вскрытие пропускается.</p>
             )}
@@ -275,7 +275,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               onClick={onStartBriefing}
               disabled={busy || revealedHumanCount !== humanPlayers.length}
             >
-              Перейти к брифингу <ArrowRight aria-hidden="true" />
+              Открыть карты и начать брифинг <ArrowRight aria-hidden="true" />
             </button>
           )}
         </div>
@@ -544,7 +544,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 <h2>Ваши карты</h2>
                 <p>
                   {myPlayer?.display_name || 'Игрок'} · {handCards.length} карт
-                  {snapshot.my_revealed_this_round ? ' · карта этого раунда уже раскрыта' : ''}
+                  {snapshot.my_revealed_this_round ? ' · выбор на этот раунд сохранён' : ''}
                 </p>
               </div>
               {canUseEmergencyGenerator && emergencyGeneratorInstanceId && (
@@ -591,7 +591,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             />
             <p className="bunker-hand-scroll-hint">Листайте карты по горизонтали.</p>
             <div className="bunker-hand-grid bunker-online-hand-grid">
-              {handCards.map(({ instanceId, card, revealed }) => (
+              {handCards.map(({ instanceId, card, revealed, pendingReveal }) => (
                 <div key={card.card_id} className="bunker-hand-slot">
                   <CardView
                     card={card}
@@ -600,14 +600,13 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                       !revealed &&
                       isAlive &&
                       phase === 'reveal' &&
-                      !snapshot.my_revealed_this_round &&
-                      (snapshot.session.round_number !== 1 || card.category === 'roles')
+                      !snapshot.my_revealed_this_round
                     }
                     lockedLabel={
-                      phase === 'reveal' && isAlive && snapshot.my_revealed_this_round
-                        ? 'Вы уже выбрали карту в этом раунде'
-                        : phase === 'reveal' && isAlive && snapshot.session.round_number === 1 && card.category !== 'roles'
-                          ? 'Сначала откройте Роль'
+                      phase === 'reveal' && isAlive && pendingReveal
+                        ? 'Выбрана · ждёт общего вскрытия'
+                        : phase === 'reveal' && isAlive && snapshot.my_revealed_this_round
+                          ? 'Выбор уже сделан в этом раунде'
                           : 'Доступна только вам'
                     }
                     onReveal={() => onRevealCard(instanceId)}
