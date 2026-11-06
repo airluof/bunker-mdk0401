@@ -8,14 +8,16 @@ const invite015Path = resolve(root, 'supabase/migrations/202611040015_full_alpha
 const invite016Path = resolve(root, 'supabase/migrations/202611040016_alphanumeric_room_codes.sql');
 const actionReviewPath = resolve(root, 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql');
 const revealRulePath = resolve(root, 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql');
+const simultaneousRevealPath = resolve(root, 'supabase/migrations/202611060019_simultaneous_free_card_reveal.sql');
 
-const [sql, invite014, invite015, invite016, actionReview, revealRule] = await Promise.all([
+const [sql, invite014, invite015, invite016, actionReview, revealRule, simultaneousReveal] = await Promise.all([
   readFile(migrationPath, 'utf8'),
   readFile(invite014Path, 'utf8'),
   readFile(invite015Path, 'utf8'),
   readFile(invite016Path, 'utf8'),
   readFile(actionReviewPath, 'utf8'),
   readFile(revealRulePath, 'utf8'),
+  readFile(simultaneousRevealPath, 'utf8'),
 ]);
 
 const expectedTables = [
@@ -141,6 +143,21 @@ requireText(revealRule, /cc\.category = 'roles'/i, 'Test bots must also reveal R
 requireText(revealRule, /has_hidden_cards/i, 'The game snapshot must expose only the boolean availability of hidden cards.');
 requireText(revealRule, /revoke all on function public\.api_reveal_card\(uuid, uuid, uuid\) from public, anon;/i, 'Reveal RPC execution must be revoked from PUBLIC and anon.');
 requireText(revealRule, /grant execute on function public\.api_reveal_card\(uuid, uuid, uuid\) to authenticated;/i, 'Reveal RPC must be granted to authenticated users.');
+
+requireText(simultaneousReveal, /^begin;/i, 'Simultaneous reveal migration must begin transactionally.');
+requireText(simultaneousReveal, /^commit;/im, 'Simultaneous reveal migration must commit transactionally.');
+requireText(simultaneousReveal, /pending_reveal/i, 'Selected cards must remain in a private pending-reveal state.');
+requireText(simultaneousReveal, /create trigger pending_reveal_card_guard/i, 'Pending reveal cards must be protected from being changed before publication.');
+requireText(simultaneousReveal, /PLAYERS_MUST_SELECT_CARD_FIRST/i, 'Phase transition must wait for eligible human players to select a card.');
+requireText(simultaneousReveal, /update public\.card_instances ci[\s\S]*?set instance_status = 'revealed'/i, 'The phase transition must publish selected cards together.');
+requireText(simultaneousReveal, /insert into public\.public_game_events[\s\S]*?case when m\.is_bot then 'bot_card_revealed' else 'card_revealed' end/i, 'The phase transition must publish human and bot reveal events.');
+if (/FIRST_ROUND_REQUIRES_ROLE|round_number\s*=\s*1[\s\S]{0,160}category\s*<>\s*'roles'/i.test(simultaneousReveal)) {
+  failures.push('The latest reveal migration must not enforce a Role-first restriction.');
+}
+const stagedRevealFunction = simultaneousReveal.match(/create or replace function public\.api_reveal_card[\s\S]*?\$\$;/i)?.[0] || '';
+if (/insert into public\.public_game_events/i.test(stagedRevealFunction)) {
+  failures.push('Card selections must not be added to the public event stream before the shared reveal.');
+}
 
 
 if (/grant\s+[^;]+?\s+to\s+anon\s*;/i.test(sql)) {
