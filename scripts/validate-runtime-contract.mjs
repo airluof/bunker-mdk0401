@@ -9,6 +9,8 @@ const paths = {
   alphanumericMigration: 'supabase/migrations/202611040016_alphanumeric_room_codes.sql',
   actionReviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
   revealRuleMigration: 'supabase/migrations/202611050018_reveal_roles_first_and_choose_remaining.sql',
+  simultaneousRevealMigration: 'supabase/migrations/202611060019_simultaneous_free_card_reveal.sql',
+  rulesModal: 'src/components/GameRulesModal.tsx',
   cardGuidance: 'src/data/cardGuidance.ts',
   service: 'src/services/onlineRooms.ts',
   app: 'src/App.tsx',
@@ -34,6 +36,7 @@ const shortInviteSql = files.shortInviteMigration;
 const fullAlphabetSql = files.fullAlphabetMigration;
 const alphanumericSql = files.alphanumericMigration;
 const revealRuleSql = files.revealRuleMigration;
+const simultaneousRevealSql = files.simultaneousRevealMigration;
 
 const sqlFunctions = [
   'public.api_heartbeat_room',
@@ -74,11 +77,28 @@ requireText(files.app, /replace\(\/\[\^A-Z0-9\]\/g/i,
 requireText(files.cardGuidance, /export function getCardGuidance/, 'Card inspection guidance is missing.');
 requireText(files.cardGuidance, /validateCardGuidanceCoverage/, 'Card guidance coverage validation is missing.');
 requireText(files.actionReviewMigration, /effect_status = 'draft'/i, 'Incomplete action effects must be demoted to draft.');
-requireText(revealRuleSql, /FIRST_ROUND_REQUIRES_ROLE/i, 'The first round must enforce Role reveal.');
+requireText(revealRuleSql, /FIRST_ROUND_REQUIRES_ROLE/i, 'Migration 018 must remain as the historical Role-first implementation superseded by migration 019.');
 requireText(revealRuleSql, /has_hidden_cards/i, 'Snapshot must report whether a player still has hidden cards.');
-requireText(revealRuleSql, /cc\.category = 'roles'/i, 'Test bots must reveal Roles in the first round.');
+requireText(revealRuleSql, /cc\.category = 'roles'/i, 'Migration 018 historical bot logic must remain documented.');
 requireText(revealRuleSql, /PLAYERS_MUST_REVEAL_FIRST/i, 'The reveal phase must wait for players who still have hidden cards.');
-requireText(files.gameView, /snapshot\.session\.round_number !== 1 \|\| card\.category === 'roles'/i, 'The client must limit first-round reveal choices to Roles.');
+if (/snapshot\.session\.round_number !== 1 \|\| card\.category === 'roles'/.test(files.gameView)) {
+  failures.push('The client must not restrict first-round choices to the Role category.');
+}
+requireText(files.gameView, /pendingReveal: source\.status === 'pending_reveal'/i, 'The client must identify its own pending reveal card.');
+requireText(files.gameView, /Выборы сделаны:/i, 'The reveal phase must show player selection progress.');
+requireText(files.rulesModal, /каждый живой игрок выбирает любую ещё не раскрытую карту/i, 'Game rules must explain free card selection in every round.');
+
+requireText(simultaneousRevealSql, /pending_reveal/i, 'The latest reveal migration must stage each choice privately.');
+requireText(simultaneousRevealSql, /CARD_PENDING_SIMULTANEOUS_REVEAL/i, 'Pending cards must not be changed before simultaneous publication.');
+requireText(simultaneousRevealSql, /PLAYERS_MUST_SELECT_CARD_FIRST/i, 'The host must wait until eligible players have selected a card.');
+requireText(simultaneousRevealSql, /update public\.card_instances ci[\s\S]*?set instance_status = 'revealed'/i, 'All selected cards must be published at phase transition.');
+if (/FIRST_ROUND_REQUIRES_ROLE|round_number\s*=\s*1[\s\S]{0,160}category\s*<>\s*'roles'/i.test(simultaneousRevealSql)) {
+  failures.push('The latest migration must not enforce a Role-first reveal.');
+}
+const stagedRevealFunction = simultaneousRevealSql.match(/create or replace function public\.api_reveal_card[\s\S]*?\$\$;/i)?.[0] || '';
+if (/insert into public\.public_game_events/i.test(stagedRevealFunction)) {
+  failures.push('A selected card must not enter public events before simultaneous publication.');
+}
 if (!files.actionReviewMigration.includes("card_id = 'action_21'") || !files.actionReviewMigration.includes("card_id = 'action_25'")) {
   failures.push('Migration 017 must demote both Workaround and Safe Boot.');
 }
@@ -136,7 +156,10 @@ for (let index = 1; index <= 17; index += 1) {
   }
 }
 if (!migrationFiles.some((name) => name.startsWith('202611050018'))) {
-  failures.push('Missing migration 202611050018 for the Role-first reveal rule.');
+  failures.push('Missing migration 202611050018 for the initial reveal implementation.');
+}
+if (!migrationFiles.some((name) => name.startsWith('202611060019'))) {
+  failures.push('Missing migration 202611060019 for simultaneous free card reveal.');
 }
 
 if (failures.length) {
@@ -148,4 +171,4 @@ if (failures.length) {
 console.log('Runtime contracts validated.');
 console.log('Controller heartbeat/takeover, creator-elimination failover and shared survivor audit are present.');
 console.log('Restored design assets and all 180 source cards remain present.');
-console.log('All 18 sequential migrations are present, including the card-effect review and Role-first reveal rule.');
+console.log('All 19 sequential migrations are present, including card-effect review and simultaneous free card reveal.');
