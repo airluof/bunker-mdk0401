@@ -2,10 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './index.css';
-import './bunker-reference.css';
-import './bunker-polish.css';
-import './wope-theme.css';
-import './ui-elements-refinement.css';
+import './nest-theme.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
