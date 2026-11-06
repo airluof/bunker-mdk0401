@@ -1,0 +1,4248 @@
+/* NEST / CRIMSON FURNACE — complete visual system for Bunker.
+   Replaces the previous Wope and industrial layouts. No game logic lives here. */
+
+:root {
+  color-scheme: dark;
+  --nest-soot: #050303;
+  --nest-carbon: #0b0b0b;
+  --nest-graphite: #181818;
+  --nest-ash: #1e1c1c;
+  --nest-outline: #373535;
+  --nest-muted: #9b9a9a;
+  --nest-soft: #c9c7c7;
+  --nest-white: #fff;
+  --nest-crimson: #ea2845;
+  --nest-garnet: #780f20;
+  --nest-coral: #ff7b72;
+  --nest-amber: #ffa657;
+  --nest-blue: #a5d6ff;
+  --nest-frame: 32px;
+  --nest-card: 24px;
+  --nest-button: 20px;
+  --nest-input: 24px;
+  --nest-mono: 'Geist Mono', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+  --nest-display: 'Manrope', Inter, Arial, sans-serif;
+  --font-sans: var(--nest-display);
+  --font-mono: var(--nest-mono);
+  --font-tactical: var(--nest-display);
+  --incident-bg: var(--nest-soot);
+  --incident-panel: var(--nest-carbon);
+  --incident-paper: var(--nest-white);
+  --incident-muted: var(--nest-muted);
+  --incident-line: var(--nest-outline);
+  --incident-signal: var(--nest-crimson);
+  --incident-signal-soft: rgba(234, 40, 69, .12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--nest-soot);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse 900px 520px at 50% -280px, rgba(234, 40, 69, .13), transparent 72%),
+    var(--nest-soot);
+  color: var(--nest-white);
+  font-family: var(--nest-mono);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(234, 40, 69, .85);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(234, 40, 69, .38);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--nest-soot);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid var(--nest-soot);
+  border-radius: 999px;
+  background: #393536;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5b4b4e;
+}
+
+.font-tactical,
+.font-mono-tech {
+  font-family: var(--nest-mono) !important;
+  letter-spacing: 0;
+}
+
+.bunker-app {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow-x: clip;
+  background: transparent;
+  color: var(--nest-white);
+}
+
+.bunker-main {
+  width: min(1280px, calc(100% - 64px));
+  min-width: 0;
+  margin: 0 auto;
+  padding: 38px 0 112px;
+}
+
+.bunker-page,
+.bunker-home,
+.bunker-game-board,
+.incident-page {
+  min-width: 0;
+  width: 100%;
+  color: var(--nest-white);
+}
+
+.bunker-page {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+.bunker-home {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(76px, 9vw, 132px);
+}
+
+/* Navigation — a floating smoked-glass frame. */
+.bunker-nav {
+  position: sticky;
+  z-index: 40;
+  top: 14px;
+  width: min(1280px, calc(100% - 64px));
+  margin: 14px auto 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bunker-nav-inner {
+  display: flex;
+  width: 100%;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: var(--nest-frame);
+  padding: 10px 18px 10px 22px;
+  background: rgba(11, 11, 11, .82);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+
+.bunker-brand {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bunker-brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .42);
+  border-radius: 15px;
+  background: rgba(234, 40, 69, .11);
+  color: var(--nest-crimson);
+}
+
+.bunker-brand-mark svg {
+  width: 21px;
+  height: 21px;
+}
+
+.bunker-brand-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.bunker-brand-name {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.bunker-brand-subtitle {
+  margin-top: 4px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .08em;
+}
+
+.bunker-nav-room {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  margin-left: 18px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-nav-room strong {
+  overflow-wrap: anywhere;
+  color: var(--nest-white);
+  font-family: var(--nest-mono);
+  font-size: 13px;
+}
+
+.bunker-nav-actions {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.bunker-nav-link,
+.bunker-nav-icon,
+.bunker-nav-exit {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 10px 15px;
+  background: transparent;
+  color: var(--nest-soft);
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.bunker-nav-link svg,
+.bunker-nav-icon svg,
+.bunker-nav-exit svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.bunker-nav-link:hover,
+.bunker-nav-icon:hover,
+.bunker-nav-exit:hover {
+  border-color: rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, .055);
+  color: #fff;
+}
+
+.bunker-nav-link.is-active {
+  border-color: rgba(234, 40, 69, .24);
+  background: rgba(234, 40, 69, .1);
+  color: #fff;
+}
+
+.bunker-nav-icon,
+.bunker-nav-exit {
+  width: 44px;
+  padding: 0;
+}
+
+.bunker-nav-exit {
+  color: #e5a0a9;
+}
+
+.bunker-hero .bunker-nav {
+  position: relative;
+  top: auto;
+  width: 100%;
+  margin: 0 0 clamp(48px, 7vw, 88px);
+}
+
+.bunker-hero .bunker-nav-inner {
+  border-color: rgba(255, 255, 255, .17);
+  background: rgba(5, 3, 3, .54);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+/* Landing — a single luminous frame, then a quiet editorial page. */
+.bunker-hero {
+  position: relative;
+  display: flex;
+  min-height: 640px;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: var(--nest-frame);
+  padding: clamp(20px, 3vw, 42px);
+  background:
+    radial-gradient(ellipse 690px 380px at 16% 9%, rgba(234, 40, 69, .42), transparent 74%),
+    radial-gradient(ellipse 740px 430px at 76% 35%, rgba(120, 15, 32, .48), transparent 76%),
+    radial-gradient(ellipse 520px 280px at 55% 100%, rgba(234, 40, 69, .15), transparent 80%),
+    linear-gradient(112deg, #180609 0%, #100507 46%, #050303 100%);
+  isolation: isolate;
+}
+
+.bunker-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 5%, rgba(255, 255, 255, .035) 35%, transparent 62%),
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, .035), transparent 50%);
+  content: '';
+  pointer-events: none;
+}
+
+.bunker-hero::after {
+  position: absolute;
+  z-index: -1;
+  right: -8%;
+  bottom: -42%;
+  left: 24%;
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(234, 40, 69, .23), transparent 70%);
+  filter: blur(28px);
+  content: '';
+  pointer-events: none;
+}
+
+.bunker-hero-copy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1000px);
+  max-width: 1000px;
+  align-self: center;
+  margin: auto;
+  text-align: center;
+}
+
+.bunker-eyebrow,
+.bunker-kicker,
+.incident-kicker,
+.incident-alert-code,
+.incident-section-index {
+  margin: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.35;
+  letter-spacing: -.3px;
+  text-transform: uppercase;
+}
+
+.bunker-eyebrow::before,
+.bunker-kicker::before {
+  color: rgba(234, 40, 69, .85);
+  content: '{ ';
+}
+
+.bunker-eyebrow::after,
+.bunker-kicker::after {
+  color: rgba(234, 40, 69, .85);
+  content: ' }_';
+}
+
+.bunker-hero h1 {
+  max-width: 100%;
+  margin: 18px auto 24px;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(62px, 9.2vw, 118px);
+  font-weight: 500;
+  line-height: .96;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.bunker-hero h1 span {
+  color: var(--nest-crimson);
+  text-shadow: 0 0 38px rgba(234, 40, 69, .36);
+}
+
+.bunker-hero-description {
+  max-width: 660px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, .76);
+  font-family: var(--nest-mono);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+.bunker-hero-cta {
+  min-width: 190px;
+  min-height: 60px;
+  margin-top: 30px;
+  text-decoration: none;
+}
+
+.bunker-game-facts {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 720px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  align-self: flex-end;
+  margin-top: 70px;
+  border-top: 1px solid rgba(255, 255, 255, .22);
+  padding-top: 18px;
+  background: transparent;
+}
+
+.bunker-game-facts div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 20px;
+}
+
+.bunker-game-facts div + div {
+  border-left: 1px solid rgba(255, 255, 255, .16);
+}
+
+.bunker-game-facts strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(34px, 4.3vw, 54px);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bunker-game-facts span {
+  color: rgba(255, 255, 255, .68);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: .02em;
+}
+
+/* Editorial section rhythm and split headings. */
+.bunker-section {
+  min-width: 0;
+  margin: 0;
+}
+
+.bunker-game-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+
+.bunker-section-heading,
+.bunker-page-heading,
+.bunker-room-heading,
+.bunker-online-game-heading {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, .62fr);
+  align-items: end;
+  gap: 32px;
+}
+
+.bunker-section-heading h2,
+.bunker-page-heading h1,
+.bunker-room-heading h1,
+.bunker-online-game-heading h1 {
+  margin: 13px 0 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(38px, 4.2vw, 58px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.bunker-section-heading > p,
+.bunker-page-description,
+.bunker-room-heading .bunker-page-description,
+.bunker-online-game-heading .bunker-page-description {
+  max-width: 460px;
+  margin: 0 0 4px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.bunker-name-field {
+  display: flex;
+  width: min(100%, 620px);
+  flex-direction: column;
+  gap: 9px;
+}
+
+.bunker-name-field label,
+.bunker-field-label {
+  color: var(--nest-soft);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+
+.bunker-input,
+.bunker-select,
+.bunker-online-audit-textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--nest-input);
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, .055);
+  color: #fff;
+  font-family: var(--nest-mono);
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.bunker-input::placeholder,
+.bunker-online-audit-textarea::placeholder {
+  color: #777273;
+}
+
+.bunker-input:focus,
+.bunker-select:focus,
+.bunker-online-audit-textarea:focus {
+  border-color: rgba(234, 40, 69, .72);
+  background: rgba(234, 40, 69, .045);
+  box-shadow: 0 0 0 3px rgba(234, 40, 69, .09);
+}
+
+.bunker-code-input {
+  font-family: var(--nest-mono);
+  font-size: 20px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.bunker-select option {
+  background: var(--nest-carbon);
+  color: #fff;
+}
+
+.bunker-access-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  gap: 16px;
+}
+
+.bunker-panel,
+.bunker-access-panel,
+.bunker-online-action-panel,
+.bunker-online-audit,
+.bunker-online-hand,
+.bunker-crises,
+.bunker-roster,
+.bunker-briefing-timer,
+.bunker-event-log {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: var(--nest-card);
+  padding: clamp(22px, 2.4vw, 32px);
+  background: rgba(11, 11, 11, .92);
+  box-shadow: none;
+}
+
+.bunker-access-panel {
+  display: flex;
+  min-height: 310px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    radial-gradient(ellipse 400px 160px at 0 0, rgba(234, 40, 69, .11), transparent 75%),
+    var(--nest-carbon);
+}
+
+.bunker-access-panel h3,
+.bunker-panel h2,
+.bunker-online-action-panel h2,
+.bunker-online-audit h2,
+.bunker-hand-heading h2,
+.bunker-crises h2,
+.bunker-roster h2,
+.bunker-event-log h2,
+.bunker-briefing-timer h2,
+.bunker-modal-copy h2,
+.bunker-vote-heading h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.bunker-access-panel h3 {
+  margin-bottom: 9px;
+}
+
+.bunker-access-panel p,
+.bunker-invite-panel > p,
+.bunker-panel-heading p,
+.bunker-help {
+  margin: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.bunker-room-create-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+}
+
+.bunker-room-create-options .bunker-button {
+  min-height: 58px;
+}
+
+/* Buttons: white is the primary signal, crimson remains light. */
+.bunker-button,
+.bunker-game-action,
+.bunker-action-card-button,
+.bunker-card-reveal,
+.bunker-speaker-button,
+.bunker-vote-cancel,
+.bunker-vote-confirm,
+.incident-button {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--nest-button);
+  padding: 14px 20px;
+  background: var(--nest-ash);
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.bunker-button svg,
+.bunker-game-action svg,
+.bunker-action-card-button svg,
+.bunker-card-reveal svg,
+.bunker-speaker-button svg,
+.bunker-vote-cancel svg,
+.bunker-vote-confirm svg,
+.incident-button svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.bunker-button:hover:not(:disabled),
+.bunker-game-action:hover:not(:disabled),
+.bunker-action-card-button:hover:not(:disabled),
+.bunker-card-reveal:hover,
+.bunker-speaker-button:hover:not(:disabled),
+.bunker-vote-cancel:hover:not(:disabled),
+.bunker-vote-confirm:hover:not(:disabled),
+.incident-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, .18);
+  background: #292626;
+}
+
+.bunker-button-primary,
+.bunker-vote-confirm,
+.bunker-card-reveal,
+.incident-button-primary {
+  border-color: #fff;
+  background: #fff;
+  color: #080606;
+}
+
+.bunker-button-primary:hover:not(:disabled),
+.bunker-vote-confirm:hover:not(:disabled),
+.bunker-card-reveal:hover,
+.incident-button-primary:hover:not(:disabled) {
+  border-color: #f3dfe2;
+  background: #f3dfe2;
+  color: #080606;
+}
+
+.bunker-button-secondary,
+.bunker-game-action,
+.bunker-action-card-button,
+.bunker-speaker-button,
+.bunker-vote-cancel,
+.incident-button-soft {
+  border-color: rgba(255, 255, 255, .08);
+  background: var(--nest-ash);
+  color: #fff;
+}
+
+.bunker-button-danger,
+.bunker-game-action.is-danger,
+.bunker-game-action-danger,
+.incident-button-danger {
+  border-color: rgba(234, 40, 69, .32);
+  background: rgba(234, 40, 69, .08);
+  color: #ffdce1;
+}
+
+.bunker-button-danger:hover:not(:disabled),
+.bunker-game-action.is-danger:hover:not(:disabled),
+.bunker-game-action-danger:hover:not(:disabled),
+.incident-button-danger:hover:not(:disabled) {
+  border-color: rgba(234, 40, 69, .62);
+  background: rgba(234, 40, 69, .14);
+}
+
+.bunker-text-button {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  padding: 8px 0;
+  background: transparent;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bunker-text-button:hover {
+  color: var(--nest-coral);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+.bunker-help {
+  overflow-wrap: anywhere;
+}
+
+.bunker-error {
+  border: 1px solid rgba(234, 40, 69, .32);
+  border-radius: 18px;
+  padding: 16px 19px;
+  background: rgba(234, 40, 69, .08);
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.bunker-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 80;
+  display: flex;
+  width: min(420px, calc(100vw - 32px));
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 20px;
+  padding: 17px 20px;
+  background: rgba(11, 11, 11, .94);
+  color: #fff;
+  font-family: var(--nest-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.bunker-toast svg {
+  width: 19px;
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+/* Category grid — hairline cells, no generic filled cards. */
+.bunker-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 20px;
+}
+
+.bunker-category-card {
+  display: flex;
+  min-width: 0;
+  min-height: 178px;
+  align-items: flex-start;
+  gap: 15px;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, .12);
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  padding: 26px;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: background .18s ease;
+}
+
+.bunker-category-card:nth-child(3n) {
+  border-right: 0;
+}
+
+.bunker-category-card:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.bunker-category-card:hover {
+  background: linear-gradient(135deg, rgba(234, 40, 69, .10), transparent 75%);
+}
+
+.bunker-category-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  margin-top: 8px;
+  border-radius: 50%;
+  background: var(--nest-crimson);
+  box-shadow: 0 0 18px rgba(234, 40, 69, .48);
+}
+
+.bunker-category-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.bunker-category-copy strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.bunker-category-copy small {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.bunker-category-count {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+}
+
+/* Shared page headings and online lobby. */
+.bunker-page-heading,
+.bunker-room-heading,
+.bunker-online-game-heading {
+  padding: 12px 0 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, .13);
+}
+
+.bunker-room-heading,
+.bunker-online-game-heading {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr);
+}
+
+.bunker-room-heading > div:first-child,
+.bunker-online-game-heading > div:first-child {
+  min-width: 0;
+}
+
+.bunker-room-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.bunker-room-actions .bunker-button {
+  flex: 1 1 160px;
+}
+
+.bunker-connection-status {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: rgba(255, 255, 255, .035);
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bunker-connection-status svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.bunker-room-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.bunker-players-panel {
+  min-width: 0;
+}
+
+.bunker-panel-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid rgba(255, 255, 255, .13);
+}
+
+.bunker-panel-heading > div:first-child {
+  min-width: 0;
+}
+
+.bunker-panel-heading p {
+  margin-top: 7px;
+}
+
+.bunker-player-count {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-player-count svg {
+  width: 16px;
+  height: 16px;
+  align-self: center;
+  color: var(--nest-muted);
+}
+
+.bunker-player-count strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bunker-player-list {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bunker-player-row,
+.bunker-player-seat {
+  display: flex;
+  min-width: 0;
+  min-height: 70px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.bunker-player-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .24);
+  border-radius: 14px;
+  background: rgba(234, 40, 69, .09);
+  color: #ffdce1;
+  font-family: var(--nest-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bunker-player-avatar.is-empty {
+  border-color: rgba(255, 255, 255, .13);
+  background: transparent;
+  color: var(--nest-muted);
+}
+
+.bunker-player-details {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bunker-player-details strong {
+  min-width: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-details small {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bunker-host-label {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(234, 40, 69, .23);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.bunker-host-label svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+}
+
+.bunker-room-sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bunker-invite-panel {
+  background:
+    radial-gradient(ellipse 400px 190px at 20% 0, rgba(234, 40, 69, .15), transparent 75%),
+    var(--nest-carbon);
+}
+
+.bunker-invite-code {
+  overflow-wrap: anywhere;
+  margin: 20px 0;
+  border: 1px solid rgba(234, 40, 69, .28);
+  border-radius: 20px;
+  padding: 22px;
+  background: rgba(5, 3, 3, .78);
+  color: #fff;
+  font-family: var(--nest-mono);
+  font-size: clamp(20px, 2.2vw, 30px);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: .12em;
+  text-align: center;
+}
+
+.bunker-invite-code code {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: inherit;
+  font: inherit;
+}
+
+.bunker-copy-button,
+.bunker-save-settings {
+  width: 100%;
+}
+
+.bunker-setting-value {
+  margin: 16px 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bunker-setting-value span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 13px;
+}
+
+.bunker-online-note {
+  margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  padding: 17px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+/* Online game: command panel, content stream and right rail. */
+.bunker-online-game {
+  gap: 26px;
+}
+
+.bunker-online-game-heading {
+  grid-template-columns: minmax(0, 1fr) minmax(250px, .72fr);
+  align-items: center;
+}
+
+.bunker-online-game-heading .bunker-room-actions {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.bunker-online-game-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  align-items: start;
+  gap: 22px;
+}
+
+.bunker-online-game-main,
+.bunker-online-game-sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.bunker-online-game-sidebar {
+  position: sticky;
+  top: 108px;
+}
+
+.bunker-online-action-wrap {
+  min-width: 0;
+}
+
+.bunker-online-action-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  border-color: rgba(234, 40, 69, .32);
+  background:
+    radial-gradient(ellipse 640px 280px at 8% 0, rgba(234, 40, 69, .24), transparent 74%),
+    linear-gradient(115deg, #160609, #0b0b0b 68%);
+}
+
+.bunker-online-action-panel > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.bunker-online-action-panel h2,
+.bunker-online-audit h2 {
+  margin: 8px 0;
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.12;
+}
+
+.bunker-online-action-panel p,
+.bunker-online-audit p {
+  max-width: 760px;
+  margin: 4px 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-progress,
+.bunker-online-voted {
+  color: var(--nest-soft);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.bunker-online-voted {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.bunker-online-voted svg {
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+.bunker-online-timer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 38px;
+}
+
+.bunker-online-candidates {
+  display: grid;
+  width: min(100%, 560px);
+  min-width: 0;
+  gap: 8px;
+}
+
+.bunker-online-candidate {
+  display: flex;
+  min-width: 0;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 17px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, .035);
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bunker-online-candidate:hover:not(:disabled),
+.bunker-online-candidate.is-selected {
+  border-color: rgba(234, 40, 69, .58);
+  background: rgba(234, 40, 69, .09);
+}
+
+.bunker-online-candidate svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.bunker-online-crisis-panel {
+  background:
+    radial-gradient(ellipse 500px 180px at 100% 0, rgba(234, 40, 69, .11), transparent 76%),
+    var(--nest-carbon);
+}
+
+.bunker-round-stamp {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(234, 40, 69, .3);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-online-crisis-cards {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.bunker-online-crisis-card-wrap {
+  min-width: 0;
+}
+
+.bunker-online-crisis-ignore {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-hand {
+  background:
+    radial-gradient(ellipse 600px 220px at 50% 0, rgba(234, 40, 69, .08), transparent 78%),
+    var(--nest-carbon);
+}
+
+.bunker-hand-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.bunker-hand-heading > div {
+  min-width: 0;
+}
+
+.bunker-hand-heading h2 {
+  margin-top: 8px;
+}
+
+.bunker-hand-heading p {
+  margin: 8px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.bunker-online-private-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.bunker-online-private-label svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+.bunker-hand-grid,
+.bunker-online-hand-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px;
+  padding: 3px 1px 12px;
+}
+
+.bunker-hand-slot {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+}
+
+.bunker-online-hand-grid .bunker-hand-slot {
+  min-width: 0;
+  width: 100%;
+  height: 360px;
+}
+
+.bunker-online-hand-grid .bunker-card,
+.bunker-hand-grid .bunker-card {
+  width: 100%;
+  height: 360px;
+  min-height: 360px;
+  max-height: 360px;
+  flex: 1 1 auto;
+}
+
+.bunker-hand-scroll-hint {
+  display: none;
+  margin: 0 0 12px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-hand-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-hand-note svg {
+  width: 14px;
+  height: 14px;
+  color: var(--nest-crimson);
+}
+
+.bunker-online-public-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.bunker-online-public-player {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, .02);
+}
+
+.bunker-online-public-player > header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  padding-bottom: 11px;
+}
+
+.bunker-online-public-player > header strong,
+.bunker-online-public-card-list strong {
+  min-width: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-public-player > header small,
+.bunker-online-public-player > p {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.bunker-online-public-card-list {
+  display: grid;
+  gap: 5px;
+  padding-top: 10px;
+}
+
+.bunker-online-public-card-list button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 11px;
+  background: rgba(255, 255, 255, .035);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bunker-online-public-card-list button:hover {
+  border-color: rgba(234, 40, 69, .28);
+  background: rgba(234, 40, 69, .06);
+}
+
+.bunker-online-public-card-list span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.bunker-online-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.bunker-online-roster-list .bunker-player-row {
+  min-height: 58px;
+}
+
+.bunker-player-row.is-eliminated {
+  opacity: .5;
+}
+
+.bunker-online-status {
+  background:
+    radial-gradient(ellipse 360px 160px at 100% 0, rgba(234, 40, 69, .10), transparent 76%),
+    var(--nest-carbon);
+}
+
+.bunker-online-status > svg {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 14px;
+  color: var(--nest-crimson);
+}
+
+.bunker-online-status h2 {
+  margin-bottom: 12px;
+}
+
+.bunker-online-status p {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.bunker-online-vote-ledger .bunker-online-vote-row {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  padding: 12px 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.bunker-online-vote-row strong {
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+/* Action cards: clear hierarchy and controls that reflow. */
+.bunker-online-action-tools {
+  margin: 22px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .13);
+  border-bottom: 1px solid rgba(255, 255, 255, .13);
+  padding: 18px 0;
+}
+
+.bunker-online-action-tools-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-bottom: 12px;
+}
+
+.bunker-online-action-tools-heading p {
+  margin: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.bunker-online-action-tool {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  padding: 17px 0;
+}
+
+.bunker-online-action-tool:last-child {
+  border-bottom: 0;
+}
+
+.bunker-online-action-tool-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 260px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bunker-online-action-tool-copy strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-action-tool-copy span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-action-tool-controls {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 320px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.bunker-action-target-select {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 52px;
+  flex: 1 1 180px;
+}
+
+.bunker-online-action-tool-controls .bunker-button {
+  min-height: 52px;
+  white-space: normal;
+}
+
+.bunker-online-action-state {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 12px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-action-state svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+.bunker-online-pending-actions {
+  margin-top: 18px;
+  border-top: 1px dashed rgba(255, 255, 255, .14);
+  padding-top: 16px;
+}
+
+.bunker-online-pending-actions > .bunker-kicker {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--nest-muted);
+}
+
+.bunker-online-pending-action {
+  display: block;
+  min-width: 0;
+  padding: 10px 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-pending-action strong {
+  display: block;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bunker-online-pending-action span {
+  display: block;
+  max-width: 100%;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.bunker-online-private-action-results {
+  min-width: 0;
+  margin-top: 18px;
+  border: 1px solid rgba(234, 40, 69, .24);
+  border-radius: 18px;
+  padding: 17px;
+  background: rgba(234, 40, 69, .05);
+}
+
+.bunker-online-private-action-results > .bunker-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bunker-online-private-action-result {
+  min-width: 0;
+  padding-top: 12px;
+  color: var(--nest-soft);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-private-action-result + .bunker-online-private-action-result {
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+
+.bunker-online-private-action-result p {
+  margin: 5px 0 0;
+  color: var(--nest-muted);
+  line-height: 1.7;
+}
+
+.bunker-online-private-action-result ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bunker-online-private-action-result li {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.bunker-online-private-action-result li span {
+  color: var(--nest-muted);
+}
+
+/* Local play lobby and offline board. */
+.incident-local-room-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 !important;
+}
+
+.incident-local-room-page > div:first-child {
+  border: 1px solid rgba(234, 40, 69, .3) !important;
+  border-radius: var(--nest-frame) !important;
+  padding: clamp(22px, 3vw, 36px) !important;
+  background:
+    radial-gradient(ellipse 620px 240px at 8% 0, rgba(234, 40, 69, .27), transparent 78%),
+    linear-gradient(120deg, #160609, var(--nest-carbon) 75%) !important;
+  box-shadow: none !important;
+}
+
+.incident-local-room-page > div:first-child h2 {
+  margin: 12px 0 4px;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(30px, 4vw, 48px);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.incident-local-room-page > div:first-child p {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+}
+
+.incident-local-room-page > div:first-child .text-cyan-300,
+.incident-local-room-page > div:first-child .text-amber-400 {
+  color: #ffdce1 !important;
+}
+
+.incident-local-room-page > div:first-child .bg-cyan-500\/20 {
+  border: 1px solid rgba(234, 40, 69, .28);
+  border-radius: 999px;
+  background: rgba(234, 40, 69, .09);
+  color: #ffdce1;
+}
+
+.incident-local-room-page > div:first-child button,
+.incident-final-audit-page button {
+  border-radius: var(--nest-button) !important;
+  font-family: var(--nest-display) !important;
+  font-weight: 700 !important;
+  white-space: normal;
+}
+
+.incident-local-room-page > div:nth-child(2) {
+  border: 1px solid rgba(255, 255, 255, .13) !important;
+  border-radius: var(--nest-card) !important;
+  padding: clamp(20px, 2.4vw, 30px) !important;
+  background: var(--nest-carbon) !important;
+  box-shadow: none !important;
+}
+
+.incident-local-room-page > div:nth-child(2) h3 {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.incident-local-room-page > div:nth-child(2) .grid > div {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .11) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, .025) !important;
+}
+
+.bunker-game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bunker-round-header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 22px;
+  border: 1px solid rgba(234, 40, 69, .28);
+  border-radius: var(--nest-frame);
+  padding: 22px 26px;
+  background:
+    radial-gradient(ellipse 520px 240px at 0 0, rgba(234, 40, 69, .24), transparent 75%),
+    var(--nest-carbon);
+}
+
+.bunker-round-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px 30px;
+}
+
+.bunker-round-number,
+.bunker-phase-detail,
+.bunker-capacity-detail {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bunker-round-number span,
+.bunker-phase-detail > span,
+.bunker-capacity-detail > span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.bunker-round-number strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bunker-round-number strong small {
+  color: var(--nest-muted);
+  font-size: 19px;
+}
+
+.bunker-phase-detail strong,
+.bunker-capacity-detail strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.bunker-demo-label {
+  max-width: 100%;
+  border: 1px solid rgba(234, 40, 69, .28);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-round-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.bunker-round-actions .bunker-game-action {
+  min-width: 170px;
+}
+
+.bunker-table-layout {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  align-items: start;
+  gap: 22px;
+}
+
+.bunker-table-main,
+.bunker-table-sidebar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.bunker-table-sidebar {
+  position: sticky;
+  top: 110px;
+}
+
+.bunker-roster,
+.bunker-crises,
+.bunker-hand,
+.bunker-briefing-timer,
+.bunker-event-log {
+  background: var(--nest-carbon);
+}
+
+.bunker-roster-heading,
+.bunker-crises-heading,
+.bunker-event-log-heading,
+.bunker-timer-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+}
+
+.bunker-roster-title,
+.bunker-crises-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 13px;
+}
+
+.bunker-section-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .25);
+  border-radius: 15px;
+  background: rgba(234, 40, 69, .08);
+  color: var(--nest-crimson);
+}
+
+.bunker-section-mark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.bunker-roster-title .bunker-kicker,
+.bunker-crises-title .bunker-kicker {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.bunker-roster-count {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-roster-count strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 36px;
+  font-weight: 500;
+}
+
+.bunker-roster-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bunker-player-card {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, .025);
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.bunker-player-card.is-speaking,
+.bunker-player-card.is-you {
+  border-color: rgba(234, 40, 69, .34);
+  background:
+    radial-gradient(ellipse 280px 120px at 0 0, rgba(234, 40, 69, .11), transparent 78%),
+    rgba(255, 255, 255, .02);
+}
+
+.bunker-player-card.is-eliminated {
+  opacity: .52;
+}
+
+.bunker-player-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bunker-player-identity {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bunker-player-name-line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+}
+
+.bunker-player-name-line h3 {
+  min-width: 0;
+  margin: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-crown {
+  width: 14px;
+  height: 14px;
+  color: var(--nest-crimson);
+}
+
+.bunker-player-you {
+  border: 1px solid rgba(234, 40, 69, .3);
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 9px;
+}
+
+.bunker-player-status {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-votes {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-player-card-slots {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.bunker-player-card-slot {
+  display: flex;
+  min-width: 0;
+  min-height: 72px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 13px;
+  padding: 10px;
+  background: rgba(255, 255, 255, .025);
+  color: #fff;
+  text-align: left;
+}
+
+button.bunker-player-card-slot {
+  cursor: pointer;
+}
+
+button.bunker-player-card-slot:hover {
+  border-color: rgba(234, 40, 69, .35);
+  background: rgba(234, 40, 69, .055);
+}
+
+.bunker-player-card-slot > span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.bunker-player-card-slot > strong {
+  max-width: 100%;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.bunker-player-card-slot > svg {
+  width: 13px;
+  height: 13px;
+  color: var(--nest-crimson);
+}
+
+.bunker-player-card-slot.is-hidden {
+  border-style: dashed;
+  background: transparent;
+}
+
+.bunker-speaker-button {
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 9px 13px;
+  font-size: 12px;
+}
+
+.bunker-speaker-button.is-active {
+  border-color: rgba(234, 40, 69, .4);
+  background: rgba(234, 40, 69, .1);
+}
+
+.bunker-crisis-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 12px;
+}
+
+.bunker-crisis-card {
+  display: flex;
+  min-width: 0;
+  min-height: 150px;
+  align-items: stretch;
+  gap: 13px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255, 255, 255, .025);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bunker-crisis-card:hover {
+  border-color: rgba(234, 40, 69, .42);
+  background: rgba(234, 40, 69, .045);
+}
+
+.bunker-crisis-index {
+  align-self: flex-start;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-crisis-image {
+  width: 84px;
+  flex: 0 0 84px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--nest-graphite);
+}
+
+.bunker-crisis-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bunker-crisis-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.bunker-crisis-copy strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-crisis-copy span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.bunker-crisis-open {
+  align-self: flex-end;
+  color: var(--nest-crimson);
+}
+
+.bunker-crisis-open svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Timer and event timeline. */
+.bunker-timer-heading {
+  align-items: flex-start;
+}
+
+.bunker-timer-heading > div {
+  min-width: 0;
+}
+
+.bunker-timer-heading h2 {
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}
+
+.bunker-timer-heading > svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+.bunker-timer-presets,
+.bunker-timer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bunker-timer-preset,
+.bunker-timer-sound,
+.bunker-timer-start,
+.bunker-timer-reset {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 14px;
+  padding: 9px 12px;
+  background: var(--nest-ash);
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bunker-timer-sound,
+.bunker-timer-reset {
+  width: 42px;
+  padding: 0;
+}
+
+.bunker-timer-sound svg,
+.bunker-timer-reset svg,
+.bunker-timer-start svg {
+  width: 16px;
+  height: 16px;
+}
+
+.bunker-timer-display {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.bunker-timer-display > strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: clamp(58px, 7vw, 86px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.bunker-timer-expired {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+  color: var(--nest-crimson);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-timer-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--nest-ash);
+}
+
+.bunker-timer-track span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--nest-crimson), var(--nest-garnet));
+  transition: width .25s linear;
+}
+
+.bunker-timer-actions {
+  margin-top: 17px;
+}
+
+.bunker-timer-start {
+  flex: 1 1 auto;
+  min-height: 48px;
+}
+
+.bunker-timer-start.is-running {
+  border-color: rgba(234, 40, 69, .35);
+  background: rgba(234, 40, 69, .1);
+}
+
+.bunker-timer-note {
+  margin: 12px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.bunker-event-count {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 50%;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-event-list {
+  display: flex;
+  max-height: 430px;
+  flex-direction: column;
+  gap: 13px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bunker-event-entry {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.bunker-event-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .2);
+  border-radius: 11px;
+  background: rgba(234, 40, 69, .07);
+  color: var(--nest-crimson);
+}
+
+.bunker-event-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bunker-event-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.bunker-event-meta {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.bunker-event-meta strong {
+  color: var(--nest-soft);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.bunker-event-copy p {
+  margin: 4px 0 0;
+  color: #e2dfe0;
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.bunker-event-empty,
+.bunker-empty-copy {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* Cards become rounded framed objects with real hierarchy. */
+.bunker-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  height: 360px;
+  min-height: 340px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: var(--nest-card);
+  background: #0b0b0b;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+  transition: border-color .18s ease, transform .18s ease;
+}
+
+.bunker-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(234, 40, 69, .5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+}
+
+.bunker-card-topline {
+  display: flex;
+  min-width: 0;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.bunker-card-category {
+  min-width: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.bunker-card-inspect {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .04);
+  color: #fff;
+  cursor: pointer;
+}
+
+.bunker-card-inspect svg {
+  width: 15px;
+  height: 15px;
+}
+
+.bunker-card-art {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--nest-graphite);
+}
+
+.bunker-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bunker-card-art-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(234, 40, 69, .17), transparent 70%),
+    var(--nest-graphite);
+  color: var(--nest-crimson);
+}
+
+.bunker-card-art-fallback svg {
+  width: 54px;
+  height: 54px;
+}
+
+.bunker-card-copy {
+  display: flex;
+  min-width: 0;
+  min-height: 132px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 7px;
+  border-top: 2px solid var(--nest-crimson);
+  padding: 16px;
+  background: linear-gradient(145deg, #181818, #0b0b0b);
+}
+
+.bunker-card-copy h3 {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.bunker-card-copy p {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow-wrap: anywhere;
+}
+
+.bunker-card-sealed {
+  justify-content: space-between;
+  background:
+    radial-gradient(ellipse 250px 180px at 50% 35%, rgba(234, 40, 69, .13), transparent 75%),
+    linear-gradient(155deg, #181818, #090707);
+}
+
+.bunker-card-sealed::before {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(234, 40, 69, .14);
+  border-radius: 17px;
+  content: '';
+  pointer-events: none;
+}
+
+.bunker-card-seal {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  text-align: center;
+}
+
+.bunker-card-lock {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .38);
+  border-radius: 19px;
+  background: rgba(234, 40, 69, .1);
+  color: var(--nest-crimson);
+}
+
+.bunker-card-lock svg {
+  width: 23px;
+  height: 23px;
+}
+
+.bunker-card-bottom {
+  position: relative;
+  z-index: 1;
+  padding: 12px;
+}
+
+.bunker-card-reveal {
+  width: 100%;
+  min-height: 48px;
+}
+
+.bunker-card-access {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.bunker-card-access svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.bunker-card-open {
+  border-color: rgba(255, 255, 255, .16);
+}
+
+.bunker-online-hand-grid .bunker-card-open .bunker-card-copy {
+  min-height: 132px;
+  height: auto;
+  flex: 0 0 132px;
+}
+
+.bunker-online-hand-grid .bunker-card-open .bunker-card-copy p {
+  -webkit-line-clamp: 2;
+}
+
+/* Catalogue — proper tool-like search and an editorial card wall. */
+.bunker-catalog {
+  gap: 28px;
+}
+
+.bunker-catalog .bunker-page-heading {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.bunker-catalog-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+}
+
+.bunker-catalog-total strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 52px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bunker-catalog-toolbar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 24px;
+  padding: 20px;
+  background: var(--nest-carbon);
+}
+
+.bunker-search {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: var(--nest-input);
+  padding: 0 18px;
+  background: rgba(255, 255, 255, .045);
+  color: var(--nest-muted);
+}
+
+.bunker-search svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.bunker-search:focus-within {
+  border-color: rgba(234, 40, 69, .6);
+}
+
+.bunker-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font-family: var(--nest-mono);
+  font-size: 13px;
+}
+
+.bunker-search input::placeholder {
+  color: #777273;
+}
+
+.bunker-category-filters {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bunker-filter {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: transparent;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.bunker-filter svg {
+  width: 14px;
+  height: 14px;
+}
+
+.bunker-filter:hover,
+.bunker-filter.is-active {
+  border-color: rgba(234, 40, 69, .4);
+  background: rgba(234, 40, 69, .08);
+  color: #fff;
+}
+
+.bunker-catalog-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  padding-bottom: 12px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.bunker-catalog-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.bunker-catalog-item {
+  min-width: 0;
+}
+
+.bunker-catalog-item .bunker-card {
+  height: 360px;
+  min-height: 360px;
+}
+
+.bunker-catalog-note {
+  margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  padding-top: 16px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.bunker-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: var(--nest-card);
+  padding: 50px 22px;
+  text-align: center;
+}
+
+.bunker-empty > svg {
+  width: 30px;
+  height: 30px;
+  color: var(--nest-crimson);
+}
+
+.bunker-empty h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.bunker-empty p {
+  margin: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+}
+
+/* Card detail modal, voting modal and rules drawer. */
+.bunker-modal,
+.bunker-vote-modal,
+.bunker-rules-modal {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, .82);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.bunker-modal-panel,
+.bunker-vote-panel,
+.bunker-rules-panel {
+  position: relative;
+  width: min(100%, 960px);
+  max-width: 960px;
+  max-height: calc(100dvh - 40px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--nest-frame);
+  background:
+    radial-gradient(ellipse 560px 260px at 0 0, rgba(234, 40, 69, .16), transparent 76%),
+    var(--nest-carbon);
+  box-shadow: none;
+}
+
+.bunker-modal-panel {
+  display: grid;
+  grid-template-columns: minmax(260px, .85fr) minmax(0, 1.15fr);
+}
+
+.bunker-modal-art {
+  display: flex;
+  min-width: 0;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--nest-graphite);
+}
+
+.bunker-modal-art img {
+  width: 100%;
+  height: 100%;
+  max-height: 70dvh;
+  object-fit: contain;
+}
+
+.bunker-modal-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(24px, 4vw, 44px);
+}
+
+.bunker-category-label {
+  color: var(--nest-crimson);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.bunker-modal-copy h2 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 42px);
+}
+
+.bunker-modal-copy p {
+  margin: 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.bunker-modal-close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 50%;
+  background: rgba(5, 3, 3, .72);
+  color: #fff;
+  cursor: pointer;
+}
+
+.bunker-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bunker-card-guidance {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 11px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  padding-top: 16px;
+}
+
+.bunker-card-guidance-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bunker-card-guidance-heading h3 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.bunker-card-guidance-status,
+.bunker-card-guidance-tags span {
+  border: 1px solid rgba(234, 40, 69, .24);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #ffdce1;
+  font-family: var(--nest-mono);
+  font-size: 10px;
+}
+
+.bunker-card-guidance-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.bunker-card-guidance-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bunker-card-guidance-list li {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 13px;
+  padding: 11px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.bunker-card-guidance-list li > span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 9px;
+}
+
+.bunker-card-guidance-list li > strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bunker-vote-panel {
+  width: min(100%, 680px);
+  padding: clamp(20px, 3vw, 30px);
+}
+
+.bunker-vote-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.bunker-vote-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 1px solid rgba(234, 40, 69, .3);
+  border-radius: 16px;
+  background: rgba(234, 40, 69, .09);
+  color: var(--nest-crimson);
+}
+
+.bunker-vote-heading > div:last-child {
+  min-width: 0;
+}
+
+.bunker-vote-heading h2 {
+  margin-top: 8px;
+  font-size: 30px;
+}
+
+.bunker-vote-heading p {
+  margin: 8px 0 0;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+}
+
+.bunker-vote-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(234, 40, 69, .25);
+  border-radius: 17px;
+  padding: 13px 15px;
+  background: rgba(234, 40, 69, .06);
+}
+
+.bunker-vote-warning svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--nest-crimson);
+}
+
+.bunker-vote-warning p {
+  margin: 0;
+  color: var(--nest-soft);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.bunker-vote-list {
+  display: grid;
+  max-height: min(48vh, 440px);
+  gap: 7px;
+  overflow-y: auto;
+  margin: 18px 0;
+}
+
+.bunker-vote-candidate {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, .025);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bunker-vote-candidate.is-selected {
+  border-color: rgba(234, 40, 69, .5);
+  background: rgba(234, 40, 69, .08);
+}
+
+.bunker-vote-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(234, 40, 69, .1);
+  color: #ffdce1;
+  font-family: var(--nest-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bunker-vote-person {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bunker-vote-person strong {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.bunker-vote-person small {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.bunker-vote-check {
+  color: var(--nest-crimson);
+}
+
+.bunker-vote-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* Rules modal — same soot/glass system, keeping the original rule text. */
+.bunker-rules-panel {
+  display: flex;
+  width: min(100%, 920px);
+  flex-direction: column;
+}
+
+.bunker-rules-panel > div:first-child {
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, .02);
+}
+
+.bunker-rules-panel > div:first-child h2 {
+  color: #fff !important;
+  font-family: var(--nest-display) !important;
+  font-size: 20px;
+  font-weight: 500 !important;
+  line-height: 1.35;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.bunker-rules-panel > div:first-child p {
+  color: var(--nest-muted) !important;
+  font-family: var(--nest-mono) !important;
+  font-size: 11px;
+}
+
+.bunker-rules-panel > div:first-child > div > div:first-child {
+  border-color: rgba(234, 40, 69, .3) !important;
+  border-radius: 14px !important;
+  background: rgba(234, 40, 69, .08) !important;
+  color: var(--nest-crimson) !important;
+}
+
+.bunker-rules-panel > div:nth-child(2) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, .015);
+}
+
+.bunker-rules-panel > div:nth-child(2) button {
+  border-bottom-width: 2px;
+  border-radius: 999px 999px 0 0;
+  padding: 10px 14px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+}
+
+.bunker-rules-panel > div:nth-child(2) button[class*="border-sky-400"] {
+  border-color: var(--nest-crimson) !important;
+  color: #fff !important;
+}
+
+.bunker-rules-panel .text-sky-400,
+.bunker-rules-panel .text-sky-300,
+.bunker-rules-panel .text-emerald-300,
+.bunker-rules-panel .text-emerald-400,
+.bunker-rules-panel .text-amber-400,
+.bunker-rules-panel .text-rose-400,
+.bunker-rules-panel .text-purple-400,
+.bunker-rules-panel .text-yellow-300 {
+  color: var(--nest-coral) !important;
+}
+
+.bunker-rules-panel .bg-slate-900,
+.bunker-rules-panel .bg-slate-950\/60,
+.bunker-rules-panel .bg-slate-950\/70,
+.bunker-rules-panel .bg-slate-950\/40,
+.bunker-rules-panel .bg-slate-950\/85 {
+  background: rgba(255, 255, 255, .025) !important;
+}
+
+.bunker-rules-panel [class*="border-slate-"],
+.bunker-rules-panel [class*="border-sky-"],
+.bunker-rules-panel [class*="border-emerald-"],
+.bunker-rules-panel [class*="border-amber-"] {
+  border-color: rgba(255, 255, 255, .12) !important;
+}
+
+.bunker-rules-panel h3,
+.bunker-rules-panel h4 {
+  color: #fff;
+  font-family: var(--nest-display);
+  font-weight: 500;
+}
+
+.bunker-rules-panel p,
+.bunker-rules-panel li,
+.bunker-rules-panel span {
+  overflow-wrap: anywhere;
+}
+
+.bunker-rules-panel .font-mono-tech {
+  color: var(--nest-muted);
+}
+
+.bunker-rules-panel > div:last-child {
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .02) !important;
+}
+
+.bunker-rules-panel > div:last-child button {
+  min-height: 44px;
+  border-radius: var(--nest-button);
+  padding: 10px 18px;
+  background: #fff;
+  color: #080606;
+  font-family: var(--nest-display);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Final audit — restrained report workspace, no green/blue dashboard palette. */
+.incident-final-audit-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.incident-final-audit-page > div:first-child {
+  border: 1px solid rgba(234, 40, 69, .3) !important;
+  border-radius: var(--nest-frame) !important;
+  padding: clamp(22px, 3vw, 34px) !important;
+  background:
+    radial-gradient(ellipse 680px 270px at 0 0, rgba(234, 40, 69, .26), transparent 78%),
+    var(--nest-carbon) !important;
+  box-shadow: none !important;
+}
+
+.incident-final-audit-page > div:first-child h2 {
+  color: #fff !important;
+  font-family: var(--nest-display) !important;
+  font-size: clamp(26px, 3.5vw, 42px) !important;
+  font-weight: 500 !important;
+  line-height: 1.12;
+  letter-spacing: 0 !important;
+}
+
+.incident-final-audit-page .rounded-2xl,
+.incident-final-audit-page .rounded-xl,
+.incident-final-audit-page .rounded-lg {
+  border-radius: 20px !important;
+}
+
+.incident-final-audit-page .bg-slate-900\/90,
+.incident-final-audit-page .bg-slate-950\/70,
+.incident-final-audit-page .bg-slate-950\/60,
+.incident-final-audit-page .bg-purple-950\/20 {
+  background: rgba(255, 255, 255, .025) !important;
+}
+
+.incident-final-audit-page [class*="border-emerald-"],
+.incident-final-audit-page [class*="border-purple-"],
+.incident-final-audit-page [class*="border-slate-"] {
+  border-color: rgba(255, 255, 255, .12) !important;
+}
+
+.incident-final-audit-page [class*="text-emerald-"],
+.incident-final-audit-page [class*="text-purple-"],
+.incident-final-audit-page [class*="text-sky-"],
+.incident-final-audit-page [class*="text-amber-"],
+.incident-final-audit-page [class*="text-orange-"],
+.incident-final-audit-page [class*="text-rose-"] {
+  color: var(--nest-coral) !important;
+}
+
+.incident-final-audit-page h3,
+.incident-final-audit-page h4 {
+  color: #fff !important;
+  font-family: var(--nest-display) !important;
+  font-weight: 500 !important;
+  line-height: 1.35;
+}
+
+.incident-final-audit-page p,
+.incident-final-audit-page label,
+.incident-final-audit-page span,
+.incident-final-audit-page div {
+  overflow-wrap: anywhere;
+}
+
+.incident-final-audit-page input,
+.incident-final-audit-page textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 16px;
+  padding: 13px 15px;
+  background: rgba(255, 255, 255, .04);
+  color: #fff;
+  font-family: var(--nest-mono);
+  font-size: 13px;
+}
+
+.incident-final-audit-page button {
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  padding: 11px 16px;
+  background: var(--nest-ash) !important;
+  color: #fff !important;
+}
+
+/* Connection states, badges, general text safety. */
+.bunker-online-audit-label {
+  display: block;
+  margin: 15px 0 8px;
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.bunker-online-audit-textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.bunker-online-audit-submission {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, .025);
+  color: var(--nest-soft);
+  font-family: var(--nest-mono);
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-audit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.bunker-online-audit-actions > span {
+  color: var(--nest-muted);
+  font-family: var(--nest-mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.bunker-online-audit-actions .bunker-button {
+  flex: 1 1 180px;
+}
+
+.bunker-online-survivors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bunker-empty-copy {
+  margin: 0;
+}
+
+.bunker-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Hard wrap safety for user-generated names, imported card text and dynamic statuses. */
+.bunker-app *,
+.bunker-main *,
+.bunker-page *,
+.bunker-home *,
+.bunker-game-board *,
+.bunker-panel *,
+.bunker-modal-panel *,
+.bunker-vote-panel *,
+.bunker-rules-panel *,
+.incident-page * {
+  min-width: 0;
+}
+
+.bunker-page-description,
+.bunker-section-heading > p,
+.bunker-hero-description,
+.bunker-help,
+.bunker-error,
+.bunker-toast,
+.bunker-online-action-panel p,
+.bunker-online-audit p,
+.bunker-online-status p,
+.bunker-online-note,
+.bunker-online-voted,
+.bunker-online-private-action-result,
+.bunker-online-pending-action,
+.bunker-player-details strong,
+.bunker-player-details small,
+.bunker-card-copy h3,
+.bunker-card-copy p,
+.bunker-modal-copy h2,
+.bunker-modal-copy p,
+.bunker-vote-person strong,
+.bunker-vote-person small,
+.bunker-online-public-player > header strong,
+.bunker-online-public-card-list strong,
+.bunker-online-vote-row,
+.bunker-online-vote-row strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.bunker-round-header,
+.bunker-round-summary,
+.bunker-round-number,
+.bunker-phase-detail,
+.bunker-capacity-detail,
+.bunker-round-actions,
+.bunker-player-card,
+.bunker-player-card-head,
+.bunker-player-card-slots,
+.bunker-player-card-slot,
+.bunker-player-identity,
+.bunker-player-votes,
+.bunker-crisis-copy,
+.bunker-online-action-tool,
+.bunker-online-action-tool-copy,
+.bunker-online-action-tool-controls,
+.bunker-online-private-label,
+.bunker-online-public-player,
+.bunker-online-public-player > header,
+.bunker-online-pending-action,
+.bunker-vote-person {
+  max-width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .bunker-main {
+    width: min(100% - 44px, 1280px);
+  }
+
+  .bunker-nav {
+    width: min(100% - 44px, 1280px);
+  }
+
+  .bunker-online-game-grid,
+  .bunker-table-layout {
+    grid-template-columns: minmax(0, 1fr) 310px;
+  }
+
+  .bunker-hand-grid,
+  .bunker-online-hand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bunker-catalog-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bunker-online-hand-grid .bunker-card,
+  .bunker-hand-grid .bunker-card {
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+}
+
+@media (max-width: 820px) {
+  .bunker-main {
+    width: min(100% - 36px, 1280px);
+    padding-top: 28px;
+  }
+
+  .bunker-nav {
+    width: min(100% - 36px, 1280px);
+  }
+
+  .bunker-hero {
+    min-height: 610px;
+  }
+
+  .bunker-section-heading,
+  .bunker-page-heading,
+  .bunker-room-heading,
+  .bunker-online-game-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+  }
+
+  .bunker-section-heading > p,
+  .bunker-page-description {
+    max-width: 640px;
+  }
+
+  .bunker-room-actions {
+    justify-content: flex-start;
+  }
+
+  .bunker-room-layout,
+  .bunker-online-game-grid,
+  .bunker-table-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-online-game-sidebar,
+  .bunker-table-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .bunker-access-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-access-panel {
+    min-height: 0;
+  }
+
+  .bunker-online-crisis-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bunker-hand-grid,
+  .bunker-online-hand-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bunker-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .bunker-main {
+    width: calc(100% - 28px);
+    padding: 22px 0 66px;
+  }
+
+  .bunker-nav {
+    position: relative;
+    top: auto;
+    width: calc(100% - 28px);
+    margin-top: 10px;
+  }
+
+  .bunker-nav-inner {
+    min-height: 62px;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 22px;
+  }
+
+  .bunker-brand {
+    gap: 8px;
+  }
+
+  .bunker-brand-mark {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 12px;
+  }
+
+  .bunker-brand-name {
+    font-size: 17px;
+  }
+
+  .bunker-brand-subtitle,
+  .bunker-nav-room {
+    display: none;
+  }
+
+  .bunker-nav-actions {
+    gap: 3px;
+  }
+
+  .bunker-nav-link,
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    min-height: 40px;
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 0;
+  }
+
+  .bunker-nav-link {
+    width: 40px;
+  }
+
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    width: 40px;
+  }
+
+  .bunker-nav-link svg,
+  .bunker-nav-icon svg,
+  .bunker-nav-exit svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .bunker-hero {
+    min-height: 590px;
+    border-radius: 25px;
+    padding: 14px;
+  }
+
+  .bunker-hero .bunker-nav {
+    width: 100%;
+    margin: 0 0 45px;
+  }
+
+  .bunker-hero .bunker-nav-inner {
+    border-radius: 20px;
+    padding: 7px 8px;
+  }
+
+  .bunker-hero h1 {
+    margin: 16px auto 18px;
+    font-size: clamp(50px, 12.5vw, 76px);
+    line-height: .98;
+  }
+
+  .bunker-hero-description {
+    font-size: 12px;
+    line-height: 1.75;
+  }
+
+  .bunker-hero-cta {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .bunker-game-facts {
+    width: 100%;
+    margin-top: 38px;
+    padding-top: 15px;
+  }
+
+  .bunker-game-facts div {
+    gap: 5px;
+    padding: 0 9px;
+  }
+
+  .bunker-game-facts strong {
+    font-size: clamp(27px, 8vw, 38px);
+  }
+
+  .bunker-game-facts span {
+    font-size: 9px;
+  }
+
+  .bunker-home {
+    gap: 70px;
+  }
+
+  .bunker-section-heading h2,
+  .bunker-page-heading h1,
+  .bunker-room-heading h1,
+  .bunker-online-game-heading h1 {
+    font-size: clamp(32px, 9vw, 44px);
+  }
+
+  .bunker-section-heading,
+  .bunker-page-heading,
+  .bunker-room-heading,
+  .bunker-online-game-heading {
+    gap: 10px;
+    padding-bottom: 20px;
+  }
+
+  .bunker-page {
+    gap: 22px;
+  }
+
+  .bunker-name-field,
+  .bunker-input,
+  .bunker-select,
+  .bunker-online-audit-textarea {
+    width: 100%;
+  }
+
+  .bunker-access-panel,
+  .bunker-panel,
+  .bunker-online-action-panel,
+  .bunker-online-audit,
+  .bunker-online-hand,
+  .bunker-crises,
+  .bunker-roster,
+  .bunker-briefing-timer,
+  .bunker-event-log {
+    border-radius: 20px;
+    padding: 19px;
+  }
+
+  .bunker-room-create-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-button,
+  .bunker-game-action,
+  .bunker-action-card-button,
+  .bunker-card-reveal,
+  .bunker-speaker-button,
+  .bunker-vote-cancel,
+  .bunker-vote-confirm,
+  .incident-button {
+    min-height: 50px;
+    padding: 12px 15px;
+    font-size: 13px;
+  }
+
+  .bunker-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bunker-category-card {
+    min-height: 150px;
+    gap: 9px;
+    padding: 16px 12px;
+  }
+
+  .bunker-category-card:nth-child(3n) {
+    border-right: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .bunker-category-card:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .bunker-category-card:nth-last-child(-n + 3) {
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .bunker-category-card:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .bunker-category-copy strong {
+    font-size: 16px;
+  }
+
+  .bunker-category-copy small {
+    font-size: 10px;
+  }
+
+  .bunker-room-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bunker-room-actions .bunker-button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .bunker-room-page .bunker-room-actions .bunker-button-primary {
+    grid-column: 1 / -1;
+  }
+
+  .bunker-player-list,
+  .bunker-roster-grid,
+  .bunker-player-card-slots,
+  .bunker-online-public-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-online-game-sidebar,
+  .bunker-table-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bunker-panel-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .bunker-player-count strong,
+  .bunker-roster-count strong {
+    font-size: 28px;
+  }
+
+  .bunker-round-header {
+    align-items: stretch;
+    flex-direction: column;
+    border-radius: 22px;
+    padding: 19px;
+  }
+
+  .bunker-round-summary {
+    gap: 15px 20px;
+  }
+
+  .bunker-round-number strong {
+    font-size: 34px;
+  }
+
+  .bunker-round-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-round-actions .bunker-game-action {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .bunker-online-crisis-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-crisis-card {
+    min-height: 126px;
+  }
+
+  .bunker-crisis-image {
+    width: 72px;
+    flex-basis: 72px;
+  }
+
+  .bunker-hand-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bunker-hand-grid,
+  .bunker-online-hand-grid {
+    display: grid;
+    grid-auto-columns: 78vw;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 3px 2px 14px;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-inline: contain;
+  }
+
+  .bunker-hand-slot,
+  .bunker-online-hand-grid .bunker-hand-slot {
+    height: 350px;
+    min-height: 350px;
+    scroll-snap-align: start;
+  }
+
+  .bunker-hand-grid .bunker-card,
+  .bunker-online-hand-grid .bunker-card {
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+
+  .bunker-hand-scroll-hint {
+    display: block;
+  }
+
+  .bunker-online-action-tool {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bunker-online-action-tool-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bunker-action-target-select,
+  .bunker-online-action-tool-controls .bunker-button {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .bunker-catalog-toolbar {
+    border-radius: 20px;
+    padding: 15px;
+  }
+
+  .bunker-catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+
+  .bunker-catalog-item .bunker-card {
+    height: 310px;
+    min-height: 310px;
+  }
+
+  .bunker-card-copy {
+    min-height: 118px;
+    padding: 12px;
+  }
+
+  .bunker-card-copy h3 {
+    font-size: 14px;
+  }
+
+  .bunker-card-copy p {
+    font-size: 10px;
+    -webkit-line-clamp: 2;
+  }
+
+  .bunker-modal,
+  .bunker-vote-modal,
+  .bunker-rules-modal {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .bunker-modal-panel {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: calc(100dvh - 20px);
+    border-radius: 22px;
+  }
+
+  .bunker-modal-art {
+    min-height: 180px;
+    max-height: 32dvh;
+  }
+
+  .bunker-modal-art img {
+    max-height: 32dvh;
+  }
+
+  .bunker-modal-copy {
+    gap: 11px;
+    padding: 19px;
+  }
+
+  .bunker-modal-copy h2 {
+    padding-right: 34px;
+    font-size: 27px;
+  }
+
+  .bunker-card-guidance-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-vote-panel,
+  .bunker-rules-panel {
+    max-height: calc(100dvh - 20px);
+    border-radius: 22px;
+  }
+
+  .bunker-vote-panel {
+    padding: 18px;
+  }
+
+  .bunker-vote-heading h2 {
+    font-size: 25px;
+  }
+
+  .bunker-vote-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bunker-vote-actions .bunker-button,
+  .bunker-vote-actions button {
+    width: 100%;
+  }
+
+  .bunker-rules-panel > div:first-child {
+    padding: 16px;
+  }
+
+  .bunker-rules-panel > div:nth-child(2) {
+    padding: 9px 12px;
+  }
+
+  .bunker-online-audit-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bunker-online-audit-actions .bunker-button {
+    width: 100%;
+  }
+
+  .incident-local-room-page > div:first-child .flex.items-center.gap-3 {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .incident-local-room-page > div:first-child .flex.items-center.gap-3 button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .incident-final-audit-page > .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .incident-final-audit-page > div:first-child > div.relative {
+    align-items: flex-start;
+  }
+
+  .bunker-toast {
+    right: 14px;
+    bottom: 14px;
+    width: calc(100vw - 28px);
+  }
+}
+
+@media (max-width: 380px) {
+  .bunker-main {
+    width: calc(100% - 22px);
+  }
+
+  .bunker-nav {
+    width: calc(100% - 22px);
+  }
+
+  .bunker-nav-inner {
+    gap: 3px;
+    padding-inline: 7px;
+  }
+
+  .bunker-brand-mark {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .bunker-nav-link,
+  .bunker-nav-icon,
+  .bunker-nav-exit {
+    width: 36px;
+    min-height: 38px;
+  }
+
+  .bunker-hero h1 {
+    font-size: 48px;
+  }
+
+  .bunker-category-card {
+    min-height: 138px;
+    padding: 13px 9px;
+  }
+
+  .bunker-catalog-grid {
+    gap: 8px;
+  }
+
+  .bunker-catalog-item .bunker-card {
+    height: 294px;
+    min-height: 294px;
+  }
+
+  .bunker-card-copy {
+    min-height: 110px;
+    padding: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
