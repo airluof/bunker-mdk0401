@@ -122,7 +122,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                 <div className="space-y-2 mt-2">
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-sky-400">ФАЗА 1:</span>
-                    <span><strong>Вскрытие характеристик.</strong> В первом раунде каждый открывает Роль; в раундах 2–5 — одну оставшуюся закрытую карту на выбор. Очерёдности нет: карта становится видна всем сразу после выбора.</span>
+                    <span><strong>Вскрытие характеристик.</strong> В каждом раунде каждый живой игрок выбирает любую ещё не раскрытую карту. Категория свободная, включая Роль. Выборы скрыты до общего вскрытия: после выбора всех участников карты открываются одновременно.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-amber-400">ФАЗА 2:</span>
@@ -182,7 +182,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
                   <div className="font-mono-tech text-emerald-400 font-bold">Вскрытие карт · принято для цифровой версии</div>
-                  <p className="text-slate-300 text-[11px] mt-0.5">Раунд 1 — Роль. Раунды 2–5 — любая оставшаяся закрытая карта. Каждый выбирает самостоятельно; выбранная карта сразу открывается всем.</p>
+                  <p className="text-slate-300 text-[11px] mt-0.5">В каждом раунде можно выбрать любую ещё не раскрытую карту. Выборы остаются скрытыми и открываются одновременно, когда все живые игроки готовы.</p>
                 </div>
 
                 <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
