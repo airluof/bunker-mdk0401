@@ -60,9 +60,9 @@ for (const [, id, status] of actionRows) {
   if (!ids.has(id)) failures.push('Unknown action id: ' + id);
   actionStatusCounts[status] += 1;
 }
-if (actionStatusCounts.ready !== 14) failures.push('Expected 14 ready actions.');
+if (actionStatusCounts.ready !== 20) failures.push('Expected 20 ready actions.');
 if (actionStatusCounts.blocked !== 2) failures.push('Expected two blocked partial actions.');
-if (actionStatusCounts['needs-rule'] !== 14) failures.push('Expected 14 actions requiring rule clarification.');
+if (actionStatusCounts['needs-rule'] !== 8) failures.push('Expected eight actions requiring rule clarification.');
 
 for (const id of ids) {
   if (!guidance.includes(id)) failures.push('No relationship or rule guidance for card ' + id + '.');
