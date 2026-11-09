@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Copy, RefreshCw, Users, Crown, DoorOpen, XCircle, Settings2 } from 'lucide-react';
+import { Copy, RefreshCw, Users, Crown, DoorOpen, XCircle, Settings2, UserMinus } from 'lucide-react';
 import type { RoomSnapshot } from '../services/onlineRooms';
 import { OnlineConnectionStatusView } from './OnlineConnectionStatus';
 import type { OnlineConnectionStatus } from './OnlineConnectionStatus';
@@ -14,6 +14,7 @@ interface OnlineRoomLobbyProps {
   onRefresh: () => void;
   onTakeover: () => void;
   onExit: () => void;
+  onKickMember: (memberId: string) => void;
   onSaveSettings: (maxPlayers: number) => void;
   onStartGame: () => void;
   onAddTestBots: () => void;
@@ -29,6 +30,7 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
   onRefresh,
   onTakeover,
   onExit,
+  onKickMember,
   onSaveSettings,
   onStartGame,
   onAddTestBots,
@@ -140,9 +142,21 @@ export const OnlineRoomLobby: React.FC<OnlineRoomLobbyProps> = ({
                   <strong>{player.display_name}</strong>
                   <small>{player.is_bot ? 'Тестовый бот · без управления' : player.technical_role === 'host' ? 'Создатель комнаты' : 'Игрок'}</small>
                 </span>
-                {player.technical_role === 'host' && (
+                {player.technical_role === 'host' ? (
                   <span className="bunker-host-label"><Crown aria-hidden="true" /> Ведущий</span>
-                )}
+                ) : isHost && snapshot.room.status === 'lobby' ? (
+                  <button
+                    type="button"
+                    className="bunker-lobby-kick"
+                    onClick={() => onKickMember(player.member_id)}
+                    disabled={busy}
+                    title={`Исключить ${player.display_name} из комнаты`}
+                    aria-label={`Исключить ${player.display_name} из комнаты`}
+                  >
+                    <UserMinus aria-hidden="true" />
+                    <span>Исключить</span>
+                  </button>
+                ) : null}
               </div>
             ))}
             {snapshot.room.status === 'lobby' && Array.from(
