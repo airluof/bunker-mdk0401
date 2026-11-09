@@ -31,6 +31,8 @@ jobs:
 
       - name: Validate original card catalog
         run: npm run db:import-cards -- --dry-run
+      - name: Verify card texts and image assets against source export
+        run: npm run db:validate-source-cards
 
       - name: Validate Supabase migration structure
         run: npm run db:validate-migration
