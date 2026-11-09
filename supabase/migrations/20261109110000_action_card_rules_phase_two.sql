@@ -900,7 +900,8 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $$2
+as $$
+declare
   v_user_id uuid := auth.uid();
   v_room public.rooms%rowtype;
   v_session public.game_sessions%rowtype;
@@ -1162,7 +1163,7 @@ begin
 
   return v_result;
 end;
-$;
+$$;
 
 revoke all on function public.api_resolve_vote(uuid, uuid) from public, anon;
 grant execute on function public.api_resolve_vote(uuid, uuid) to authenticated;
