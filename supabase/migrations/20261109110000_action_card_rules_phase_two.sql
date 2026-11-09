@@ -1,5 +1,18 @@
 begin;
 
+-- Permit explicitly marked Skill copies while preserving one physical source
+-- card instance per session for every regular deck card.
+alter table public.card_instances
+  add column if not exists is_copy boolean not null default false;
+
+alter table public.card_instances
+  drop constraint if exists card_instances_session_id_card_id_key;
+
+create unique index if not exists card_instances_one_source_card_per_session
+  on public.card_instances (session_id, card_id)
+  where is_copy = false;
+
+
 -- Enable six Action cards whose digital procedures are now explicit and testable.
 update public.card_catalog
 set effect_status = 'approved',
@@ -203,7 +216,7 @@ begin
     else null
   end;
 
-  if v_action.card_id in ('action_05', 'action_06', 'action_12', 'action_14', 'action_18', 'action_20')
+  if v_action.card_id in ('action_03', 'action_05', 'action_06', 'action_12', 'action_14', 'action_18', 'action_20')
      and p_target_member_id is not null
      and exists (
        select 1
@@ -349,11 +362,11 @@ begin
     where id = v_target_card.id;
     insert into public.card_instances (
       session_id, room_id, owner_member_id, card_id, catalog_version,
-      zone, instance_status, revealed_at, revealed_by_member_id
+      zone, instance_status, revealed_at, revealed_by_member_id, is_copy
     )
     values (
       v_session.id, p_room_id, v_actor_id, v_target_card.card_id, v_target_card.catalog_version,
-      'hand', 'revealed', now(), v_actor_id
+      'hand', 'revealed', now(), v_actor_id, true
     );
     select cc.title_original, cc.description_original
       into v_card_title, v_card_description
