@@ -678,6 +678,7 @@ export function App() {
     actionId: string,
     targetMemberId?: string,
     targetCardInstanceId?: string,
+    actionChoice?: 'double_vote' | 'tie_save',
   ) => runOnlineGameAction(
     () => actionId === 'action_11'
       ? useOnlineExploitSkillCard(onlineRoom!.roomId, cardInstanceId)
@@ -686,6 +687,7 @@ export function App() {
           cardInstanceId,
           targetMemberId,
           targetCardInstanceId,
+          actionChoice,
         ),
     actionId === 'action_11'
       ? 'Эксплойт применён. В личную руку добавлен второй Навык.'
