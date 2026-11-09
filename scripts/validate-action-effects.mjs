@@ -190,6 +190,10 @@ requireText(files.phaseTwoMigration, /action_07_modifier/i, 'Veto vote modifier 
 requireText(files.phaseTwoMigration, /ACTION_TARGET_PROTECTED/i, 'Security Sandbox is not enforced on targeted actions.');
 requireText(files.phaseTwoMigration, /CLONE_TARGET_NOT_ADJACENT/i, 'Clone VM must validate a circular neighbour target.');
 requireText(files.phaseTwoMigration, /FACTORY_RESET_DECK_INCOMPLETE/i, 'Factory Reset must fail atomically when any of four decks is empty.');
+requireText(files.phaseTwoMigration, /add column if not exists is_copy boolean/i, 'Cloned Skill instances need an explicit copy marker.');
+requireText(files.phaseTwoMigration, /where is_copy = false/i, 'Only original source card instances should be unique in a session.');
+requireText(files.phaseTwoMigration, /'hand', 'revealed', now\(\), v_actor_id, true/i, 'Clone VM must mark duplicated Skill instances as copies.');
+requireText(files.phaseTwoMigration, /v_action.card_id <> 'action_03' or coalesce\(v_target_alive, false\)/i, 'Sandbox must not protect an expelled Baggage-trade target.');
 requireText(files.phaseTwoMigration, /set zone = 'discard',[\s\S]*?owner_member_id = null/i, 'Factory Reset must discard the old four-category hand.');
 requireText(files.phaseTwoMigration, /create or replace function public\.api_resolve_vote/i, 'Vote resolver must apply Rollback and Veto effects.');
 requireText(files.phaseTwoMigration, /tie_saved/i, 'Vote result must expose Veto tie protection.');
