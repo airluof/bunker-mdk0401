@@ -172,7 +172,19 @@ function formatOnlineError(error: unknown, fallback: string): string {
     return 'Сейчас нельзя передать управление этой комнатой.';
   }
   if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
-    return 'Создатель должен закрыть комнату, прежде чем выйти из неё.';
+    return 'Создатель должен закрыть комнату ожидания, прежде чем выйти из неё.';
+  }
+  if (normalized.includes('KICK_ONLY_ALLOWED_IN_LOBBY')) {
+    return 'Исключать участников можно только до начала партии.';
+  }
+  if (normalized.includes('HOST_ONLY')) {
+    return 'Исключить участника может только ведущий комнаты.';
+  }
+  if (normalized.includes('CANNOT_KICK_ROOM_HOST')) {
+    return 'Нельзя исключить ведущего комнаты.';
+  }
+  if (normalized.includes('KICK_TARGET_NOT_AVAILABLE')) {
+    return 'Этот участник уже покинул комнату или больше не доступен.';
   }
   if (normalized.includes('BOTS_ALLOWED_ONLY_IN_TEST_ROOMS')) {
     return 'Боты разрешены только в тестовых комнатах. Создайте тестовую комнату, чтобы добавить их.';
@@ -196,7 +208,7 @@ function formatOnlineError(error: unknown, fallback: string): string {
     return 'Не все реальные участники ещё проголосовали.';
   }
   if (normalized.includes('VOTE_TIE_NEEDS_RULE')) {
-    return 'Получилась ничья. Для обычной партии способ её разрешения ещё не утверждён.';
+    return 'Получилась ничья. В этом раунде никто не выбывает.';
   }
   if (normalized.includes('AUDIT_PLAN_INVALID')) {
     return 'План восстановления должен содержать от 20 до 12 000 символов.';
