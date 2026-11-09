@@ -109,6 +109,8 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onFinishGame,
 }) => {
   const [selectedVote, setSelectedVote] = useState<string | null>(null);
+  // Accept snapshots from deployments whose generated RPC type is older.
+  const resultHasTieSaved = (snapshot.current_result as { tie_saved?: boolean }).tie_saved === true;
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [auditDraft, setAuditDraft] = useState(snapshot.audit_plan.plan_text || '');
 
@@ -382,7 +384,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 ? ` · ${snapshot.current_result.vote_count} голосов`
                 : ''}
             </p>
-            {(snapshot.public_state?.tie_saved === true || snapshot.current_result.tie_saved === true) && (
+            {(snapshot.public_state?.tie_saved === true || resultHasTieSaved) && (
               <p className="bunker-help">Право Вето сработало: владелец карты спасён при равенстве голосов.</p>
             )}
             {snapshot.current_result.tie_break_used && isTestMode && (
