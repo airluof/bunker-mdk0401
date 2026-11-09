@@ -218,6 +218,7 @@ begin
 
   if v_action.card_id in ('action_03', 'action_05', 'action_06', 'action_12', 'action_14', 'action_18', 'action_20')
      and p_target_member_id is not null
+     and (v_action.card_id <> 'action_03' or coalesce(v_target_alive, false))
      and exists (
        select 1
        from jsonb_array_elements(coalesce(v_state->'action_shields', '[]'::jsonb)) shield
