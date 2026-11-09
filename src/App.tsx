@@ -101,6 +101,22 @@ function isValidOnlineInviteCode(value: string): boolean {
   return /^[A-Z0-9]{5}$/.test(normalized) || /^[0-9A-F]{32}$/.test(normalized);
 }
 
+function getSavedOnlineInviteCode(): string | undefined {
+  try {
+    // Migrate invitation codes saved by the previous sessionStorage version.
+    const inviteCode = localStorage.getItem(ONLINE_INVITE_STORAGE_KEY)
+      || sessionStorage.getItem(ONLINE_INVITE_STORAGE_KEY);
+    if (inviteCode) {
+      localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+    }
+    sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+    return inviteCode || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function formatOnlineError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error || '');
   const normalized = message.toUpperCase();
@@ -250,7 +266,7 @@ export function App() {
         setOnlineRoom({
           roomId: storedRoomId,
           memberId: snapshot.my_member_id,
-          inviteCode: localStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+          inviteCode: getSavedOnlineInviteCode(),
           snapshot,
         });
         setSavedRoomId(null);
@@ -405,7 +421,7 @@ export function App() {
       setOnlineRoom({
         roomId: storedRoomId,
         memberId: snapshot.my_member_id,
-        inviteCode: localStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+        inviteCode: getSavedOnlineInviteCode(),
         snapshot,
       });
       setSavedRoomId(null);
@@ -424,6 +440,7 @@ export function App() {
   const handleForgetSavedOnlineRoom = () => {
     localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
     localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
     setSavedRoomId(null);
     setOnlineError(null);
   };
@@ -463,8 +480,10 @@ export function App() {
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       if (result.invite_code) {
         localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       } else {
         localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       }
       setSavedRoomId(null);
 
@@ -728,6 +747,7 @@ export function App() {
         const result = await exitOnlineTestRoom(onlineRoom.roomId);
         localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
         localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         setOnlineRoom(null);
         setGameState(null);
         clearGameState();
@@ -742,6 +762,7 @@ export function App() {
 
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
       localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       setOnlineRoom(null);
       setGameState(null);
       clearGameState();
