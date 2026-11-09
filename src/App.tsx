@@ -492,7 +492,7 @@ export function App() {
         localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       }
-      setSavedRoomId(null);
+      setSavedRoomId(result.room_id);
 
       const snapshot = await getOnlineRoomSnapshot(result.room_id);
       setOnlineRoom({
@@ -501,6 +501,7 @@ export function App() {
         inviteCode: result.invite_code,
         snapshot,
       });
+      setSavedRoomId(null);
       setGameState(null);
       clearGameState();
       sound.playCrisisAlert();
@@ -533,7 +534,7 @@ export function App() {
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
       sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
-      setSavedRoomId(null);
+      setSavedRoomId(result.room_id);
 
       const snapshot = await getOnlineRoomSnapshot(result.room_id);
       setOnlineRoom({
@@ -542,6 +543,7 @@ export function App() {
         inviteCode,
         snapshot,
       });
+      setSavedRoomId(null);
       setGameState(null);
       clearGameState();
     } catch (error: unknown) {
