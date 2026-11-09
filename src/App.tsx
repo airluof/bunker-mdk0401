@@ -108,7 +108,6 @@ function getSavedOnlineInviteCode(): string | undefined {
       || sessionStorage.getItem(ONLINE_INVITE_STORAGE_KEY);
     if (inviteCode) {
       localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
-      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
     }
     sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
     return inviteCode || undefined;
@@ -440,7 +439,7 @@ export function App() {
   const handleForgetSavedOnlineRoom = () => {
     localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
     localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
-        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+    sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
     setSavedRoomId(null);
     setOnlineError(null);
   };
@@ -480,7 +479,7 @@ export function App() {
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       if (result.invite_code) {
         localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
-      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       } else {
         localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
@@ -525,6 +524,7 @@ export function App() {
       const result = await joinOnlineRoom(inviteCode, displayName);
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       setSavedRoomId(null);
 
       const snapshot = await getOnlineRoomSnapshot(result.room_id);
@@ -748,6 +748,7 @@ export function App() {
         localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
         localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        setSavedRoomId(null);
         setOnlineRoom(null);
         setGameState(null);
         clearGameState();
@@ -762,7 +763,8 @@ export function App() {
 
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
       localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
-        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+      setSavedRoomId(null);
       setOnlineRoom(null);
       setGameState(null);
       clearGameState();
