@@ -174,8 +174,8 @@ function formatOnlineError(error: unknown, fallback: string): string {
   if (normalized.includes('HOST_MUST_CLOSE_ROOM')) {
     return 'Создатель должен закрыть комнату ожидания, прежде чем выйти из неё.';
   }
-  if (normalized.includes('KICK_ONLY_ALLOWED_IN_LOBBY')) {
-    return 'Исключать участников можно только до начала партии.';
+  if (normalized.includes('KICK_NOT_ALLOWED_IN_THIS_ROOM_STATE')) {
+    return 'В этой комнате сейчас нельзя исключать участников.';
   }
   if (normalized.includes('HOST_ONLY')) {
     return 'Исключить участника может только ведущий комнаты.';
@@ -333,6 +333,18 @@ export function App() {
           })
           .catch((error: unknown) => {
             if (!cancelled) {
+              const message = error instanceof Error ? error.message.toUpperCase() : '';
+              if (message.includes('NOT_ROOM_MEMBER')) {
+                localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+                localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+                sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+                setSavedRoomId(null);
+                setOnlineRoom(null);
+                setGameState(null);
+                clearGameState();
+                showToast('Вас исключили из комнаты.');
+                return;
+              }
               setOnlineConnectionStatus('reconnecting');
               setOnlineError(formatOnlineError(error, 'Не удалось обновить комнату.'));
             }
@@ -650,7 +662,8 @@ export function App() {
     if (!onlineRoom) return;
     const target = onlineRoom.snapshot.players.find((player) => player.member_id === memberId);
     const targetName = target?.display_name || 'этого участника';
-    if (!window.confirm(`Исключить ${targetName} из комнаты ожидания?`)) return;
+    const targetPlace = onlineRoom.snapshot.room.status === 'in_progress' ? 'из партии' : 'из комнаты ожидания';
+    if (!window.confirm(`Исключить ${targetName} ${targetPlace}?`)) return;
 
     setOnlineBusy(true);
     setOnlineError(null);
