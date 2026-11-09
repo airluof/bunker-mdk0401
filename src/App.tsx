@@ -120,6 +120,14 @@ function formatOnlineError(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error || '');
   const normalized = message.toUpperCase();
 
+  if (
+    normalized.includes('FAILED TO FETCH') ||
+    normalized.includes('NETWORK REQUEST FAILED') ||
+    normalized.includes('NETWORKERROR') ||
+    normalized.includes('ERR_INTERNET_DISCONNECTED')
+  ) {
+    return 'Нет соединения с сервером. Проверьте интернет и повторите попытку — сохранённая комната не удалится.';
+  }
   if (normalized.includes('SUPABASE_NOT_CONFIGURED')) {
     return 'Онлайн-режим не настроен. Проверьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY.';
   }
@@ -1525,7 +1533,7 @@ export function App() {
                 <div className="bunker-panel bunker-access-panel" aria-live="polite">
                   <div>
                     <h3>Сохранённая комната</h3>
-                    <p>В этом браузере осталась комната из предыдущего сеанса. Попробуйте восстановить подключение — код приглашения и данные комнаты сохранены.</p>
+                    <p>В этом браузере осталась комната из предыдущего сеанса. Попробуйте восстановить подключение — код приглашения и данные комнаты сохранены. Очистка удалит только локальные данные, но не закроет комнату на сервере.</p>
                   </div>
                   <div className="bunker-room-create-options">
                     <button
@@ -1543,7 +1551,7 @@ export function App() {
                       disabled={onlineBusy}
                       className="bunker-button bunker-button-secondary"
                     >
-                      Очистить сохранённую комнату
+                      Очистить данные на этом устройстве
                     </button>
                   </div>
                 </div>
