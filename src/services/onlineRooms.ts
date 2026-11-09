@@ -79,6 +79,7 @@ export interface RoomSnapshot {
     eliminated_name?: string | null;
     vote_count?: number | null;
     tie_break_used?: boolean;
+    tie_saved?: boolean;
   };
   bunker_capacity: number | null;
   audit_plan: {
