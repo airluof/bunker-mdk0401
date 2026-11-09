@@ -190,16 +190,16 @@ requireText(files.phaseTwoMigration, /action_07_modifier/i, 'Veto vote modifier 
 requireText(files.phaseTwoMigration, /ACTION_TARGET_PROTECTED/i, 'Security Sandbox is not enforced on targeted actions.');
 requireText(files.phaseTwoMigration, /CLONE_TARGET_NOT_ADJACENT/i, 'Clone VM must validate a circular neighbour target.');
 requireText(files.phaseTwoMigration, /FACTORY_RESET_DECK_INCOMPLETE/i, 'Factory Reset must fail atomically when any of four decks is empty.');
-requireText(files.phaseTwoMigration, /set zone = 'discard',[\\s\\S]*?owner_member_id = null/i, 'Factory Reset must discard the old four-category hand.');
-requireText(files.phaseTwoMigration, /create or replace function public\\.api_resolve_vote/i, 'Vote resolver must apply Rollback and Veto effects.');
+requireText(files.phaseTwoMigration, /set zone = 'discard',[\s\S]*?owner_member_id = null/i, 'Factory Reset must discard the old four-category hand.');
+requireText(files.phaseTwoMigration, /create or replace function public\.api_resolve_vote/i, 'Vote resolver must apply Rollback and Veto effects.');
 requireText(files.phaseTwoMigration, /tie_saved/i, 'Vote result must expose Veto tie protection.');
-requireText(files.service, /p_action_choice: actionChoice \\?\\? null/i, 'Client must pass the selected Veto mode.');
-requireText(files.actionControls, /action_02: \\{ description:/i, 'Rollback control is missing.');
-requireText(files.actionControls, /action_05: \\{ description:/i, 'gpupdate control is missing.');
-requireText(files.actionControls, /action_07: \\{ description:/i, 'Veto control is missing.');
-requireText(files.actionControls, /action_09: \\{ description:/i, 'Security Sandbox control is missing.');
-requireText(files.actionControls, /action_14: \\{ description:/i, 'Clone VM control is missing.');
-requireText(files.actionControls, /action_29: \\{ description:/i, 'Factory Reset control is missing.');
+requireText(files.service, /p_action_choice: actionChoice \?\? null/i, 'Client must pass the selected Veto mode.');
+requireText(files.actionControls, /action_02: \{ description:/i, 'Rollback control is missing.');
+requireText(files.actionControls, /action_05: \{ description:/i, 'gpupdate control is missing.');
+requireText(files.actionControls, /action_07: \{ description:/i, 'Veto control is missing.');
+requireText(files.actionControls, /action_09: \{ description:/i, 'Security Sandbox control is missing.');
+requireText(files.actionControls, /action_14: \{ description:/i, 'Clone VM control is missing.');
+requireText(files.actionControls, /action_29: \{ description:/i, 'Factory Reset control is missing.');
 
 
 if (failures.length) {
