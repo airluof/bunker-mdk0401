@@ -13,6 +13,7 @@ interface ActionPlayer {
   display_name: string;
   is_alive: boolean;
   membership_status: 'active' | 'left';
+  joined_at?: string;
 }
 
 interface ActionCrisis {
@@ -33,32 +34,39 @@ interface ActionCardControlsProps {
   vulnerabilitiesDisabledRound: number | null;
   ignoredCrisisIds: string[];
   busy: boolean;
-  onUse: (cardInstanceId: string, actionId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
+  onUse: (
+    cardInstanceId: string,
+    actionId: string,
+    targetMemberId?: string,
+    targetCardInstanceId?: string,
+    actionChoice?: 'double_vote' | 'tie_save',
+  ) => void;
 }
 
-const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 'player' | 'expelled' | 'hot-swap' | 'crisis' }> = {
+const AVAILABLE_EFFECTS: Record<string, { description: string; target: 'none' | 'player' | 'expelled' | 'hot-swap' | 'crisis' | 'self-or-player' | 'neighbour' | 'choice' }> = {
+  action_02: { description: 'Отменить результат текущего голосования. До конца раунда никто не выбывает.', target: 'none' },
   action_03: { description: 'Обменять свой Багаж с колодой или Багажом изгнанного игрока.', target: 'hot-swap' },
+  action_05: { description: 'В фазе брифинга или голосования заставить соперника раскрыть одну случайную закрытую карту.', target: 'player' },
   action_06: { description: 'Поменять карты Ролей с выбранным участником.', target: 'player' },
+  action_07: { description: 'Во время голосования выбрать один режим: двойной голос или спасение при равенстве.', target: 'choice' },
+  action_09: { description: 'Защитить себя или другого живого игрока от направленных действий до конца текущего раунда.', target: 'self-or-player' },
   action_08: { description: 'Посмотреть следующую скрытую карту будущего Кризиса. Результат увидите только вы.', target: 'none' },
   action_10: { description: 'Немедленно раскрыть Багаж всех участников.', target: 'none' },
   action_11: { description: 'Получить вторую карту Навыка из колоды. Она останется скрытой, пока вы не решите раскрыть её в одном из следующих раундов.', target: 'none' },
-  action_12: { description: 'Списать Багаж выбранного участника. Эффект сработает, если у него ровно одна карта Багажа.', target: 'player' },
+  action_12: { description: 'Списать самую старую карту Багажа выбранного участника. Если предметов несколько, выбирается первый полученный.', target: 'player' },
+  action_14: { description: 'Скопировать самую старую карту Навыка ближайшего живого соседа справа или слева. Копия станет открытой.', target: 'neighbour' },
   action_15: { description: 'Сбросить выбранный активный Кризис и открыть следующий из колоды.', target: 'crisis' },
   action_16: { description: 'Забрать Багаж у выбранного изгнанного участника.', target: 'expelled' },
   action_17: { description: 'Сократить текущий брифинг или задать 30 секунд для предстоящего брифинга этого раунда.', target: 'none' },
   action_18: { description: 'Поменять картами Уязвимостей с выбранным участником.', target: 'player' },
   action_20: { description: 'Посмотреть все скрытые карты выбранного участника. Результат увидите только вы.', target: 'player' },
   action_24: { description: 'Взять дополнительную карту Багажа из колоды.', target: 'none' },
+  action_29: { description: 'Сбросить все текущие Роль, Навыки, Багаж и Уязвимости, затем получить по одной новой закрытой карте каждой категории.', target: 'none' },
 };
 
 const PENDING_RULES: Record<string, string> = {
   action_01: 'Нужно определить, кто задаёт вопрос, кто оценивает ответ и как именно добавляется голос.',
-  action_02: 'Нужно определить момент отката и какие результаты или действия отменяются.',
-  action_05: 'Не указано, какую категорию закрытой карты нужно раскрыть.',
-  action_07: 'В исходнике два разных варианта эффекта: двойной голос или спасение при ничьей.',
-  action_09: 'Нужно определить точную область защиты и её взаимодействие с другими действиями.',
   action_13: 'Нужны критерий победы в дуэли, судья и длительность иммунитета.',
-  action_14: 'Нужно определить соседа справа/слева и что именно копируется.',
   action_19: 'Не определено, кто считается похожим игроком и как округляется половина голосов.',
   action_21: 'Сервер сохраняет отметку о выбранном Кризисе, но финальный аудит пока не исключает его из проверки. Карта отключена до появления структурированного аудита.',
   action_25: 'В игре нет формализованных автоматических эффектов Уязвимостей, которые Safe Boot мог бы отключить. Карта отключена до реализации этой системы.',
@@ -66,7 +74,6 @@ const PENDING_RULES: Record<string, string> = {
   action_23: 'Нужно определить влияние пары на вместимость, голосование и изгнание.',
   action_26: 'Нужен порядок отправки запроса преподавателю и получения подсказки.',
   action_27: 'Нужно определить, как подтверждаются одинаковые роли и заменяет ли это обычное голосование.',
-  action_29: 'Нужно определить состав нового набора из четырёх карт и судьбу пятой карты.',
   action_30: 'Нужно определить, что считается ошибкой и кто оценивает защиту плана.',
 };
 
@@ -86,7 +93,11 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
 }) => {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const activePlayers = useMemo(
-    () => players.filter((player) => player.membership_status === 'active'),
+    () => players.filter((player) => player.membership_status === 'active' && player.is_alive),
+    [players],
+  );
+  const expelledPlayers = useMemo(
+    () => players.filter((player) => player.membership_status === 'active' && !player.is_alive),
     [players],
   );
   const availableCards = cards.filter((card) =>
@@ -97,7 +108,12 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
   const submit = (card: ActionCard) => {
     const mode = AVAILABLE_EFFECTS[card.card_id]?.target;
     const selected = selections[card.instance_id] || (mode === 'hot-swap' ? 'deck' : '');
-    if (mode === 'player' || mode === 'expelled') {
+    if (mode === 'choice') {
+      if (selected !== 'double_vote' && selected !== 'tie_save') return;
+      onUse(card.instance_id, card.card_id, undefined, undefined, selected);
+      return;
+    }
+    if (mode === 'player' || mode === 'expelled' || mode === 'self-or-player' || mode === 'neighbour') {
       if (!selected) return;
       onUse(card.instance_id, card.card_id, selected);
       return;
@@ -128,24 +144,45 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
             {availableCards.map((card) => {
               const config = AVAILABLE_EFFECTS[card.card_id];
               const otherPlayers = activePlayers.filter((player) => player.member_id !== myMemberId);
-              const eligiblePlayers = config.target === 'expelled'
-                ? otherPlayers.filter((player) => !player.is_alive)
-                : otherPlayers;
+              const neighbours = (() => {
+                const ordered = [...activePlayers].sort((a, b) =>
+                  (a.joined_at || '').localeCompare(b.joined_at || '') || a.member_id.localeCompare(b.member_id)
+                );
+                const index = ordered.findIndex((player) => player.member_id === myMemberId);
+                if (index < 0 || ordered.length < 2) return [];
+                const left = ordered[(index - 1 + ordered.length) % ordered.length];
+                const right = ordered[(index + 1) % ordered.length];
+                return [...new Map([left, right].map((player) => [player.member_id, player])).values()];
+              })();
               const selected = selections[card.instance_id] || (config.target === 'hot-swap' ? 'deck' : '');
               const options = config.target === 'crisis'
                 ? crises.map((crisis) => ({ value: crisis.instance_id, label: crisis.title }))
-                : config.target === 'hot-swap'
+                : config.target === 'choice'
                   ? [
-                      { value: 'deck', label: 'Взять случайную карту из колоды Багажа' },
-                      ...eligiblePlayers.filter((player) => !player.is_alive).map((player) => ({
-                        value: player.member_id,
-                        label: 'Обмен с изгнанным: ' + player.display_name,
-                      })),
+                      { value: 'double_vote', label: 'Мой голос считается за два' },
+                      { value: 'tie_save', label: 'Спастись при равенстве голосов' },
                     ]
-                  : eligiblePlayers.map((player) => ({
-                      value: player.member_id,
-                      label: player.display_name + (player.is_alive ? '' : ' · изгнан'),
-                    }));
+                  : config.target === 'hot-swap'
+                    ? [
+                        { value: 'deck', label: 'Взять случайную карту из колоды Багажа' },
+                        ...expelledPlayers.map((player) => ({
+                          value: player.member_id,
+                          label: 'Обмен с изгнанным: ' + player.display_name,
+                        })),
+                      ]
+                    : config.target === 'expelled'
+                      ? expelledPlayers.map((player) => ({
+                          value: player.member_id,
+                          label: player.display_name + ' · изгнан',
+                        }))
+                      : config.target === 'self-or-player'
+                        ? [
+                            { value: myMemberId, label: 'Защитить себя' },
+                            ...otherPlayers.map((player) => ({ value: player.member_id, label: player.display_name })),
+                          ]
+                        : config.target === 'neighbour'
+                          ? neighbours.map((player) => ({ value: player.member_id, label: player.display_name + ' · сосед' }))
+                          : otherPlayers.map((player) => ({ value: player.member_id, label: player.display_name }));
               const needsSelection = config.target !== 'none';
               const selectionValid = config.target === 'none'
                 || (config.target === 'hot-swap' && selected === 'deck')
@@ -168,7 +205,7 @@ export const ActionCardControls: React.FC<ActionCardControlsProps> = ({
                         disabled={busy || options.length === 0}
                         aria-label={'Цель действия: ' + card.title}
                       >
-                        <option value="">Выберите цель</option>
+                        <option value="">{config.target === 'choice' ? 'Выберите режим' : 'Выберите цель'}</option>
                         {options.map((option) => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
