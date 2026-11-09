@@ -322,6 +322,7 @@ export async function useOnlineActionEffect(
   cardInstanceId: string,
   targetMemberId?: string,
   targetCardInstanceId?: string,
+  actionChoice?: 'double_vote' | 'tie_save',
 ) {
   const client = getClient();
   await ensureAnonymousSession();
@@ -331,6 +332,7 @@ export async function useOnlineActionEffect(
     p_target_member_id: targetMemberId ?? null,
     p_target_card_instance_id: targetCardInstanceId ?? null,
     p_command_id: crypto.randomUUID(),
+    p_action_choice: actionChoice ?? null,
   });
   throwIfError(error);
   return data as {
