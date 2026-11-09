@@ -9,6 +9,7 @@
     "lint": "tsc --noEmit",
     "preview": "vite preview --host 0.0.0.0 --port 3000",
     "db:import-cards": "node scripts/import-cards-to-supabase.mjs",
+    "db:validate-source-cards": "node scripts/validate-source-card-catalog.mjs",
     "db:validate-migration": "node scripts/validate-supabase-migration.mjs",
     "db:validate-actions": "node scripts/validate-action-effects.mjs && node scripts/validate-card-guidance.mjs",
     "db:validate-runtime": "node scripts/validate-runtime-contract.mjs",
