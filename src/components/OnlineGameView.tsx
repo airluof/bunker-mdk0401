@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   RefreshCw, Users, Crown, DoorOpen, LockKeyhole, Radio, Timer,
-  Vote, ArrowRight, CheckCircle2, Circle, Skull, Bot, ShieldCheck, Zap,
+  Vote, ArrowRight, CheckCircle2, Circle, Skull, Bot, ShieldCheck, Zap, UserMinus,
 } from 'lucide-react';
 import type { Card, CardCategory } from '../types/game';
 import { CATEGORY_CONFIG } from '../data/cards';
@@ -21,6 +21,7 @@ interface OnlineGameViewProps {
   onRefresh: () => void;
   onTakeover: () => void;
   onExit: () => void;
+  onKickMember: (memberId: string) => void;
   onInspectCard: (card: Card) => void;
   onRevealCard: (instanceId: string) => void;
   onUseActionCard: (instanceId: string) => void;
@@ -95,6 +96,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onRefresh,
   onTakeover,
   onExit,
+  onKickMember,
   onInspectCard,
   onRevealCard,
   onUseActionCard,
@@ -507,10 +509,12 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             <RefreshCw aria-hidden="true" />
             {busy ? 'Синхронизируем…' : 'Синхронизировать'}
           </button>
-          <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
-            <DoorOpen aria-hidden="true" />
-            Выйти из партии
-          </button>
+          {!isTestMode && (
+            <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
+              <DoorOpen aria-hidden="true" />
+              Выйти из партии
+            </button>
+          )}
           {!isHost && isAlive && (
             <button type="button" onClick={onTakeover} disabled={busy} className="bunker-button bunker-button-secondary">
               <Crown aria-hidden="true" />
@@ -713,6 +717,19 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                     </small>
                   </span>
                   {player.technical_role === 'host' && <span className="bunker-host-label"><Crown aria-hidden="true" /> Ведущий</span>}
+                  {isHost && player.member_id !== myMemberId && (
+                    <button
+                      type="button"
+                      className="bunker-lobby-kick"
+                      onClick={() => onKickMember(player.member_id)}
+                      disabled={busy}
+                      title={`Исключить ${player.display_name} из партии`}
+                      aria-label={`Исключить ${player.display_name} из партии`}
+                    >
+                      <UserMinus aria-hidden="true" />
+                      <span>Исключить</span>
+                    </button>
+                  )}
                   {player.is_bot && <Bot aria-label="Бот" />}
                   {phase === 'voting' && player.votes_received > 0 && <strong>{player.votes_received} гол.</strong>}
                 </div>
