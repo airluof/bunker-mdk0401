@@ -109,9 +109,8 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onFinishGame,
 }) => {
   const [selectedVote, setSelectedVote] = useState<string | null>(null);
-  // Accept snapshots from deployments whose generated RPC type is older.
-  const resultHasTieSaved =
-    'tie_saved' in snapshot.current_result && snapshot.current_result.tie_saved === true;
+  // The API may return tie_saved before the client snapshot type is regenerated.
+  const resultHasTieSaved = Reflect.get(snapshot.current_result, 'tie_saved') === true;
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [auditDraft, setAuditDraft] = useState(snapshot.audit_plan.plan_text || '');
 
