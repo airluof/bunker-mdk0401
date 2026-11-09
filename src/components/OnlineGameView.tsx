@@ -25,7 +25,13 @@ interface OnlineGameViewProps {
   onRevealCard: (instanceId: string) => void;
   onUseActionCard: (instanceId: string) => void;
   onUseHotfixCard: (actionInstanceId: string, vulnerabilityInstanceId: string) => void;
-  onUseActionEffect: (cardInstanceId: string, actionId: string, targetMemberId?: string, targetCardInstanceId?: string) => void;
+  onUseActionEffect: (
+    cardInstanceId: string,
+    actionId: string,
+    targetMemberId?: string,
+    targetCardInstanceId?: string,
+    actionChoice?: 'double_vote' | 'tie_save',
+  ) => void;
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
@@ -367,13 +373,18 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <div className="bunker-online-action-panel">
           <div>
             <span className="bunker-kicker">Результат раунда</span>
-            <h2>Бункер покидает участник</h2>
+            <h2>{snapshot.public_state?.no_elimination === true ? 'Голосование отменено' : 'Бункер покидает участник'}</h2>
             <p>
-              {snapshot.current_result.eliminated_name || 'Результат ещё не получен'}
-              {snapshot.current_result.vote_count != null
+              {snapshot.public_state?.no_elimination === true
+                ? 'По карте Rollback в этом раунде никто не выбывает.'
+                : snapshot.current_result.eliminated_name || 'Результат ещё не получен'}
+              {snapshot.public_state?.no_elimination !== true && snapshot.current_result.vote_count != null
                 ? ` · ${snapshot.current_result.vote_count} голосов`
                 : ''}
             </p>
+            {snapshot.current_result.tie_saved === true && (
+              <p className="bunker-help">Право Вето сработало: владелец карты спасён при равенстве голосов.</p>
+            )}
             {snapshot.current_result.tie_break_used && isTestMode && (
               <p className="bunker-help">В тестовом режиме ничья разрешена случайным выбором только для проверки дальнейшего игрового цикла. Это не утверждённое правило обычной партии.</p>
             )}
