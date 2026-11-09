@@ -228,32 +228,44 @@ export function App() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [onlineRoom, setOnlineRoom] = useState<OnlineRoomSession | null>(null);
+  const [savedRoomId, setSavedRoomId] = useState<string | null>(null);
   const [onlineBusy, setOnlineBusy] = useState(false);
   const [onlineError, setOnlineError] = useState<string | null>(null);
   const [onlineConnectionStatus, setOnlineConnectionStatus] = useState<OnlineConnectionStatus>('disconnected');
 
 
-  // Restore the last online room after a page refresh, using the persisted Supabase Auth session.
+  // Restore the last online room after a page refresh. A temporary network
+  // failure must not erase the saved room or its invitation code.
   useEffect(() => {
-    const savedRoomId = localStorage.getItem(ONLINE_ROOM_STORAGE_KEY);
-    if (!savedRoomId) return;
+    const storedRoomId = localStorage.getItem(ONLINE_ROOM_STORAGE_KEY);
+    if (!storedRoomId) return;
 
     let cancelled = false;
-    void getOnlineRoomSnapshot(savedRoomId)
+    setSavedRoomId(storedRoomId);
+    setOnlineBusy(true);
+
+    void getOnlineRoomSnapshot(storedRoomId)
       .then((snapshot) => {
         if (cancelled) return;
         setOnlineRoom({
-          roomId: savedRoomId,
+          roomId: storedRoomId,
           memberId: snapshot.my_member_id,
-          inviteCode: sessionStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+          inviteCode: localStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
           snapshot,
         });
+        setSavedRoomId(null);
+        setOnlineError(null);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
-          sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+          setOnlineError(formatOnlineError(
+            error,
+            'Не удалось восстановить подключение. Сохранённая комната не удалена — попробуйте ещё раз.',
+          ));
         }
+      })
+      .finally(() => {
+        if (!cancelled) setOnlineBusy(false);
       });
 
     return () => {
@@ -382,6 +394,40 @@ export function App() {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
+  const handleRestoreSavedOnlineRoom = async () => {
+    const storedRoomId = localStorage.getItem(ONLINE_ROOM_STORAGE_KEY) || savedRoomId;
+    if (!storedRoomId) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const snapshot = await getOnlineRoomSnapshot(storedRoomId);
+      setOnlineRoom({
+        roomId: storedRoomId,
+        memberId: snapshot.my_member_id,
+        inviteCode: localStorage.getItem(ONLINE_INVITE_STORAGE_KEY) || undefined,
+        snapshot,
+      });
+      setSavedRoomId(null);
+      setCurrentView('game');
+      showToast('Подключение к сохранённой комнате восстановлено.');
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(
+        error,
+        'Не удалось восстановить подключение. Проверьте сеть и повторите попытку.',
+      ));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleForgetSavedOnlineRoom = () => {
+    localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
+    localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+    setSavedRoomId(null);
+    setOnlineError(null);
+  };
+
   const addLog = (
     type: GameLogEntry['type'], 
     message: string, 
@@ -416,8 +462,11 @@ export function App() {
         : await createOnlineRoom(displayName);
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
       if (result.invite_code) {
-        sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
+        localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, result.invite_code);
+      } else {
+        localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       }
+      setSavedRoomId(null);
 
       const snapshot = await getOnlineRoomSnapshot(result.room_id);
       setOnlineRoom({
@@ -447,7 +496,7 @@ export function App() {
       return;
     }
     if (!isValidOnlineInviteCode(inviteCode)) {
-      setOnlineError('Новый код комнаты состоит из пяти латинских букв A–Z.');
+      setOnlineError('Код должен содержать 5 символов A–Z или 0–9. Также принимаются старые 32-символьные коды.');
       return;
     }
 
@@ -456,7 +505,8 @@ export function App() {
     try {
       const result = await joinOnlineRoom(inviteCode, displayName);
       localStorage.setItem(ONLINE_ROOM_STORAGE_KEY, result.room_id);
-      sessionStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+      localStorage.setItem(ONLINE_INVITE_STORAGE_KEY, inviteCode);
+      setSavedRoomId(null);
 
       const snapshot = await getOnlineRoomSnapshot(result.room_id);
       setOnlineRoom({
@@ -677,7 +727,7 @@ export function App() {
       if (isTestMode && ['in_progress', 'finished'].includes(onlineRoom.snapshot.room.status)) {
         const result = await exitOnlineTestRoom(onlineRoom.roomId);
         localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
-        sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+        localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
         setOnlineRoom(null);
         setGameState(null);
         clearGameState();
@@ -691,7 +741,7 @@ export function App() {
       await leaveOnlineRoom(onlineRoom.roomId);
 
       localStorage.removeItem(ONLINE_ROOM_STORAGE_KEY);
-      sessionStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
+      localStorage.removeItem(ONLINE_INVITE_STORAGE_KEY);
       setOnlineRoom(null);
       setGameState(null);
       clearGameState();
@@ -1448,6 +1498,33 @@ export function App() {
               </div>
 
               {onlineError && <div role="alert" className="bunker-error">{onlineError}</div>}
+              {savedRoomId && !onlineRoom && (
+                <div className="bunker-panel bunker-access-panel" aria-live="polite">
+                  <div>
+                    <h3>Сохранённая комната</h3>
+                    <p>В этом браузере осталась комната из предыдущего сеанса. Попробуйте восстановить подключение — код приглашения и данные комнаты сохранены.</p>
+                  </div>
+                  <div className="bunker-room-create-options">
+                    <button
+                      type="button"
+                      onClick={handleRestoreSavedOnlineRoom}
+                      disabled={onlineBusy || !isSupabaseConfigured}
+                      className="bunker-button bunker-button-primary"
+                    >
+                      <RefreshCw aria-hidden="true" />
+                      {onlineBusy ? 'Подключаемся…' : 'Восстановить комнату'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleForgetSavedOnlineRoom}
+                      disabled={onlineBusy}
+                      className="bunker-button bunker-button-secondary"
+                    >
+                      Очистить сохранённую комнату
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
 
             <section className="bunker-section bunker-categories-section">
