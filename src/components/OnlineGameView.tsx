@@ -375,11 +375,17 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <div className="bunker-online-action-panel">
           <div>
             <span className="bunker-kicker">Результат раунда</span>
-            <h2>{snapshot.public_state?.no_elimination === true ? 'Голосование отменено' : 'Бункер покидает участник'}</h2>
+            <h2>{snapshot.public_state?.no_elimination === true
+              ? 'Голосование отменено'
+              : snapshot.public_state?.tie_no_elimination === true
+                ? 'Ничья — никто не выбывает'
+                : 'Бункер покидает участник'}</h2>
             <p>
               {snapshot.public_state?.no_elimination === true
                 ? 'По карте Rollback в этом раунде никто не выбывает.'
-                : snapshot.current_result.eliminated_name || 'Результат ещё не получен'}
+                : snapshot.public_state?.tie_no_elimination === true
+                  ? 'У нескольких участников одинаковое число голосов. В этом раунде никто не выбывает.'
+                  : snapshot.current_result.eliminated_name || 'Результат ещё не получен'}
               {snapshot.public_state?.no_elimination !== true && snapshot.current_result.vote_count != null
                 ? ` · ${snapshot.current_result.vote_count} голосов`
                 : ''}
@@ -500,6 +506,10 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
           <button type="button" onClick={onRefresh} disabled={busy} className="bunker-button bunker-button-secondary">
             <RefreshCw aria-hidden="true" />
             {busy ? 'Синхронизируем…' : 'Синхронизировать'}
+          </button>
+          <button type="button" onClick={onExit} disabled={busy} className="bunker-button bunker-button-danger">
+            <DoorOpen aria-hidden="true" />
+            Выйти из партии
           </button>
           {!isHost && isAlive && (
             <button type="button" onClick={onTakeover} disabled={busy} className="bunker-button bunker-button-secondary">
