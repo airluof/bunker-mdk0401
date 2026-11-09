@@ -26,13 +26,19 @@ const sourceSheets = {
 };
 
 const approvedActionHandlers = {
+  action_02: 'rollback_cancel_voting_round',
   action_03: 'hot_swap_baggage',
   action_04: 'hotfix_discard_own_vulnerability',
+  action_05: 'gpupdate_force_reveal_hidden_card',
+  action_04: 'hotfix_discard_own_vulnerability',
   action_06: 'vmotion_swap_roles',
+  action_07: 'sudo_double_vote_or_tie_save',
   action_08: 'smart_peek_future_crisis',
+  action_09: 'security_sandbox_protect_targeted_actions',
   action_10: 'cmdb_reveal_all_baggage',
   action_11: 'exploit_draw_second_skill',
   action_12: 'write_off_target_baggage',
+  action_14: 'clone_neighbour_skill_until_game_end',
   action_15: 'cr_replace_selected_crisis',
   action_16: 'confiscate_expelled_baggage',
   action_17: 'watchdog_30_second_briefing',
@@ -40,6 +46,7 @@ const approvedActionHandlers = {
   action_20: 'memory_dump_private_peek',
   action_24: 'kernel_driver_draw_second_baggage',
   action_28: 'emergency_generator_capacity_plus_one',
+  action_29: 'factory_reset_redraw_four_core_cards',
 };
 
 const ids = new Set();
