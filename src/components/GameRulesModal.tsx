@@ -194,6 +194,18 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                   <div className="font-mono-tech text-sky-400 font-bold">Ничья при голосовании · требует решения</div>
                   <p className="text-slate-300 text-[11px] mt-0.5">В обычной партии система не выбирает выбывшего случайно. Способ разрешения ничьей ещё предстоит утвердить.</p>
                 </div>
+                <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
+                  <div className="font-mono-tech text-amber-300 font-bold">Вместимость и число раундов · требуют решения</div>
+                  <p className="text-slate-300 text-[11px] mt-0.5">Сервер округляет половину числа игроков вниз и начинает финал после достижения вместимости или в конце 5-го раунда. При 16 игроках после пяти изгнаний остаётся 11 человек при 8 местах.</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
+                  <div className="font-mono-tech text-amber-300 font-bold">Срок действия кризисов · требует решения</div>
+                  <p className="text-slate-300 text-[11px] mt-0.5">Сейчас кризисы 2-го и 4-го раундов добавляются к уже открытым. Исходный материал не уточняет, должны ли предыдущие кризисы оставаться активными до финала.</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800">
+                  <div className="font-mono-tech text-amber-300 font-bold">Финальный аудит · требует доработки</div>
+                  <p className="text-slate-300 text-[11px] mt-0.5">В онлайн-комнате сохраняется одна общая текстовая запись. В текущем серверном RPC её может отправить или изменить только создатель комнаты, если он остаётся живым. Проверяемые критерии плана не заданы.</p>
+                </div>
               </div>
             </div>
           )}
