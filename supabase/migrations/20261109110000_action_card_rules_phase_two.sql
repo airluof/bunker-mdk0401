@@ -900,8 +900,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
-declare
+as $$2
   v_user_id uuid := auth.uid();
   v_room public.rooms%rowtype;
   v_session public.game_sessions%rowtype;
