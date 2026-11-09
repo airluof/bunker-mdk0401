@@ -391,6 +391,35 @@ export async function useOnlineHotfixCard(
   };
 }
 
+export async function kickOnlineRoomMember(
+  roomId: string,
+  targetMemberId: string,
+): Promise<{
+  ok: boolean;
+  room_id: string;
+  member_id: string;
+  display_name: string;
+  status: 'kicked';
+}> {
+  const client = getClient();
+  await ensureAnonymousSession();
+
+  const { data, error } = await client.rpc('api_kick_room_member', {
+    p_room_id: roomId,
+    p_target_member_id: targetMemberId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+
+  return data as {
+    ok: boolean;
+    room_id: string;
+    member_id: string;
+    display_name: string;
+    status: 'kicked';
+  };
+}
+
 export async function transitionOnlineGamePhase(roomId: string, nextPhase: 'briefing' | 'voting') {
   const client = getClient();
   await ensureAnonymousSession();
