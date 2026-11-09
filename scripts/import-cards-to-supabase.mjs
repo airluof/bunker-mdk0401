@@ -30,7 +30,6 @@ const approvedActionHandlers = {
   action_03: 'hot_swap_baggage',
   action_04: 'hotfix_discard_own_vulnerability',
   action_05: 'gpupdate_force_reveal_hidden_card',
-  action_04: 'hotfix_discard_own_vulnerability',
   action_06: 'vmotion_swap_roles',
   action_07: 'sudo_double_vote_or_tie_save',
   action_08: 'smart_peek_future_crisis',
