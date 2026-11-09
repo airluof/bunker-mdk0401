@@ -83,4 +83,4 @@ if (failures.length) {
 console.log('Card guidance validation passed.');
 console.log('All 180 cards are covered by category-specific guidance and thematic links.');
 console.log('Crisis links cover every Role, Skill and Baggage card.');
-console.log('Action status: 14 ready, 2 blocked pending implementation, 14 awaiting rule clarification.');
+console.log('Action status: 20 ready, 2 blocked pending implementation, 8 awaiting rule clarification.');
