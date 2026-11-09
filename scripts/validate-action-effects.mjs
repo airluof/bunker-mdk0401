@@ -7,6 +7,7 @@ const paths = {
   generatorMigration: 'supabase/migrations/202611040008_action_effects_phase_one.sql',
   hotfixMigration: 'supabase/migrations/202611040009_hotfix_action_effect.sql',
   unifiedMigration: 'supabase/migrations/202611040010_unified_action_engine.sql',
+  phaseTwoMigration: 'supabase/migrations/20261109110000_action_card_rules_phase_two.sql',
   exploitMigration: 'supabase/migrations/202611040011_exploit_second_skill.sql',
   reviewMigration: 'supabase/migrations/202611040017_disable_incomplete_card_effects.sql',
   service: 'src/services/onlineRooms.ts',
@@ -29,13 +30,18 @@ const manifest = JSON.parse(files.manifest.replace(/^\uFEFF/, ''));
 const actions = (manifest.assets || []).filter((card) => card.category === 'actions');
 const expectedIds = Array.from({ length: 30 }, (_, index) => `action_${String(index + 1).padStart(2, '0')}`);
 const supportedHandlers = {
+  action_02: 'rollback_cancel_voting_round',
   action_03: 'hot_swap_baggage',
   action_04: 'hotfix_discard_own_vulnerability',
+  action_05: 'gpupdate_force_reveal_hidden_card',
   action_06: 'vmotion_swap_roles',
+  action_07: 'sudo_double_vote_or_tie_save',
   action_08: 'smart_peek_future_crisis',
+  action_09: 'security_sandbox_protect_targeted_actions',
   action_10: 'cmdb_reveal_all_baggage',
   action_11: 'exploit_draw_second_skill',
   action_12: 'write_off_target_baggage',
+  action_14: 'clone_neighbour_skill_until_game_end',
   action_15: 'cr_replace_selected_crisis',
   action_16: 'confiscate_expelled_baggage',
   action_17: 'watchdog_30_second_briefing',
@@ -43,6 +49,7 @@ const supportedHandlers = {
   action_20: 'memory_dump_private_peek',
   action_24: 'kernel_driver_draw_second_baggage',
   action_28: 'emergency_generator_capacity_plus_one',
+  action_29: 'factory_reset_redraw_four_core_cards',
 };
 const blockedHandlers = {
   action_21: 'workaround_ignore_crisis_in_audit',
@@ -81,8 +88,8 @@ requireText(files.hotfixMigration, /grant execute on function public\.api_use_ho
 
 requireText(files.unifiedMigration, /zone in \('hand', 'crisis_deck', 'active_crisis', 'category_deck', 'discard'\)/i, 'Category-deck zone is missing.');
 requireText(files.unifiedMigration, /populate_category_decks_after_start/i, 'Unused source cards must be populated into category decks after game start.');
-requireText(files.unifiedMigration, /create or replace function public\.api_use_action_effect/i, 'Unified action RPC is missing.');
-requireText(files.unifiedMigration, /cc\.effect_status = 'approved'/i, 'Unified RPC must verify catalog approval.');
+requireText(files.phaseTwoMigration, /create or replace function public\.api_use_action_effect/i, 'Phase two action RPC is missing.');
+requireText(files.phaseTwoMigration, /cc\.effect_status = 'approved'/i, 'Phase two RPC must verify catalog approval.');
 requireText(files.unifiedMigration, /create or replace function public\.api_get_my_action_private_data/i, 'Private action result RPC is missing.');
 requireText(files.unifiedMigration, /create trigger game_sessions_watchdog_deadline/i, 'Watchdog deadline trigger is missing.');
 requireText(files.unifiedMigration, /ignored_crisis_ids/i, 'Workaround must persist the selected crisis.');
@@ -96,7 +103,7 @@ requireText(files.exploitMigration, /instance_status = 'hidden'/i, 'The addition
 
 for (const [id, handler] of Object.entries(supportedHandlers)) {
   if (id === 'action_04' || id === 'action_28') continue;
-  const migration = id === 'action_11' ? files.exploitMigration : files.unifiedMigration;
+  const migration = id === 'action_11' ? files.exploitMigration : files.phaseTwoMigration;
   const handlerIsRegistered = id === 'action_11'
     ? migration.includes(`effect_handler_id = '${handler}'`)
     : migration.includes(`when '${id}' then '${handler}'`);
@@ -124,6 +131,7 @@ const approvedFromSql = [...new Set([
   ...[...files.hotfixMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
   ...[...files.unifiedMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
   ...[...files.exploitMigration.matchAll(/where card_id = '(action_\d+)'/gi)].map((match) => match[1]),
+  ...[...files.phaseTwoMigration.matchAll(/when '(action_\d+)' then '/gi)].map((match) => match[1]),
 ])].sort();
 const expectedRegistered = [...Object.keys(supportedHandlers), ...blockedIds].sort();
 if (approvedFromSql.join(',') !== expectedRegistered.join(',')) {
@@ -182,5 +190,5 @@ if (failures.length) {
 }
 
 console.log('Action-effect validation passed.');
-console.log('30 source action cards verified; 14 effects are fully enabled.');
-console.log('2 incomplete effects are disabled; 14 more remain draft pending rule clarification.');
+console.log('30 source action cards verified; 20 effects are fully enabled.');
+console.log('2 incomplete effects are disabled; 8 more remain draft pending rule clarification.');
