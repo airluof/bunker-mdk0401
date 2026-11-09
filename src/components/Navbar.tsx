@@ -105,8 +105,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={onExitGame}
               className="bunker-nav-exit"
-              title={isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
-              aria-label={isHost ? 'Закрыть комнату' : 'Покинуть комнату'}
+              title="Покинуть комнату"
+              aria-label="Покинуть комнату"
             >
               <LogOut aria-hidden="true" />
             </button>
