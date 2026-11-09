@@ -134,7 +134,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-purple-400">ФАЗА 4:</span>
-                    <span><strong>Изгнание.</strong> Набравший больше всех голосов инженер покидает Бункер.</span>
+                    <span><strong>Изгнание.</strong> При единственном максимуме голосов выбранный инженер покидает игру. При равенстве сервер не выбирает игрока автоматически и не запускает переголосование: такое правило ещё не согласовано.</span>
                   </div>
                 </div>
               </div>
