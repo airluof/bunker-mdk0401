@@ -130,7 +130,7 @@ export const GameRulesModal: React.FC<GameRulesModalProps> = ({ onClose }) => {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-rose-400">ФАЗА 3:</span>
-                    <span><strong>Открытое голосование.</strong> Все живые участники одновременно голосуют против кандидата на изгнание.</span>
+                    <span><strong>Открытое голосование.</strong> Каждый живой участник подаёт один голос за выбранного живого участника. Автор и цель голоса отображаются в публичном протоколе сразу после отправки. Воздержание и изменение уже поданного голоса сейчас не поддерживаются.</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-mono-tech font-bold text-purple-400">ФАЗА 4:</span>
