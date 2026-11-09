@@ -1431,6 +1431,7 @@ export function App() {
               onRefresh={handleRefreshOnlineRoom}
               onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
+              onKickMember={handleKickOnlineRoomMember}
               onInspectCard={setInspectingCard}
               onRevealCard={handleRevealOnlineCard}
               onUseActionCard={handleUseOnlineActionCard}
