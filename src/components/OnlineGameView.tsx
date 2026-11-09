@@ -382,7 +382,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 ? ` · ${snapshot.current_result.vote_count} голосов`
                 : ''}
             </p>
-            {snapshot.public_state?.tie_saved === true && (
+            {(snapshot.public_state?.tie_saved === true || snapshot.current_result.tie_saved === true) && (
               <p className="bunker-help">Право Вето сработало: владелец карты спасён при равенстве голосов.</p>
             )}
             {snapshot.current_result.tie_break_used && isTestMode && (
