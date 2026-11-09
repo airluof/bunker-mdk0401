@@ -41,6 +41,7 @@ import {
   updateOnlineRoomSettings,
   startOnlineGame,
   addOnlineTestBots,
+  kickOnlineRoomMember,
   exitOnlineTestRoom,
   revealOnlineCard,
   useOnlineActionCard,
@@ -628,6 +629,28 @@ export function App() {
         : 'Минимум игроков уже набран.');
     } catch (error: unknown) {
       setOnlineError(formatOnlineError(error, 'Не удалось добавить тестовых ботов.'));
+    } finally {
+      setOnlineBusy(false);
+    }
+  };
+
+  const handleKickOnlineRoomMember = async (memberId: string) => {
+    if (!onlineRoom) return;
+    const target = onlineRoom.snapshot.players.find((player) => player.member_id === memberId);
+    const targetName = target?.display_name || 'этого участника';
+    if (!window.confirm(`Исключить ${targetName} из комнаты ожидания?`)) return;
+
+    setOnlineBusy(true);
+    setOnlineError(null);
+    try {
+      const result = await kickOnlineRoomMember(onlineRoom.roomId, memberId);
+      const snapshot = await getOnlineRoomSnapshot(onlineRoom.roomId);
+      setOnlineRoom((current) => current?.roomId === onlineRoom.roomId
+        ? { ...current, snapshot }
+        : current);
+      showToast(`${result.display_name || targetName} исключён из комнаты.`);
+    } catch (error: unknown) {
+      setOnlineError(formatOnlineError(error, 'Не удалось исключить участника из комнаты.'));
     } finally {
       setOnlineBusy(false);
     }
@@ -1356,11 +1379,7 @@ export function App() {
         isHost={onlineRoom
           ? onlineRoom.snapshot.players.some((player) => player.member_id === onlineRoom.memberId && player.technical_role === 'host')
           : gameState?.players[0]?.isHost}
-        onExitGame={onlineRoom
-          ? onlineRoom.snapshot.room.status === 'lobby' || onlineRoom.snapshot.room.status === 'archived' || onlineRoom.snapshot.room.status === 'finished' || onlineRoom.snapshot.room.room_mode === 'test' || onlineRoom.snapshot.players.some((player) => player.is_bot)
-            ? handleExitCurrentRoom
-            : undefined
-          : gameState ? handleExitCurrentRoom : undefined}
+        onExitGame={onlineRoom || gameState ? handleExitCurrentRoom : undefined}
       />
 
       {/* Toast Notification */}
@@ -1411,6 +1430,7 @@ export function App() {
               onRefresh={handleRefreshOnlineRoom}
               onTakeover={handleTakeoverOnlineRoom}
               onExit={handleExitCurrentRoom}
+              onKickMember={handleKickOnlineRoomMember}
               onSaveSettings={handleSaveOnlineRoomSettings}
               onStartGame={handleStartOnlineGame}
               onAddTestBots={handleAddOnlineTestBots}
