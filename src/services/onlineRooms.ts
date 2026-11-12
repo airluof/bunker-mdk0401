@@ -95,6 +95,33 @@ export interface RoomSnapshot {
     created_at: string;
   }>;
   my_private_action_events?: ActionPrivateEvent[];
+  my_game_meta?: {
+    my_secret_objective: {
+      objective_key: string;
+      title: string;
+      description: string;
+      completed: boolean | null;
+      completed_at: string | null;
+    } | null;
+    my_vote_revision_count: number;
+    reputation_results: Array<{
+      member_id: string;
+      display_name: string;
+      points: number;
+      awards: string[];
+      objective_completed: boolean;
+      correct_votes: number;
+      votes_received: number;
+      survived: boolean;
+    }>;
+    reputation_profile: {
+      total_points?: number;
+      games_played?: number;
+      completed_objectives?: number;
+      correct_votes?: number;
+      survivals?: number;
+    };
+  };
 }
 
 function getClient() {
@@ -278,9 +305,15 @@ export async function getOnlineRoomSnapshot(roomId: string): Promise<RoomSnapsho
     ? (privateData as { events: ActionPrivateEvent[] }).events
     : [];
 
+  const { data: gameMeta, error: gameMetaError } = await client.rpc('api_get_my_game_meta', {
+    p_room_id: roomId,
+  });
+  throwIfError(gameMetaError);
+
   return {
     ...(data as RoomSnapshot),
     my_private_action_events: privateEvents,
+    my_game_meta: gameMeta as RoomSnapshot['my_game_meta'],
   };
 }
 
@@ -442,6 +475,18 @@ export async function submitOnlineVote(roomId: string, targetMemberId: string) {
   });
   throwIfError(error);
   return data as { ok: boolean; target_member_id: string; round: number };
+}
+
+export async function changeOnlineVote(roomId: string, targetMemberId: string) {
+  const client = getClient();
+  await ensureAnonymousSession();
+  const { data, error } = await client.rpc('api_change_vote', {
+    p_room_id: roomId,
+    p_target_member_id: targetMemberId,
+    p_command_id: crypto.randomUUID(),
+  });
+  throwIfError(error);
+  return data as { ok: boolean; target_member_id: string; revision_count: number; round: number };
 }
 
 export async function resolveOnlineVote(roomId: string) {
