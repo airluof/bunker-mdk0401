@@ -36,6 +36,7 @@ interface OnlineGameViewProps {
   onStartBriefing: () => void;
   onOpenVoting: () => void;
   onVote: (targetMemberId: string) => void;
+  onChangeVote: (targetMemberId: string) => void;
   onResolveVote: () => void;
   onNextRound: () => void;
   onSubmitAuditPlan: (planText: string) => void;
@@ -105,6 +106,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   onStartBriefing,
   onOpenVoting,
   onVote,
+  onChangeVote,
   onResolveVote,
   onNextRound,
   onSubmitAuditPlan,
@@ -221,13 +223,18 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
     snapshot.current_round_votes.some((vote) => vote.voter_member_id === player.member_id)
   );
   const myVote = snapshot.my_vote_target_member_id;
-  const canResolveVote = isHost && allHumanVotesReceived && snapshot.current_round_votes.length > 0;
+  const voteRevisionCount = snapshot.my_game_meta?.my_vote_revision_count ?? 0;
+  const voteRevisionOpen = phase === 'voting' && Boolean(snapshot.session.deadline_at) && secondsLeft > 0;
+  const canReviseVote = isAlive && Boolean(myVote) && voteRevisionCount < 1 && voteRevisionOpen;
+  const voteSelection = selectedVote ?? myVote;
+  const canResolveVote = isHost && allHumanVotesReceived &&
+    snapshot.current_round_votes.length > 0 && !voteRevisionOpen;
   const revealedHumanCount = humanPlayers.filter((player) =>
     player.revealed_this_round || player.has_hidden_cards === false
   ).length;
 
   useEffect(() => {
-    if (!snapshot.session.deadline_at || phase !== 'briefing') {
+    if (!snapshot.session.deadline_at || !['briefing', 'voting'].includes(phase)) {
       setSecondsLeft(0);
       return;
     }
@@ -266,10 +273,11 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
         <div className="bunker-online-action-panel">
           <div>
             <span className="bunker-kicker">Первый этап</span>
-            <h2>Выберите карту для общего вскрытия</h2>
+            <h2>{snapshot.session.round_number > 5 ? 'Дополнительный раунд' : 'Выберите карту для общего вскрытия'}</h2>
             <p>
-              В каждом раунде можно выбрать любую ещё не раскрытую карту — Роль не имеет приоритета,
-              порядок категорий свободный. Выбор останется скрытым от остальных до общего вскрытия.
+              {snapshot.session.round_number > 5
+                ? 'После пяти личных карт игра продолжается за счёт новых кризисов и обсуждения. Если у вас остались нераскрытые карты, можно выбрать одну; если нет — вы автоматически пропускаете вскрытие.'
+                : 'В каждом раунде можно выбрать любую ещё не раскрытую карту — Роль не имеет приоритета, порядок категорий свободный. Выбор останется скрытым от остальных до общего вскрытия.'}
             </p>
             <p>Когда все живые игроки сделают выбор, ведущий начнёт брифинг — выбранные карты откроются одновременно.</p>
             <p>Если у участника не осталось закрытых карт, он пропускает вскрытие и не задерживает партию.</p>
@@ -325,38 +333,56 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
           <div>
             <span className="bunker-kicker">Третий этап</span>
             <h2>Открытое голосование</h2>
-            <p>Голоса видны всем участникам сразу после подачи. Выберите игрока, против которого хотите проголосовать.</p>
+            <p>Голоса видны всем участникам сразу после подачи. После того как проголосуют все живые игроки, откроется 20 секунд, чтобы один раз изменить свой голос.</p>
             <p className="bunker-online-progress">
               Подано голосов: {snapshot.current_round_votes.length} из {alivePlayers.length}
               {isTestMode && botCount > 0 ? ' · голоса ботов добавлены автоматически' : ''}
             </p>
           </div>
-          {isAlive && !myVote && (
+          {voteRevisionOpen && (
+            <p className="bunker-online-progress">Окно пересмотра голосов: {formatClock(secondsLeft)}. У каждого участника одна попытка изменить выбор.</p>
+          )}
+          {isAlive && (!myVote || canReviseVote) && (
             <div className="bunker-online-candidates">
               {alivePlayers.map((player) => (
                 <button
                   type="button"
                   key={player.member_id}
-                  className={selectedVote === player.member_id ? 'bunker-online-candidate is-selected' : 'bunker-online-candidate'}
+                  className={voteSelection === player.member_id ? 'bunker-online-candidate is-selected' : 'bunker-online-candidate'}
                   onClick={() => setSelectedVote(player.member_id)}
                   disabled={busy}
                 >
                   <span>{player.display_name}</span>
                   {player.is_bot && <Bot aria-label="Тестовый бот" />}
-                  {selectedVote === player.member_id ? <CheckCircle2 /> : <Circle />}
+                  {voteSelection === player.member_id ? <CheckCircle2 /> : <Circle />}
                 </button>
               ))}
               <button
                 type="button"
                 className="bunker-button bunker-button-danger"
-                onClick={() => selectedVote && onVote(selectedVote)}
-                disabled={busy || !selectedVote}
+                onClick={() => {
+                  if (!voteSelection) return;
+                  if (myVote) onChangeVote(voteSelection);
+                  else onVote(voteSelection);
+                }}
+                disabled={busy || !voteSelection || voteSelection === myVote || (Boolean(myVote) && !canReviseVote)}
               >
-                Подтвердить голос
+                {myVote ? 'Изменить голос' : 'Подтвердить голос'}
               </button>
             </div>
           )}
-          {myVote && <p className="bunker-online-voted"><CheckCircle2 aria-hidden="true" /> Ваш голос принят. Изменить его нельзя.</p>}
+          {myVote && (
+            <p className="bunker-online-voted">
+              <CheckCircle2 aria-hidden="true" />
+              {voteRevisionCount > 0
+                ? 'Голос изменён. Повторная попытка в этом раунде недоступна.'
+                : canReviseVote
+                  ? `Ваш голос принят. Можно один раз изменить его ещё ${formatClock(secondsLeft)}.`
+                  : voteRevisionOpen
+                    ? `Ваш голос принят. Ожидаем остальных участников · ${formatClock(secondsLeft)}.`
+                    : 'Ваш голос принят.'}
+            </p>
+          )}
           {!isAlive && <p className="bunker-online-voted">Вы выбыли из активного голосования. Доступен просмотр результатов.</p>}
           {isHost && (
             <button
@@ -481,6 +507,34 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
           <p>Финальный план восстановления сохранён и доступен всем участникам комнаты.</p>
           {snapshot.audit_plan.plan_text && (
             <div className="bunker-online-audit-submission">{snapshot.audit_plan.plan_text}</div>
+          )}
+          {(snapshot.my_game_meta?.reputation_results?.length ?? 0) > 0 && (
+            <section className="bunker-panel bunker-online-reputation">
+              <div className="bunker-panel-heading">
+                <div>
+                  <p className="bunker-eyebrow">Итоги партии</p>
+                  <h2>Репутация участников</h2>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {snapshot.my_game_meta?.reputation_results.map((result, index) => (
+                  <div className="bunker-online-reputation-row" key={result.member_id}>
+                    <span className="bunker-online-reputation-rank">{index + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <strong>{result.display_name}</strong>
+                      <p>{result.awards.length > 0 ? result.awards.join(' · ') : 'Без дополнительных наград'}</p>
+                    </div>
+                    <strong>{result.points} очк.</strong>
+                  </div>
+                ))}
+              </div>
+              {typeof snapshot.my_game_meta?.reputation_profile?.total_points === 'number' && (
+                <p className="bunker-help">
+                  Ваш накопленный рейтинг: {snapshot.my_game_meta.reputation_profile.total_points} очков ·
+                  партий: {snapshot.my_game_meta.reputation_profile.games_played ?? 0}
+                </p>
+              )}
+            </section>
           )}
         </section>
       );
@@ -759,6 +813,29 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             </section>
           )}
 
+
+          {snapshot.my_game_meta?.my_secret_objective && (
+            <section className="bunker-panel bunker-online-objective">
+              <div className="bunker-panel-heading">
+                <div>
+                  <p className="bunker-eyebrow">Личное задание · только вам</p>
+                  <h2>{snapshot.my_game_meta.my_secret_objective.title}</h2>
+                </div>
+                <LockKeyhole aria-hidden="true" />
+              </div>
+              <p>{snapshot.my_game_meta.my_secret_objective.description}</p>
+              <span className="bunker-online-objective-status">
+                {snapshot.my_game_meta.my_secret_objective.completed === true
+                  ? 'Выполнено'
+                  : snapshot.my_game_meta.my_secret_objective.completed === false
+                    ? 'Не выполнено'
+                    : 'Задание активно'}
+              </span>
+              {typeof snapshot.my_game_meta.reputation_profile?.total_points === 'number' && (
+                <p className="bunker-help">Ваш общий рейтинг: {snapshot.my_game_meta.reputation_profile.total_points} очков</p>
+              )}
+            </section>
+          )}
           <section className="bunker-panel bunker-online-status">
             <Radio aria-hidden="true" />
             <h2>Состояние комнаты</h2>
