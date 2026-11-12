@@ -224,7 +224,10 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
   );
   const myVote = snapshot.my_vote_target_member_id;
   const voteRevisionCount = snapshot.my_game_meta?.my_vote_revision_count ?? 0;
-  const voteRevisionOpen = phase === 'voting' && Boolean(snapshot.session.deadline_at) && secondsLeft > 0;
+  const voteRevisionSecondsLeft = phase === 'voting' && snapshot.session.deadline_at
+    ? Math.max(0, Math.ceil((new Date(snapshot.session.deadline_at).getTime() - Date.now()) / 1000))
+    : 0;
+  const voteRevisionOpen = voteRevisionSecondsLeft > 0;
   const canReviseVote = isAlive && Boolean(myVote) && voteRevisionCount < 1 && voteRevisionOpen;
   const voteSelection = selectedVote ?? myVote;
   const canResolveVote = isHost && allHumanVotesReceived &&
@@ -340,7 +343,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
             </p>
           </div>
           {voteRevisionOpen && (
-            <p className="bunker-online-progress">Окно пересмотра голосов: {formatClock(secondsLeft)}. У каждого участника одна попытка изменить выбор.</p>
+            <p className="bunker-online-progress">Окно пересмотра голосов: {formatClock(voteRevisionSecondsLeft)}. У каждого участника одна попытка изменить выбор.</p>
           )}
           {isAlive && (!myVote || canReviseVote) && (
             <div className="bunker-online-candidates">
@@ -377,9 +380,9 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               {voteRevisionCount > 0
                 ? 'Голос изменён. Повторная попытка в этом раунде недоступна.'
                 : canReviseVote
-                  ? `Ваш голос принят. Можно один раз изменить его ещё ${formatClock(secondsLeft)}.`
+                  ? `Ваш голос принят. Можно один раз изменить его ещё ${formatClock(voteRevisionSecondsLeft)}.`
                   : voteRevisionOpen
-                    ? `Ваш голос принят. Ожидаем остальных участников · ${formatClock(secondsLeft)}.`
+                    ? `Ваш голос принят. Ожидаем остальных участников · ${formatClock(voteRevisionSecondsLeft)}.`
                     : 'Ваш голос принят.'}
             </p>
           )}
@@ -518,8 +521,8 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
               </div>
               <div className="space-y-3">
                 {snapshot.my_game_meta?.reputation_results.map((result, index) => (
-                  <div className="bunker-online-reputation-row" key={result.member_id}>
-                    <span className="bunker-online-reputation-rank">{index + 1}</span>
+                  <div className="bunker-online-reputation-row flex items-center gap-3 border-b border-white/10 pb-3 last:border-b-0" key={result.member_id}>
+                    <span className="bunker-online-reputation-rank flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-sm">{index + 1}</span>
                     <div className="min-w-0 flex-1">
                       <strong>{result.display_name}</strong>
                       <p>{result.awards.length > 0 ? result.awards.join(' · ') : 'Без дополнительных наград'}</p>
@@ -824,7 +827,7 @@ export const OnlineGameView: React.FC<OnlineGameViewProps> = ({
                 <LockKeyhole aria-hidden="true" />
               </div>
               <p>{snapshot.my_game_meta.my_secret_objective.description}</p>
-              <span className="bunker-online-objective-status">
+              <span className="bunker-online-objective-status mt-2 inline-flex rounded-full border border-white/15 px-3 py-1 text-xs tracking-wide">
                 {snapshot.my_game_meta.my_secret_objective.completed === true
                   ? 'Выполнено'
                   : snapshot.my_game_meta.my_secret_objective.completed === false
