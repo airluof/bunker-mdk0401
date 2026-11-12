@@ -50,6 +50,7 @@ import {
   useOnlineHotfixCard,
   transitionOnlineGamePhase,
   submitOnlineVote,
+  changeOnlineVote,
   resolveOnlineVote,
   advanceOnlineGameRound,
   submitOnlineAuditPlan,
@@ -767,6 +768,12 @@ export function App() {
     'Не удалось подать голос.',
   );
 
+  const handleChangeOnlineVote = (targetMemberId: string) => runOnlineGameAction(
+    () => changeOnlineVote(onlineRoom!.roomId, targetMemberId),
+    'Ваш голос изменён. Повторное изменение в этом раунде недоступно.',
+    'Не удалось изменить голос.',
+  );
+
   const handleResolveOnlineVote = () => runOnlineGameAction(
     () => resolveOnlineVote(onlineRoom!.roomId),
     'Результат голосования зафиксирован.',
@@ -1440,6 +1447,7 @@ export function App() {
               onStartBriefing={handleStartBriefing}
               onOpenVoting={handleOpenVoting}
               onVote={handleSubmitOnlineVote}
+              onChangeVote={handleChangeOnlineVote}
               onResolveVote={handleResolveOnlineVote}
               onNextRound={handleAdvanceOnlineRound}
               onSubmitAuditPlan={handleSubmitOnlineAuditPlan}
